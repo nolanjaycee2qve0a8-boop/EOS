@@ -1,0 +1,1 @@
+"""Immutable EOS domain objects."""
