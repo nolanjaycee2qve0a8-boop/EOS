@@ -94,3 +94,23 @@ class JournaledEMSRuntime:
             tick.execution.cycle.result,
         )
         return DispatchedJournaledEMSTick(tick=tick)
+
+    @staticmethod
+    def progress_after_dispatch(
+        previous_dispatch: DispatchedJournaledEMSTick,
+        policy: EMSPolicy,
+        context: EnergySystemContext,
+    ) -> JournaledEMSTick:
+        """Progress from the exact tick retained after successful dispatch."""
+        if not isinstance(previous_dispatch, DispatchedJournaledEMSTick):
+            raise TypeError("previous_dispatch must be a DispatchedJournaledEMSTick")
+        if not isinstance(policy, EMSPolicy):
+            raise TypeError("policy must be an EMSPolicy instance")
+        if not isinstance(context, EnergySystemContext):
+            raise TypeError("context must be an EnergySystemContext")
+
+        return JournaledEMSRuntime.progress(
+            previous_dispatch.tick,
+            policy,
+            context,
+        )
