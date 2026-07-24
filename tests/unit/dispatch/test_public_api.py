@@ -4,12 +4,16 @@ import inspect
 
 import kernel.dispatch as dispatch_package
 import kernel.dispatch.dispatcher as dispatcher_module
-from kernel.dispatch import CommandDispatcher
+from kernel.dispatch import CommandDispatcher, CommandExecutor
 
 
 def test_command_dispatcher_is_publicly_importable() -> None:
     assert CommandDispatcher is dispatcher_module.CommandDispatcher
-    assert dispatch_package.__all__ == ["CommandDispatcher"]
+    assert CommandExecutor.__name__ == "CommandExecutor"
+    assert dispatch_package.__all__ == [
+        "CommandDispatcher",
+        "CommandExecutor",
+    ]
 
 
 def test_no_concrete_production_dispatcher_is_introduced() -> None:
