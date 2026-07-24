@@ -45,3 +45,23 @@ class JournaledEMSRuntime:
             journal,
         )
         return JournaledEMSTick(execution=execution)
+
+    @staticmethod
+    def progress(
+        previous_tick: JournaledEMSTick,
+        policy: EMSPolicy,
+        context: EnergySystemContext,
+    ) -> JournaledEMSTick:
+        """Progress from the previous tick's exact immutable journal."""
+        if not isinstance(previous_tick, JournaledEMSTick):
+            raise TypeError("previous_tick must be a JournaledEMSTick")
+        if not isinstance(policy, EMSPolicy):
+            raise TypeError("policy must be an EMSPolicy instance")
+        if not isinstance(context, EnergySystemContext):
+            raise TypeError("context must be an EnergySystemContext")
+
+        return JournaledEMSRuntime.tick(
+            policy,
+            context,
+            previous_tick.execution.journal,
+        )
