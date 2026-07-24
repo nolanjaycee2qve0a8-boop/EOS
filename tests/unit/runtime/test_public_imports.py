@@ -1,6 +1,7 @@
 """Tests for public runtime kernel imports."""
 
 from kernel.runtime import (
+    DispatchedJournaledEMSTick,
     JournaledEMSRuntime,
     JournaledEMSTick,
     RuntimeKernel,
@@ -9,6 +10,7 @@ from kernel.runtime import (
 
 
 def test_runtime_interfaces_are_publicly_importable() -> None:
+    assert DispatchedJournaledEMSTick.__name__ == "DispatchedJournaledEMSTick"
     assert JournaledEMSRuntime.__name__ == "JournaledEMSRuntime"
     assert JournaledEMSTick.__name__ == "JournaledEMSTick"
     assert RuntimeKernel.__name__ == "RuntimeKernel"
