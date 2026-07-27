@@ -3,6 +3,7 @@
 from kernel.runtime import (
     DispatchedJournaledEMSTick,
     DispatchProgressionRuntime,
+    ExecutionAudit,
     JournaledEMSRuntime,
     JournaledEMSTick,
     ReplayResult,
@@ -16,6 +17,7 @@ from kernel.runtime import (
 def test_runtime_interfaces_are_publicly_importable() -> None:
     assert DispatchProgressionRuntime.__name__ == "DispatchProgressionRuntime"
     assert DispatchedJournaledEMSTick.__name__ == "DispatchedJournaledEMSTick"
+    assert ExecutionAudit.__name__ == "ExecutionAudit"
     assert JournaledEMSRuntime.__name__ == "JournaledEMSRuntime"
     assert JournaledEMSTick.__name__ == "JournaledEMSTick"
     assert ReplayResult.__name__ == "ReplayResult"
