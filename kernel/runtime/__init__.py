@@ -7,6 +7,7 @@ from kernel.runtime.journaled import (
     JournaledEMSTick,
 )
 from kernel.runtime.kernel import RuntimeKernel
+from kernel.runtime.replay import ReplayResult, RuntimeReplay
 from kernel.runtime.tick import TickResult
 from kernel.runtime.trace import RuntimeExecutionTrace
 
@@ -15,7 +16,9 @@ __all__ = [
     "DispatchedJournaledEMSTick",
     "JournaledEMSRuntime",
     "JournaledEMSTick",
+    "ReplayResult",
     "RuntimeExecutionTrace",
     "RuntimeKernel",
+    "RuntimeReplay",
     "TickResult",
 ]
