@@ -1,6 +1,7 @@
 """Public deterministic runtime tick interfaces."""
 
 from kernel.runtime.audit import ExecutionAudit
+from kernel.runtime.explanation import DecisionExplanation
 from kernel.runtime.integration import DispatchProgressionRuntime
 from kernel.runtime.journaled import (
     DispatchedJournaledEMSTick,
@@ -13,6 +14,7 @@ from kernel.runtime.tick import TickResult
 from kernel.runtime.trace import RuntimeExecutionTrace
 
 __all__ = [
+    "DecisionExplanation",
     "DispatchProgressionRuntime",
     "DispatchedJournaledEMSTick",
     "ExecutionAudit",
