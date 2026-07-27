@@ -8,12 +8,14 @@ from kernel.runtime.journaled import (
 )
 from kernel.runtime.kernel import RuntimeKernel
 from kernel.runtime.tick import TickResult
+from kernel.runtime.trace import RuntimeExecutionTrace
 
 __all__ = [
     "DispatchProgressionRuntime",
     "DispatchedJournaledEMSTick",
     "JournaledEMSRuntime",
     "JournaledEMSTick",
+    "RuntimeExecutionTrace",
     "RuntimeKernel",
     "TickResult",
 ]
