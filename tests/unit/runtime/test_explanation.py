@@ -163,7 +163,7 @@ def test_explanation_preserves_exact_decision_artifact_identities() -> None:
 
     assert explanation.audit is audit
     assert explanation.trace is audit.trace
-    assert explanation.context is source_cycle.context
+    assert explanation.source_context is source_cycle.context
     assert explanation.decision_result is source_cycle.result
     assert explanation.decision_result.commands[0] is source_cycle.result.commands[0]
     assert explanation.decision_result.events[0] is source_cycle.result.events[0]
@@ -179,7 +179,7 @@ def test_repeated_explanations_share_no_explanation_state() -> None:
     assert first is not second
     assert first.audit is second.audit is audit
     assert first.trace is second.trace is audit.trace
-    assert first.context is second.context
+    assert first.source_context is second.source_context
     assert first.decision_result is second.decision_result
 
 
@@ -310,7 +310,7 @@ def test_direct_construction_rejects_reconstructed_decision_result() -> None:
         DecisionExplanation(
             audit=audit,
             trace=audit.trace,
-            context=source_cycle.context,
+            source_context=source_cycle.context,
             decision_result=reconstructed,
         )
 
@@ -321,13 +321,13 @@ def test_explanation_is_frozen_slotted_and_has_exact_fields() -> None:
     assert tuple(field.name for field in fields(DecisionExplanation)) == (
         "audit",
         "trace",
-        "context",
+        "source_context",
         "decision_result",
     )
     assert DecisionExplanation.__slots__ == (
         "audit",
         "trace",
-        "context",
+        "source_context",
         "decision_result",
     )
     assert not hasattr(explanation, "__dict__")

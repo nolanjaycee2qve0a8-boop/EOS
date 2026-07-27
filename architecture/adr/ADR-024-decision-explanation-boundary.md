@@ -24,7 +24,7 @@ retains exact references to:
 
 - the audit;
 - its execution trace;
-- the source decision context; and
+- the source decision context as `source_context`; and
 - the source `DecisionResult`.
 
 Validation uses object identity for the audit-to-trace lifecycle relationship,

@@ -14,7 +14,7 @@ class DecisionExplanation:
 
     audit: ExecutionAudit
     trace: RuntimeExecutionTrace
-    context: EnergySystemContext
+    source_context: EnergySystemContext
     decision_result: DecisionResult
 
     def __post_init__(self) -> None:
@@ -22,8 +22,8 @@ class DecisionExplanation:
             raise TypeError("audit must be an ExecutionAudit")
         if not isinstance(self.trace, RuntimeExecutionTrace):
             raise TypeError("trace must be a RuntimeExecutionTrace")
-        if not isinstance(self.context, EnergySystemContext):
-            raise TypeError("context must be an EnergySystemContext")
+        if not isinstance(self.source_context, EnergySystemContext):
+            raise TypeError("source_context must be an EnergySystemContext")
         if not isinstance(self.decision_result, DecisionResult):
             raise TypeError("decision_result must be a DecisionResult")
 
@@ -45,8 +45,8 @@ class DecisionExplanation:
             )
 
         source_cycle = self.audit.source_tick.execution.cycle
-        if self.context is not source_cycle.context:
-            raise ValueError("context must be the exact source decision context")
+        if self.source_context is not source_cycle.context:
+            raise ValueError("source_context must be the exact source decision context")
         if self.decision_result is not source_cycle.result:
             raise ValueError("decision_result must be the exact source decision result")
 
@@ -74,6 +74,6 @@ class DecisionExplanation:
         return cls(
             audit=audit,
             trace=audit.trace,
-            context=source_cycle.context,
+            source_context=source_cycle.context,
             decision_result=source_cycle.result,
         )

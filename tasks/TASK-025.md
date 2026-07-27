@@ -28,7 +28,8 @@ immutable explanation observation
 ~~~
 
 `DecisionExplanation.create(audit)` returns a frozen, slotted object containing
-the exact audit, trace, source context, and source `DecisionResult` references.
+the exact audit, trace, `source_context`, and source `DecisionResult`
+references.
 
 ## Identity Contract
 
@@ -36,7 +37,8 @@ The explanation preserves:
 
 - `explanation.audit is audit`;
 - `explanation.trace is audit.trace`;
-- `explanation.context is audit.source_tick.execution.cycle.context`; and
+- `explanation.source_context is
+  audit.source_tick.execution.cycle.context`; and
 - `explanation.decision_result is
   audit.source_tick.execution.cycle.result`.
 
