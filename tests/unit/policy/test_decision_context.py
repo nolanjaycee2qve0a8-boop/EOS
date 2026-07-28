@@ -8,10 +8,10 @@ from typing import Any, cast, get_type_hints
 import pytest
 
 from kernel.context import EnergySystemContext
-from kernel.decision import DecisionContext, DecisionResult
+from kernel.decision import DecisionContext, DecisionContextResult, DecisionResult
 from kernel.policy import DecisionContextPolicy, EMSPolicy
 
-FIXED_RESULT = DecisionResult.empty()
+FIXED_RESULT = DecisionContextResult()
 
 
 class EmptyDecisionContextPolicy(DecisionContextPolicy):
@@ -19,7 +19,7 @@ class EmptyDecisionContextPolicy(DecisionContextPolicy):
 
     __slots__ = ()
 
-    def evaluate(self, context: DecisionContext) -> DecisionResult:
+    def evaluate(self, context: DecisionContext) -> DecisionContextResult:
         return FIXED_RESULT
 
 
@@ -31,7 +31,7 @@ class RecordingDecisionContextPolicy(DecisionContextPolicy):
     def __init__(self) -> None:
         self.received_context: DecisionContext | None = None
 
-    def evaluate(self, context: DecisionContext) -> DecisionResult:
+    def evaluate(self, context: DecisionContext) -> DecisionContextResult:
         self.received_context = context
         return FIXED_RESULT
 
@@ -73,7 +73,7 @@ def test_evaluate_signature_accepts_only_decision_context() -> None:
     assert parameters == ["self", "context"]
     assert hints == {
         "context": DecisionContext,
-        "return": DecisionResult,
+        "return": DecisionContextResult,
     }
 
 
@@ -81,7 +81,7 @@ def test_return_contract_is_documented() -> None:
     documentation = DecisionContextPolicy.evaluate.__doc__
 
     assert documentation is not None
-    assert "DecisionResult" in documentation
+    assert "DecisionContextResult" in documentation
     assert "DecisionContext" in documentation
 
 

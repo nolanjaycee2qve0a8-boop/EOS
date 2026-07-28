@@ -1,4 +1,4 @@
-# ADR-028 — DecisionContext Policy Boundary
+# ADR-028 ? DecisionContext Policy Boundary
 
 ## Status
 
@@ -22,7 +22,7 @@ Introduce an independent abstract boundary:
 ~~~python
 DecisionContextPolicy.evaluate(
     context: DecisionContext,
-) -> DecisionResult
+) -> DecisionContextResult
 ~~~
 
 `DecisionContextPolicy` has empty slots and defines no behavior beyond the
@@ -43,7 +43,7 @@ EnergySystemContext
 EMSPolicy
         |
         v
-DecisionResult
+DecisionContextResult
 ~~~
 
 ### New path
@@ -61,13 +61,13 @@ DecisionContext
 DecisionContextPolicy
         |
         v
-DecisionResult
+DecisionContextResult
 ~~~
 
 ## Consequences
 
 - Future decision-context policies gain an explicit immutable input/output
-  contract.
+  contract through `DecisionContextResult`.
 - Legacy runtime behavior and existing `EMSPolicy` consumers remain unchanged.
 - No compatibility or migration semantics are implied.
 - A future architecture task must explicitly define execution integration if
