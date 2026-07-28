@@ -1,4 +1,4 @@
-# TASK-029 — DecisionContext Policy Boundary
+# TASK-029 ? DecisionContext Policy Boundary
 
 ## Status
 
@@ -7,7 +7,7 @@ IN REVIEW
 ## Objective
 
 Introduce `DecisionContextPolicy` as a pure, stateless abstraction between the
-immutable `DecisionContext` input and immutable `DecisionResult` output.
+immutable `DecisionContext` input and immutable `DecisionContextResult` output.
 
 TASK-029 defines a contract only. It does not implement an EMS algorithm or
 migrate existing execution and runtime boundaries.
@@ -23,7 +23,7 @@ EnergySystemContext
 EMSPolicy
         |
         v
-DecisionResult
+DecisionContextResult
 ~~~
 
 ### DecisionContext boundary
@@ -41,7 +41,7 @@ DecisionContext
 DecisionContextPolicy
         |
         v
-DecisionResult
+DecisionContextResult
 ~~~
 
 ## Contract
@@ -49,13 +49,13 @@ DecisionResult
 `DecisionContextPolicy` is an abstract class with one method:
 
 ~~~python
-evaluate(context: DecisionContext) -> DecisionResult
+evaluate(context: DecisionContext) -> DecisionContextResult
 ~~~
 
 The boundary:
 
 - accepts exactly one `DecisionContext`;
-- returns exactly one `DecisionResult`;
+- returns exactly one `DecisionContextResult`;
 - has empty slots and owns no instance state;
 - does not mutate its immutable input; and
 - defines no algorithm or execution behavior.

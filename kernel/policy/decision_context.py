@@ -2,15 +2,15 @@
 
 from abc import ABC, abstractmethod
 
-from kernel.decision import DecisionContext, DecisionResult
+from kernel.decision import DecisionContext, DecisionContextResult
 
 
 class DecisionContextPolicy(ABC):
-    """Stateless contract from DecisionContext to DecisionResult."""
+    """Stateless contract from DecisionContext to DecisionContextResult."""
 
     __slots__ = ()
 
     @abstractmethod
-    def evaluate(self, context: DecisionContext) -> DecisionResult:
-        """Return a DecisionResult without mutating the DecisionContext."""
+    def evaluate(self, context: DecisionContext) -> DecisionContextResult:
+        """Return a DecisionContextResult without mutating the input."""
         raise NotImplementedError

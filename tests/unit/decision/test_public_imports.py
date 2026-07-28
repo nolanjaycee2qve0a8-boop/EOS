@@ -2,6 +2,7 @@
 
 from kernel.decision import (
     DecisionContext,
+    DecisionContextResult,
     DecisionPipeline,
     DecisionPolicy,
     DecisionResult,
@@ -20,6 +21,7 @@ from kernel.ids import (
 
 def test_decision_interfaces_are_publicly_importable() -> None:
     assert DecisionContext.__name__ == "DecisionContext"
+    assert DecisionContextResult.__name__ == "DecisionContextResult"
     assert DecisionPipeline.__name__ == "DecisionPipeline"
     assert DecisionPolicy.__name__ == "DecisionPolicy"
     assert DecisionResult.__name__ == "DecisionResult"
