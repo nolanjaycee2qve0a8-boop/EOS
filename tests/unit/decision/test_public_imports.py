@@ -1,12 +1,14 @@
 """Tests for public decision imports and TASK-002 import regression."""
 
 from kernel.decision import (
+    DecisionConstraintBoundary,
     DecisionContext,
     DecisionContextResult,
     DecisionIntent,
     DecisionPipeline,
     DecisionPolicy,
     DecisionResult,
+    FeasibleDecisionIntent,
 )
 from kernel.domain import Command, Event, Mission, Snapshot
 from kernel.ids import (
@@ -21,12 +23,14 @@ from kernel.ids import (
 
 
 def test_decision_interfaces_are_publicly_importable() -> None:
+    assert DecisionConstraintBoundary.__name__ == "DecisionConstraintBoundary"
     assert DecisionContext.__name__ == "DecisionContext"
     assert DecisionContextResult.__name__ == "DecisionContextResult"
     assert DecisionIntent.__name__ == "DecisionIntent"
     assert DecisionPipeline.__name__ == "DecisionPipeline"
     assert DecisionPolicy.__name__ == "DecisionPolicy"
     assert DecisionResult.__name__ == "DecisionResult"
+    assert FeasibleDecisionIntent.__name__ == "FeasibleDecisionIntent"
 
 
 def test_task_002_domain_imports_remain_public() -> None:

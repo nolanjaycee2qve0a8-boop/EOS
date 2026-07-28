@@ -1,6 +1,10 @@
 """Public deterministic decision interfaces for the EOS kernel."""
 
 from kernel.decision.assembler import DecisionContextAssembler
+from kernel.decision.constraint import (
+    DecisionConstraintBoundary,
+    FeasibleDecisionIntent,
+)
 from kernel.decision.context import DecisionContext
 from kernel.decision.context_result import DecisionContextResult
 from kernel.decision.intent import DecisionIntent
@@ -9,6 +13,7 @@ from kernel.decision.policy import DecisionPolicy
 from kernel.decision.result import DecisionResult
 
 __all__ = [
+    "DecisionConstraintBoundary",
     "DecisionContext",
     "DecisionContextAssembler",
     "DecisionContextResult",
@@ -16,4 +21,5 @@ __all__ = [
     "DecisionPipeline",
     "DecisionPolicy",
     "DecisionResult",
+    "FeasibleDecisionIntent",
 ]
