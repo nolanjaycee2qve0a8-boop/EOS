@@ -17,8 +17,9 @@ TASK-030 does not define policy output fields or command-generation behavior.
 ## Decision
 
 Introduce `DecisionContextResult` as an independent frozen, slotted dataclass.
-The initial contract is intentionally fieldless and therefore contains no
-commands, events, mutable collections, cache, or history.
+TASK-031 subsequently adds its immutable semantic `DecisionIntent` reference.
+The result contains no commands, events, mutable collections, cache, or
+history.
 
 Change only `DecisionContextPolicy.evaluate()` to return
 `DecisionContextResult`. Keep `DecisionResult`, `EMSPolicy`, and all legacy
