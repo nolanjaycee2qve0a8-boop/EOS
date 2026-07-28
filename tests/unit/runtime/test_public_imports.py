@@ -1,6 +1,7 @@
 """Tests for public runtime kernel imports."""
 
 from kernel.runtime import (
+    DecisionExplanation,
     DispatchedJournaledEMSTick,
     DispatchProgressionRuntime,
     ExecutionAudit,
@@ -15,6 +16,7 @@ from kernel.runtime import (
 
 
 def test_runtime_interfaces_are_publicly_importable() -> None:
+    assert DecisionExplanation.__name__ == "DecisionExplanation"
     assert DispatchProgressionRuntime.__name__ == "DispatchProgressionRuntime"
     assert DispatchedJournaledEMSTick.__name__ == "DispatchedJournaledEMSTick"
     assert ExecutionAudit.__name__ == "ExecutionAudit"
