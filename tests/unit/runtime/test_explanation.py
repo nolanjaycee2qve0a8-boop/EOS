@@ -157,13 +157,14 @@ def fabricate_audit(
 def test_explanation_preserves_exact_decision_artifact_identities() -> None:
     audit, _, _, _ = make_audit()
     source_cycle = audit.source_tick.execution.cycle
+    original_context = source_cycle.context
     source_record = audit.source_tick.execution.journal.events()[0]
 
     explanation = DecisionExplanation.create(audit)
 
     assert explanation.audit is audit
     assert explanation.trace is audit.trace
-    assert explanation.source_context is source_cycle.context
+    assert explanation.source_context is original_context
     assert explanation.decision_result is source_cycle.result
     assert explanation.decision_result.commands[0] is source_cycle.result.commands[0]
     assert explanation.decision_result.events[0] is source_cycle.result.events[0]
@@ -318,6 +319,8 @@ def test_direct_construction_rejects_reconstructed_decision_result() -> None:
 def test_explanation_is_frozen_slotted_and_has_exact_fields() -> None:
     explanation = DecisionExplanation.create(make_audit()[0])
 
+    assert hasattr(explanation, "source_context")
+    assert not hasattr(explanation, "context")
     assert tuple(field.name for field in fields(DecisionExplanation)) == (
         "audit",
         "trace",
