@@ -1,6 +1,11 @@
 """Tests for public decision imports and TASK-002 import regression."""
 
-from kernel.decision import DecisionPipeline, DecisionPolicy, DecisionResult
+from kernel.decision import (
+    DecisionContext,
+    DecisionPipeline,
+    DecisionPolicy,
+    DecisionResult,
+)
 from kernel.domain import Command, Event, Mission, Snapshot
 from kernel.ids import (
     AssetId,
@@ -14,6 +19,7 @@ from kernel.ids import (
 
 
 def test_decision_interfaces_are_publicly_importable() -> None:
+    assert DecisionContext.__name__ == "DecisionContext"
     assert DecisionPipeline.__name__ == "DecisionPipeline"
     assert DecisionPolicy.__name__ == "DecisionPolicy"
     assert DecisionResult.__name__ == "DecisionResult"
