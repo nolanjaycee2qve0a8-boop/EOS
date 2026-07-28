@@ -8,10 +8,15 @@ from typing import Any, cast, get_type_hints
 import pytest
 
 from kernel.context import EnergySystemContext
-from kernel.decision import DecisionContext, DecisionContextResult, DecisionResult
+from kernel.decision import (
+    DecisionContext,
+    DecisionContextResult,
+    DecisionIntent,
+    DecisionResult,
+)
 from kernel.policy import DecisionContextPolicy, EMSPolicy
 
-FIXED_RESULT = DecisionContextResult()
+FIXED_RESULT = DecisionContextResult(DecisionIntent(0.0))
 
 
 class EmptyDecisionContextPolicy(DecisionContextPolicy):

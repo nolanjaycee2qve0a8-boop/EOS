@@ -46,10 +46,9 @@ Future command generation layer
 
 ## Contract
 
-`DecisionContextResult` is a frozen, slotted dataclass. Its initial contract is
-intentionally fieldless because TASK-030 does not authorize policy-specific
-outputs. It therefore contains no mutable collection, device command, or
-execution event.
+`DecisionContextResult` was introduced by TASK-030 as a frozen, slotted
+dataclass. TASK-031 subsequently adds its semantic `DecisionIntent` reference.
+It contains no mutable collection, device command, or execution event.
 
 `DecisionContextPolicy.evaluate()` returns `DecisionContextResult`. It remains
 a stateless abstract contract and provides no implementation.
