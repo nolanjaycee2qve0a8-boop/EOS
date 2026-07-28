@@ -23,9 +23,10 @@ Component models contain only finite factual scalar values with explicit units,
 ranges, and sign conventions. PCS operating and fault states are non-empty
 string observations; no enum or state machine is introduced.
 
-`EnergySystemState` stores the exact four component objects received from its
-caller. Construction performs type validation but no copy, reconstruction,
-serialization, calculation, or state transition.
+`EnergySystemState` exposes the fields `battery`, `pcs`, `pv`, and `grid`, and
+stores the exact four component objects received from its caller. Construction
+performs type validation but no copy, reconstruction, serialization,
+calculation, or state transition. No compatibility aliases are provided.
 
 ## Architecture Position
 

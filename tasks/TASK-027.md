@@ -82,8 +82,16 @@ No MPPT or forecast behavior is included.
 
 ### EnergySystemState
 
-The aggregate contains exact references to one battery, PCS, PV, and grid state.
-It does not copy, serialize, reconstruct, sort, or normalize component objects.
+The aggregate exposes exactly four component fields:
+
+- `battery`: the original `BatteryState`.
+- `pcs`: the original `PCSState`.
+- `pv`: the original `PVState`.
+- `grid`: the original `GridState`.
+
+Each field contains the exact object supplied by the caller. The aggregate does
+not copy, serialize, reconstruct, sort, or normalize component objects. No
+compatibility aliases are provided.
 
 ## Immutability
 

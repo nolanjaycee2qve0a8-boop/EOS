@@ -28,30 +28,34 @@ def test_system_state_preserves_exact_component_identities() -> None:
 
     state = EnergySystemState(battery, pcs, pv, grid)
 
-    assert state.battery_state is battery
-    assert state.pcs_state is pcs
-    assert state.pv_state is pv
-    assert state.grid_state is grid
+    assert state.battery is battery
+    assert state.pcs is pcs
+    assert state.pv is pv
+    assert state.grid is grid
 
 
 def test_system_state_is_frozen_slotted_and_has_exact_fields() -> None:
     state = EnergySystemState(*make_components())
 
     assert tuple(field.name for field in fields(EnergySystemState)) == (
-        "battery_state",
-        "pcs_state",
-        "pv_state",
-        "grid_state",
+        "battery",
+        "pcs",
+        "pv",
+        "grid",
     )
     assert EnergySystemState.__slots__ == (
-        "battery_state",
-        "pcs_state",
-        "pv_state",
-        "grid_state",
+        "battery",
+        "pcs",
+        "pv",
+        "grid",
     )
     assert not hasattr(state, "__dict__")
+    assert not hasattr(state, "battery_state")
+    assert not hasattr(state, "pcs_state")
+    assert not hasattr(state, "pv_state")
+    assert not hasattr(state, "grid_state")
     with pytest.raises(FrozenInstanceError):
-        cast(Any, state).battery_state = state.battery_state
+        cast(Any, state).battery = state.battery
 
 
 def test_system_state_has_no_mutable_container_fields() -> None:
@@ -66,10 +70,10 @@ def test_system_state_has_no_mutable_container_fields() -> None:
 @pytest.mark.parametrize(
     ("field_name", "invalid_value"),
     [
-        ("battery_state", object()),
-        ("pcs_state", object()),
-        ("pv_state", object()),
-        ("grid_state", object()),
+        ("battery", object()),
+        ("pcs", object()),
+        ("pv", object()),
+        ("grid", object()),
     ],
 )
 def test_system_state_rejects_invalid_component_types(
@@ -78,7 +82,7 @@ def test_system_state_rejects_invalid_component_types(
 ) -> None:
     components = dict(
         zip(
-            ("battery_state", "pcs_state", "pv_state", "grid_state"),
+            ("battery", "pcs", "pv", "grid"),
             make_components(),
             strict=True,
         )
