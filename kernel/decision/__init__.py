@@ -5,6 +5,7 @@ from kernel.decision.constraint import (
     DecisionConstraintBoundary,
     FeasibleDecisionIntent,
 )
+from kernel.decision.constraint_explanation import ConstraintExplanation
 from kernel.decision.context import DecisionContext
 from kernel.decision.context_result import DecisionContextResult
 from kernel.decision.intent import DecisionIntent
@@ -13,6 +14,7 @@ from kernel.decision.policy import DecisionPolicy
 from kernel.decision.result import DecisionResult
 
 __all__ = [
+    "ConstraintExplanation",
     "DecisionConstraintBoundary",
     "DecisionContext",
     "DecisionContextAssembler",

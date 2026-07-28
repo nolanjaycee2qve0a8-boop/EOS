@@ -1,6 +1,7 @@
 """Tests for public decision imports and TASK-002 import regression."""
 
 from kernel.decision import (
+    ConstraintExplanation,
     DecisionConstraintBoundary,
     DecisionContext,
     DecisionContextResult,
@@ -23,6 +24,7 @@ from kernel.ids import (
 
 
 def test_decision_interfaces_are_publicly_importable() -> None:
+    assert ConstraintExplanation.__name__ == "ConstraintExplanation"
     assert DecisionConstraintBoundary.__name__ == "DecisionConstraintBoundary"
     assert DecisionContext.__name__ == "DecisionContext"
     assert DecisionContextResult.__name__ == "DecisionContextResult"
