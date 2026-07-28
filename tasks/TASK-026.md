@@ -36,7 +36,7 @@ evidence-to-context assembly and policy integration remain future boundaries.
 - battery SOC;
 - battery power limit and energy capacity;
 - PV, load, and grid power observations;
-- electricity price;
+- signed electricity price in CNY per kWh;
 - reserve SOC; and
 - export limit.
 
@@ -65,8 +65,17 @@ Validation establishes factual input integrity only:
 - physical limits and non-negative measurements must not be negative; and
 - all numeric facts must be finite and non-boolean.
 
-Grid power and electricity price remain signed observations. No balance,
-strategy, recommendation, or control calculation occurs.
+`electricity_price_cny_per_kwh` is a signed finite value measured in CNY per
+kWh. The field name fixes both currency and energy basis, so callers must not
+scale values as fen per kWh or CNY per MWh.
+
+`grid_power_kw` uses this sign convention:
+
+- greater than zero means importing power from the grid;
+- less than zero means exporting power to the grid; and
+- zero means balanced grid exchange.
+
+No balance, strategy, recommendation, or control calculation occurs.
 
 ## Non-goals
 

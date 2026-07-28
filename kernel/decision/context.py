@@ -14,7 +14,12 @@ from kernel.decision.validation import (
 
 @dataclass(frozen=True, slots=True)
 class DecisionContext:
-    """Describe the world observed at one decision boundary."""
+    """Describe the world observed at one decision boundary.
+
+    ``electricity_price_cny_per_kwh`` is a signed finite value in CNY per kWh.
+    For ``grid_power_kw``, values greater than zero mean grid import, values
+    less than zero mean grid export, and zero means balanced grid exchange.
+    """
 
     timestamp: datetime
     soc: float
@@ -23,7 +28,7 @@ class DecisionContext:
     pv_power_kw: float
     load_power_kw: float
     grid_power_kw: float
-    electricity_price: float
+    electricity_price_cny_per_kwh: float
     reserve_soc: float
     export_limit_kw: float
 
@@ -71,8 +76,11 @@ class DecisionContext:
         )
         object.__setattr__(
             self,
-            "electricity_price",
-            require_number(self.electricity_price, "electricity_price"),
+            "electricity_price_cny_per_kwh",
+            require_number(
+                self.electricity_price_cny_per_kwh,
+                "electricity_price_cny_per_kwh",
+            ),
         )
         object.__setattr__(
             self,

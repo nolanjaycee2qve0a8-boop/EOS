@@ -24,8 +24,15 @@ export limit.
 
 All numeric facts are finite and non-boolean. SOC values use the inclusive
 zero-to-one interval. Capacity is positive, while physical limits and
-non-negative measurements are non-negative. Grid power and electricity price
-are signed observations.
+non-negative measurements are non-negative.
+
+Electricity price is exposed as `electricity_price_cny_per_kwh`: a signed
+finite value measured in CNY per kWh. This explicit name prevents ambiguity
+between currencies, CNY and fen, or kWh and MWh scaling.
+
+Grid power is measured in kW. Positive `grid_power_kw` means importing from the
+grid, negative means exporting to the grid, and zero means balanced grid
+exchange.
 
 The model owns no mutable collection and defines no behavior beyond factual
 input validation.

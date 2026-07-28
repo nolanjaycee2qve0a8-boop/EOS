@@ -23,7 +23,7 @@ def make_context(**overrides: object) -> DecisionContext:
         "pv_power_kw": 40.0,
         "load_power_kw": 30.0,
         "grid_power_kw": -10.0,
-        "electricity_price": 0.25,
+        "electricity_price_cny_per_kwh": 0.25,
         "reserve_soc": 0.2,
         "export_limit_kw": 15.0,
     }
@@ -41,7 +41,7 @@ def test_context_stores_decision_input_facts() -> None:
     assert context.pv_power_kw == 40.0
     assert context.load_power_kw == 30.0
     assert context.grid_power_kw == -10.0
-    assert context.electricity_price == 0.25
+    assert context.electricity_price_cny_per_kwh == 0.25
     assert context.reserve_soc == 0.2
     assert context.export_limit_kw == 15.0
 
@@ -65,7 +65,7 @@ def test_context_is_frozen_slotted_and_has_only_fixed_fields() -> None:
         "pv_power_kw",
         "load_power_kw",
         "grid_power_kw",
-        "electricity_price",
+        "electricity_price_cny_per_kwh",
         "reserve_soc",
         "export_limit_kw",
     )
@@ -149,7 +149,7 @@ def test_context_rejects_invalid_ranges(
         "pv_power_kw",
         "load_power_kw",
         "grid_power_kw",
-        "electricity_price",
+        "electricity_price_cny_per_kwh",
         "reserve_soc",
         "export_limit_kw",
     ],
@@ -163,6 +163,24 @@ def test_context_rejects_boolean_numeric_fields(field_name: str) -> None:
 def test_context_rejects_non_finite_values(invalid_value: float) -> None:
     with pytest.raises(ValueError, match="grid_power_kw"):
         make_context(grid_power_kw=invalid_value)
+
+
+def test_price_field_has_explicit_unit_and_signed_finite_contract() -> None:
+    context = make_context(electricity_price_cny_per_kwh=-0.1)
+
+    assert context.electricity_price_cny_per_kwh == -0.1
+    assert not hasattr(context, "electricity_price")
+    with pytest.raises(ValueError, match="electricity_price_cny_per_kwh"):
+        make_context(electricity_price_cny_per_kwh=float("nan"))
+
+
+def test_grid_power_sign_convention_is_publicly_documented() -> None:
+    documentation = DecisionContext.__doc__
+
+    assert documentation is not None
+    assert "greater than zero mean grid import" in documentation
+    assert "less than zero mean grid export" in documentation
+    assert "zero means balanced grid exchange" in documentation
 
 
 def test_context_requires_timezone_aware_timestamp() -> None:
