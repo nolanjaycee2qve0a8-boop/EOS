@@ -331,24 +331,70 @@ Intent 不是 command，也不是 constraint result。与命令合并会绑定 P
 业务规则。Phase 1 先建立通用接口，TASK-038 再在不改变接口的前提下加入第一个具体
 电池约束实现。
 
-#### TASK-038 BatteryConstraintImplementation
+### 4.7 Battery Constraint Layer
+
+TASK-038 Battery Constraint Implementation 是 EOS 第一个具体物理约束实现。
+TASK-001～037 建立决策基础设施，TASK-037 的 Policy 首次产生真实能源管理意图；
+TASK-038 的 Constraint 首次根据电池物理限制把策略意图转换为可行意图。
+
+```text
+DecisionIntent
+        |
+        v
+BatteryConstraintImplementation
+        |
+        v
+FeasibleDecisionIntent
+```
+
+**Intent 与 Capability 的区别**
+
+- Intent：策略希望做什么；
+- Constraint：系统的物理能力允许做什么。
+
+Policy 根据能源状态产生意图，不负责 SOC 限制、电池功率限制或设备能力判断。
+Constraint 只负责将已有意图限制在物理可行范围，不重新制定策略。
+
+**输入**
+
+原始 `DecisionIntent`。
+
+**约束事实**
 
 `BatteryConstraintImplementation` 在构造阶段接收一次评估所需的 immutable battery
 facts：
 
 - `soc`：`[0, 1]` 的无量纲比例；
 - `reserve_soc`：`[0, 1]` 的无量纲比例；
-- `max_charge_power_kw`：非负原始 kW；
-- `max_discharge_power_kw`：非负原始 kW。
+- `max_charge_power_kw`：非负、未经缩放的 kW；
+- `max_discharge_power_kw`：非负、未经缩放的 kW。
 
-它保持 `evaluate(intent)` 通用契约，只处理满电禁止充电、reserve SOC 禁止放电和
-最大充放电功率裁剪。若无需调整，输出继续引用原始 `DecisionIntent`；若被禁止或
-裁剪，则创建新的 immutable intent，原始策略意图不变。
+**输出**
 
-这些 facts 不是 runtime state。实现不得保存 history、cache、device 或 command，
-也不得计算 SOC 或承担 EMS 策略。
+`FeasibleDecisionIntent`。
 
-### 4.7 FeasibleDecisionIntent
+**核心规则**
+
+- SOC 达到满电限制时禁止继续充电；
+- SOC 小于或等于 `reserve_soc` 时禁止继续放电；
+- 超过最大充放电功率时限制到对应最大值；
+- 未调整时保持原始 intent identity；
+- 禁止或裁剪时生成新的 immutable intent，不修改原始 `DecisionIntent`。
+
+**为什么不能与其他模块合并**
+
+与 Policy 合并会让策略同时承担意图生成和物理可行性判断；与 Runtime 或 Device
+合并会让约束依赖执行机制。保持独立边界后，策略与约束可以分别替换和测试。
+
+**刻意不包含**
+
+- PCS 或 BMS 控制；
+- CAN、Modbus 或 device command；
+- runtime 执行或 dispatch；
+- optimization 或 forecasting；
+- SOC 计算、history、cache 或 mutable runtime state。
+
+### 4.8 FeasibleDecisionIntent
 
 **为什么存在**
 
@@ -373,7 +419,7 @@ facts：
 若直接覆盖原始 intent，就无法审计策略到底产生了什么；若与 command 合并，就跨越了
 语义决策与设备执行边界。
 
-### 4.8 ConstraintExplanation
+### 4.9 ConstraintExplanation
 
 **为什么存在**
 
@@ -398,7 +444,7 @@ facts：
 Explanation 不执行约束，也不生成理由或推荐。与约束算法合并会让观察触发计算；
 与持久化合并会让领域对象承担存储职责。
 
-### 4.9 DecisionEvaluationCycle
+### 4.10 DecisionEvaluationCycle
 
 **为什么存在**
 
@@ -424,7 +470,7 @@ Explanation 不执行约束，也不生成理由或推荐。与约束算法合�
 Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会使对象构造产生副作用，
 也会失去“已完成生命周期观察”的语义。
 
-### 4.10 DecisionEvaluationOrchestrator
+### 4.11 DecisionEvaluationOrchestrator
 
 **为什么存在**
 
