@@ -3,6 +3,7 @@
 import kernel.policy as policy
 from kernel.policy import (
     DecisionContextPolicy,
+    DecisionContextPolicyImplementation,
     DecisionEvaluationOrchestrator,
     EMSPolicy,
 )
@@ -10,6 +11,10 @@ from kernel.policy import (
 
 def test_policy_boundaries_are_publicly_importable() -> None:
     assert DecisionContextPolicy.__name__ == "DecisionContextPolicy"
+    assert (
+        DecisionContextPolicyImplementation.__name__
+        == "DecisionContextPolicyImplementation"
+    )
     assert DecisionEvaluationOrchestrator.__name__ == "DecisionEvaluationOrchestrator"
     assert EMSPolicy.__name__ == "EMSPolicy"
 
@@ -17,6 +22,7 @@ def test_policy_boundaries_are_publicly_importable() -> None:
 def test_policy_package_exports_both_independent_boundaries() -> None:
     assert policy.__all__ == [
         "DecisionContextPolicy",
+        "DecisionContextPolicyImplementation",
         "DecisionEvaluationOrchestrator",
         "EMSPolicy",
     ]
