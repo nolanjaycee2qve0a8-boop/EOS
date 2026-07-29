@@ -150,6 +150,9 @@ DecisionContext
 DecisionContextPolicy
         |
         v
+DecisionContextResult
+        |
+        v
 DecisionIntent
         |
         v
