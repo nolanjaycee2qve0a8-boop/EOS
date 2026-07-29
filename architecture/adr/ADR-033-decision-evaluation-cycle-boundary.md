@@ -18,12 +18,12 @@ exact existing:
 
 - `DecisionContext`;
 - `DecisionContextResult`;
-- `DecisionIntent`;
+- source `DecisionIntent`;
 - `FeasibleDecisionIntent`; and
 - `ConstraintExplanation`.
 
 Validate the represented chain with identity comparisons. The classmethod
-factory reads `result.intent` but performs no policy call, constraint
+factory stores `result.intent` as `source_intent` but performs no policy call, constraint
 evaluation, copying, normalization, or state transition.
 
 ## Architecture
@@ -35,7 +35,7 @@ DecisionContext
 DecisionContextResult
         |
         v
-DecisionIntent
+source DecisionIntent
         |
         v
 FeasibleDecisionIntent
@@ -50,7 +50,9 @@ DecisionEvaluationCycle
 ## Consequences
 
 - One completed evaluation can be observed as a coherent immutable lifecycle.
-- All stored artifact identities remain available.
+- The exact policy source and feasible output identities remain available.
+- An unchanged feasible intent may retain source identity; an adjusted
+  feasible intent may have a different immutable identity.
 - Invalid represented identity chains are rejected deterministically.
 - Runtime, execution, policy, and constraint implementations remain
   independent.

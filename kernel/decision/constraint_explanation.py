@@ -8,7 +8,7 @@ from kernel.decision.intent import DecisionIntent
 
 @dataclass(frozen=True, slots=True)
 class ConstraintExplanation:
-    """Expose exact constraint artifacts without deriving new reasoning."""
+    """Expose exact source and feasible artifacts without derived reasoning."""
 
     feasible_intent: FeasibleDecisionIntent
     source_intent: DecisionIntent
@@ -18,19 +18,20 @@ class ConstraintExplanation:
             raise TypeError("feasible_intent must be a FeasibleDecisionIntent")
         if not isinstance(self.source_intent, DecisionIntent):
             raise TypeError("source_intent must be a DecisionIntent")
-        if self.source_intent is not self.feasible_intent.intent:
-            raise ValueError("source_intent must be the exact feasible intent source")
 
     @classmethod
     def create(
         cls,
         feasible_intent: FeasibleDecisionIntent,
+        source_intent: DecisionIntent,
     ) -> "ConstraintExplanation":
-        """Observe an existing feasible intent without recomputing it."""
+        """Observe exact source and feasible intent references without execution."""
         if not isinstance(feasible_intent, FeasibleDecisionIntent):
             raise TypeError("feasible_intent must be a FeasibleDecisionIntent")
+        if not isinstance(source_intent, DecisionIntent):
+            raise TypeError("source_intent must be a DecisionIntent")
 
         return cls(
             feasible_intent=feasible_intent,
-            source_intent=feasible_intent.intent,
+            source_intent=source_intent,
         )

@@ -46,25 +46,29 @@ DecisionEvaluationCycle
 ~~~python
 context: DecisionContext
 result: DecisionContextResult
-intent: DecisionIntent
+source_intent: DecisionIntent
 feasible_intent: FeasibleDecisionIntent
 explanation: ConstraintExplanation
 ~~~
 
-`create()` stores the exact supplied artifacts and derives `intent` only by
-reading `result.intent`. It performs no copy, reconstruction, serialization,
-normalization, or mutation.
+`create()` stores the exact supplied artifacts and derives `source_intent`
+only by reading `result.intent`. It performs no copy, reconstruction,
+serialization, normalization, or mutation.
 
 ## Lifecycle Validation
 
 The cycle validates all relationships represented by current contracts:
 
 ~~~python
-cycle.intent is cycle.result.intent
-cycle.feasible_intent.intent is cycle.intent
+cycle.source_intent is cycle.result.intent
 cycle.explanation.feasible_intent is cycle.feasible_intent
-cycle.explanation.source_intent is cycle.intent
+cycle.explanation.source_intent is cycle.source_intent
 ~~~
+
+When no constraint adjustment occurs,
+`cycle.feasible_intent.intent is cycle.source_intent`. When a constraint blocks
+or clips the request, `cycle.feasible_intent.intent` is a different immutable
+intent. Both relationships are valid lineage states.
 
 `DecisionContextResult` does not retain its source `DecisionContext`, so the
 cycle does not claim to independently prove that provenance. Re-running policy

@@ -20,10 +20,11 @@ feasible_intent: FeasibleDecisionIntent
 source_intent: DecisionIntent
 ~~~
 
-The explanation preserves the exact source references and validates their
-identity relationship with `is`. Its `create()` method reads an existing
-`FeasibleDecisionIntent` and constructs no replacement lifecycle or domain
-objects.
+The explanation preserves the exact source references. Following the TASK-039
+lineage refinement, `create(feasible_intent, source_intent)` receives both
+completed artifacts explicitly. The feasible inner intent may preserve the
+source identity or may be a different immutable intent produced by constraint
+adjustment. The method constructs no replacement lifecycle or domain objects.
 
 ## Architecture
 
@@ -43,8 +44,8 @@ ConstraintExplanation
 ## Consequences
 
 - Constraint evidence can be observed through a stable immutable contract.
-- Exact source identity remains available to future presentation or audit
-  boundaries.
+- Exact policy source identity and exact feasible result identity remain
+  available to future presentation or audit boundaries.
 - Explanation remains independent from evaluation, execution, and storage.
 - Adding human-readable or derived explanations requires a separate
   architecture decision.

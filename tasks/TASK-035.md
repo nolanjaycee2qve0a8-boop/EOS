@@ -67,11 +67,13 @@ The orchestration path passes exact objects between boundaries. The returned
 cycle guarantees:
 
 ~~~python
-cycle.intent is cycle.result.intent
-cycle.feasible_intent.intent is cycle.intent
+cycle.source_intent is cycle.result.intent
 cycle.explanation.feasible_intent is cycle.feasible_intent
-cycle.explanation.source_intent is cycle.intent
+cycle.explanation.source_intent is cycle.source_intent
 ~~~
+
+The feasible inner intent preserves `source_intent` identity when unchanged
+and may be a different immutable intent after constraint adjustment.
 
 There is no copy, reconstruction, serialization, normalization, or mutation
 of decision artifacts.

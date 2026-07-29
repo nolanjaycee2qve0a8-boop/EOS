@@ -36,16 +36,19 @@ feasible_intent: FeasibleDecisionIntent
 source_intent: DecisionIntent
 ~~~
 
-`ConstraintExplanation.create(feasible_intent)` preserves:
+After the TASK-039 lineage refinement,
+`ConstraintExplanation.create(feasible_intent, source_intent)` preserves:
 
 ~~~python
 explanation.feasible_intent is feasible_intent
-explanation.source_intent is feasible_intent.intent
+explanation.source_intent is source_intent
 ~~~
 
-Creation performs type and identity relationship validation only. It does not
-copy, reconstruct, serialize, normalize, execute, or mutate either source
-object.
+The feasible inner intent may be the same object as `source_intent` when no
+adjustment occurred, or a different immutable object after a constraint
+adjustment. Creation performs type validation and stores exact references. It
+does not copy, reconstruct, serialize, normalize, execute, or mutate either
+source object.
 
 ## Observation Only
 
