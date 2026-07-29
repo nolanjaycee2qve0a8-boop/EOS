@@ -141,11 +141,9 @@ cycle.explanation.source_intent is cycle.intent
 
 ```python
 class EMS:
-    def decide(self):
-        ...
+    def decide(self): ...
 
-    def control(self):
-        ...
+    def control(self): ...
 ```
 
 这种设计短期简单，但会逐渐把以下职责混在一个对象中：
