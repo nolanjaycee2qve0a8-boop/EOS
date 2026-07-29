@@ -5,6 +5,7 @@ from kernel.decision import (
     DecisionConstraintBoundary,
     DecisionContext,
     DecisionContextResult,
+    DecisionEvaluationCycle,
     DecisionIntent,
     DecisionPipeline,
     DecisionPolicy,
@@ -28,6 +29,7 @@ def test_decision_interfaces_are_publicly_importable() -> None:
     assert DecisionConstraintBoundary.__name__ == "DecisionConstraintBoundary"
     assert DecisionContext.__name__ == "DecisionContext"
     assert DecisionContextResult.__name__ == "DecisionContextResult"
+    assert DecisionEvaluationCycle.__name__ == "DecisionEvaluationCycle"
     assert DecisionIntent.__name__ == "DecisionIntent"
     assert DecisionPipeline.__name__ == "DecisionPipeline"
     assert DecisionPolicy.__name__ == "DecisionPolicy"
