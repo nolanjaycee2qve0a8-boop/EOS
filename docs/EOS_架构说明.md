@@ -26,17 +26,19 @@ EOS 的目标不是提供一个不可拆分的“万能 EMS 类”，而是提�
 
 ### 2.1 当前演进阶段
 
-#### Phase 1：TASK-001～TASK-036 — Decision Kernel Architecture
+#### Phase 1：TASK-001～TASK-037 — Decision Kernel
 
 该阶段建立不可变领域对象、状态、决策上下文、策略合同、意图、约束、生命周期、
 编排、journal、replay、audit 和 legacy isolation。目标是完成 EMS 算法可以稳定运行
-的决策基础设施。
+的决策基础设施。TASK-037 的 `SelfConsumptionPolicy` 在这些边界上首次产生真实
+能源管理意图，但仍然只负责表达策略意图。
 
-#### Phase 2：TASK-037+ — EMS Algorithm Implementation
+#### Phase 2：TASK-038+ — Physical Constraint Layer
 
-该阶段在稳定边界之上逐步加入具体 EMS 策略。TASK-037 的
-`SelfConsumptionPolicy` 是第一个实现，只根据 PV 与 Load 产生
-`DecisionIntent`，不改变 Constraint、Runtime、Execution 或 Device 边界。
+该阶段从 TASK-038 开始，将策略意图限制到物理可行范围。
+`BatteryConstraintImplementation` 是第一个具体物理约束实现：它根据 SOC、
+reserve SOC 和最大充放电功率生成 `FeasibleDecisionIntent`，同时保持 Policy、
+Runtime、Execution 和 Device 边界不变。
 
 ## 3. 核心架构原则
 

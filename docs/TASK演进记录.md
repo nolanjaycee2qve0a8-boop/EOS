@@ -638,12 +638,11 @@ PV = Load -> 0
 只使用当前 PV 与负荷功率；不读取价格、grid、SOC 或 power limit；策略创建的
 `DecisionIntent` 原始引用直接进入 `DecisionContextResult`。
 
-## TASK-038 Battery Constraint Boundary
+## TASK-038 Battery Constraint Implementation
 
 **目标：**
 
-实现 EOS Phase 2 第一个具体 constraint，在不修改通用 boundary 的前提下判断电池
-意图是否可行。
+实现第一个具体物理约束层，在不修改通用 boundary 的前提下判断电池意图是否可行。
 
 **实现内容：**
 
@@ -677,8 +676,23 @@ SOC 使用 `[0, 1]` 无量纲比例，功率使用未经缩放的 kW。
 
 **架构意义：**
 
-Policy 继续决定“想做什么”，Constraint 决定“允许做什么”。Battery-specific facts
-不会泄漏到通用 `DecisionConstraintBoundary` 或 Orchestrator。
+这是 EOS 第一个物理约束实现。TASK-001～037 建立决策基础设施；TASK-037 的 Policy
+首次产生真实能源管理意图；TASK-038 的 Constraint 首次根据电池物理限制，将策略
+意图转换为可行意图。
+
+```text
+DecisionIntent
+        |
+        v
+BatteryConstraintImplementation
+        |
+        v
+FeasibleDecisionIntent
+```
+
+Policy 负责根据能源状态产生意图，不负责 SOC 限制、电池功率限制或设备能力判断。
+Constraint 负责将意图限制在物理可行范围。Battery-specific facts 不会泄漏到通用
+`DecisionConstraintBoundary` 或 Orchestrator。
 
 **Identity：**
 
@@ -689,8 +703,10 @@ Policy 继续决定“想做什么”，Constraint 决定“允许做什么”�
 
 - SOC 计算或预测
 - EMS 策略
-- runtime、dispatch 或 persistence
-- PCS、BMS 或设备命令
+- runtime 执行、dispatch 或 persistence
+- PCS 或 BMS 控制
+- CAN、Modbus 或 device command
+- optimization 或 forecasting
 - cache、history 或 mutable runtime state
 
 **新增文件：**
