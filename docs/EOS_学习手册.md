@@ -325,7 +325,25 @@ Intent 不是 command，也不是 constraint result。与命令合并会绑定 P
 **为什么不能与其他模块合并**
 
 与 policy 合并会让策略同时承担偏好和安全责任；与 runtime 合并会让执行层重新解释
-业务规则。当前 TASK 只建立接口，没有约束算法。
+业务规则。Phase 1 先建立通用接口，TASK-038 再在不改变接口的前提下加入第一个具体
+电池约束实现。
+
+#### TASK-038 BatteryConstraintImplementation
+
+`BatteryConstraintImplementation` 在构造阶段接收一次评估所需的 immutable battery
+facts：
+
+- `soc`：`[0, 1]` 的无量纲比例；
+- `reserve_soc`：`[0, 1]` 的无量纲比例；
+- `max_charge_power_kw`：非负原始 kW；
+- `max_discharge_power_kw`：非负原始 kW。
+
+它保持 `evaluate(intent)` 通用契约，只处理满电禁止充电、reserve SOC 禁止放电和
+最大充放电功率裁剪。若无需调整，输出继续引用原始 `DecisionIntent`；若被禁止或
+裁剪，则创建新的 immutable intent，原始策略意图不变。
+
+这些 facts 不是 runtime state。实现不得保存 history、cache、device 或 command，
+也不得计算 SOC 或承担 EMS 策略。
 
 ### 4.7 FeasibleDecisionIntent
 

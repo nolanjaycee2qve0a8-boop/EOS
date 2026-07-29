@@ -217,6 +217,7 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - `DecisionContextResult`
 - `DecisionIntent`
 - `DecisionConstraintBoundary`
+- `BatteryConstraintImplementation`
 - `FeasibleDecisionIntent`
 - `ConstraintExplanation`
 - `DecisionEvaluationCycle`
@@ -227,7 +228,12 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - 设备协议；
 - runtime 循环；
 - 命令执行；
-- 策略或约束的具体算法。
+- EMS 策略优化、runtime 执行或设备控制。
+
+`BatteryConstraintImplementation` 是 Phase 2 的第一个 concrete constraint。它通过
+构造阶段持有一次评估所需的 immutable SOC、reserve SOC 和功率限制 facts，保持
+`DecisionConstraintBoundary.evaluate(intent)` 契约不变。它不拥有 history、cache
+或 runtime state。
 
 ### 5.3 `kernel/policy`
 
