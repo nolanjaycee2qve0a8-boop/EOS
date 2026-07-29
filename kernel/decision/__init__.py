@@ -1,6 +1,7 @@
 """Public deterministic decision interfaces for the EOS kernel."""
 
 from kernel.decision.assembler import DecisionContextAssembler
+from kernel.decision.battery_constraint import BatteryConstraintImplementation
 from kernel.decision.constraint import (
     DecisionConstraintBoundary,
     FeasibleDecisionIntent,
@@ -15,6 +16,7 @@ from kernel.decision.policy import DecisionPolicy
 from kernel.decision.result import DecisionResult
 
 __all__ = [
+    "BatteryConstraintImplementation",
     "ConstraintExplanation",
     "DecisionConstraintBoundary",
     "DecisionContext",

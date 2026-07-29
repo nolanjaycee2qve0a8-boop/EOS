@@ -638,6 +638,75 @@ PV = Load -> 0
 只使用当前 PV 与负荷功率；不读取价格、grid、SOC 或 power limit；策略创建的
 `DecisionIntent` 原始引用直接进入 `DecisionContextResult`。
 
+## TASK-038 Battery Constraint Boundary
+
+**目标：**
+
+实现 EOS Phase 2 第一个具体 constraint，在不修改通用 boundary 的前提下判断电池
+意图是否可行。
+
+**实现内容：**
+
+新增 frozen、slotted 的 `BatteryConstraintImplementation`，继承
+`DecisionConstraintBoundary` 并保持：
+
+```python
+evaluate(intent: DecisionIntent) -> FeasibleDecisionIntent
+```
+
+**输入：**
+
+- 原始 `DecisionIntent`
+- 构造阶段注入的 `soc`
+- `reserve_soc`
+- `max_charge_power_kw`
+- `max_discharge_power_kw`
+
+SOC 使用 `[0, 1]` 无量纲比例，功率使用未经缩放的 kW。
+
+**输出：**
+
+`FeasibleDecisionIntent`。
+
+**约束规则：**
+
+- 满电时禁止继续充电；
+- SOC 位于或低于 reserve SOC 时禁止继续放电；
+- 充放电意图超过对应功率上限时执行确定性裁剪；
+- 零意图保持不变。
+
+**架构意义：**
+
+Policy 继续决定“想做什么”，Constraint 决定“允许做什么”。Battery-specific facts
+不会泄漏到通用 `DecisionConstraintBoundary` 或 Orchestrator。
+
+**Identity：**
+
+未修改的意图保持 exact identity。被禁止或裁剪时创建新的 immutable intent，原始
+`DecisionIntent` 不被修改。
+
+**刻意不包含：**
+
+- SOC 计算或预测
+- EMS 策略
+- runtime、dispatch 或 persistence
+- PCS、BMS 或设备命令
+- cache、history 或 mutable runtime state
+
+**新增文件：**
+
+`kernel/decision/battery_constraint.py`、专项单元测试、`tasks/TASK-038.md` 和
+`architecture/adr/ADR-037-battery-constraint-boundary.md`。
+
+**验证结果：**
+
+730 tests passed；Ruff check、Ruff format 和 mypy 通过。
+
+**关键设计决策：**
+
+约束事实通过构造阶段注入 frozen implementation；通用 `evaluate(intent)` 契约和
+`DecisionEvaluationOrchestrator` 保持不变。
+
 ## 2. 后续追加模板
 
 ```markdown
