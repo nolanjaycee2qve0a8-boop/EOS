@@ -122,11 +122,14 @@ EOS 不只关心值相等，还关心生命周期证据是否来自同一个对�
 验证，例如：
 
 ```python
-cycle.intent is cycle.result.intent
-cycle.feasible_intent.intent is cycle.intent
+cycle.source_intent is cycle.result.intent
 cycle.explanation.feasible_intent is cycle.feasible_intent
-cycle.explanation.source_intent is cycle.intent
+cycle.explanation.source_intent is cycle.source_intent
 ```
+
+未发生约束调整时，`cycle.feasible_intent.intent is cycle.source_intent`。发生阻止或
+裁剪时，feasible inner intent 是新的 immutable 对象；Cycle 同时保留 source 与
+feasible 两条 exact identity。
 
 因此在生命周期边界中禁止：
 
@@ -236,6 +239,11 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 构造阶段持有一次评估所需的 immutable SOC、reserve SOC 和功率限制 facts，保持
 `DecisionConstraintBoundary.evaluate(intent)` 契约不变。它不拥有 history、cache
 或 runtime state。
+
+TASK-039 将 `DecisionEvaluationCycle.intent` 明确升级为 `source_intent`。Policy
+原始意图始终来自 `DecisionContextResult.intent`；constraint 输出通过
+`FeasibleDecisionIntent.intent` 保存。两者在未调整时可以是同一对象，在约束调整后
+可以是两个不同的 immutable 对象。
 
 ### 5.3 `kernel/policy`
 

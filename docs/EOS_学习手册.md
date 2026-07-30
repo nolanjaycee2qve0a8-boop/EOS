@@ -402,7 +402,7 @@ facts：
 
 **解决什么工程问题**
 
-- 保留原始 `DecisionIntent` 身份；
+- 保存约束允许执行的 effective `DecisionIntent` 身份；
 - 区分原始策略输出和约束阶段产物；
 - 为后续命令生成提供明确输入类型。
 
@@ -412,7 +412,9 @@ facts：
 
 **输出**
 
-包含原始意图引用的不可变 wrapper。
+包含 exact feasible intent 引用的不可变 wrapper。若约束未调整，inner intent 与
+policy source intent 是同一对象；若发生阻止或裁剪，则 inner intent 是新的
+immutable 对象。
 
 **为什么不能与其他模块合并**
 
@@ -433,7 +435,7 @@ facts：
 
 **输入**
 
-已有的 `FeasibleDecisionIntent`。
+已有的 `FeasibleDecisionIntent` 和 policy 原始 `source_intent`。
 
 **输出**
 
@@ -448,13 +450,13 @@ Explanation 不执行约束，也不生成理由或推荐。与约束算法合�
 
 **为什么存在**
 
-一次完成的决策评估包含 context、result、intent、feasible intent 和 explanation。
-需要一个统一生命周期对象验证这些产物确实属于同一条身份链。
+一次完成的决策评估包含 context、result、source intent、feasible intent 和
+explanation。需要一个统一生命周期对象验证这些产物确实属于同一次 lineage。
 
 **解决什么工程问题**
 
 - 保存一次完整评估的证据；
-- 通过 `is` 校验关键关系；
+- 通过 `is` 分别校验 source 与 feasible 关系；
 - 防止来自不同评估的对象被误拼接。
 
 **输入**
@@ -464,6 +466,26 @@ Explanation 不执行约束，也不生成理由或推荐。与约束算法合�
 **输出**
 
 不可变 `DecisionEvaluationCycle`。
+
+其关键合同是：
+
+```python
+cycle.source_intent is cycle.result.intent
+cycle.explanation.source_intent is cycle.source_intent
+cycle.explanation.feasible_intent is cycle.feasible_intent
+```
+
+约束未调整时：
+
+```python
+cycle.feasible_intent.intent is cycle.source_intent
+```
+
+约束阻止或裁剪时：
+
+```python
+cycle.feasible_intent.intent is not cycle.source_intent
+```
 
 **为什么不能与其他模块合并**
 
@@ -496,6 +518,9 @@ Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会
 
 Orchestrator 只协调，不拥有 policy、constraint、runtime 或 device。若与 policy 合并，
 算法会控制生命周期；若与 runtime 合并，新决策路径会被隐式接入旧执行路径。
+
+TASK-039 修复后，Orchestrator 会把 policy 的 exact source intent 和 constraint 的
+exact feasible output 同时传入 explanation/cycle，不复制或重建任一对象。
 
 ## 5. 学习建议
 

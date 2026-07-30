@@ -60,7 +60,10 @@ class DecisionEvaluationOrchestrator:
         if not isinstance(feasible_intent, FeasibleDecisionIntent):
             raise TypeError("constraint must return a FeasibleDecisionIntent")
 
-        explanation = ConstraintExplanation.create(feasible_intent)
+        explanation = ConstraintExplanation.create(
+            feasible_intent,
+            result.intent,
+        )
         return DecisionEvaluationCycle.create(
             context,
             result,

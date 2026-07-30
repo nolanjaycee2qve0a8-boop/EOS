@@ -8,6 +8,7 @@ from typing import Any, cast
 import pytest
 
 from kernel.decision import (
+    BatteryConstraintImplementation,
     ConstraintExplanation,
     DecisionConstraintBoundary,
     DecisionContext,
@@ -20,6 +21,7 @@ from kernel.decision import (
 from kernel.policy import (
     DecisionContextPolicy,
     DecisionEvaluationOrchestrator,
+    SelfConsumptionPolicy,
 )
 from kernel.policy import orchestration as orchestration_module
 from kernel.system_state import (
@@ -140,13 +142,33 @@ def test_evaluate_preserves_complete_identity_chain() -> None:
     assert policy.contexts == [cycle.context]
     assert policy.contexts[0] is cycle.context
     assert cycle.result is result
-    assert cycle.intent is result.intent
-    assert constraint.intents == [cycle.intent]
-    assert constraint.intents[0] is cycle.intent
+    assert cycle.source_intent is result.intent
+    assert constraint.intents == [cycle.source_intent]
+    assert constraint.intents[0] is cycle.source_intent
     assert cycle.feasible_intent is feasible_intent
-    assert cycle.feasible_intent.intent is cycle.intent
+    assert cycle.feasible_intent.intent is cycle.source_intent
     assert cycle.explanation.feasible_intent is cycle.feasible_intent
-    assert cycle.explanation.source_intent is cycle.intent
+    assert cycle.explanation.source_intent is cycle.source_intent
+
+
+def test_battery_constraint_clipping_preserves_complete_intent_lineage() -> None:
+    cycle = evaluate(
+        make_state(),
+        SelfConsumptionPolicy(),
+        BatteryConstraintImplementation(
+            soc=0.5,
+            reserve_soc=0.2,
+            max_charge_power_kw=2.0,
+            max_discharge_power_kw=2.0,
+        ),
+    )
+
+    assert cycle.source_intent is cycle.result.intent
+    assert cycle.source_intent.battery_power_intent_kw == 5.0
+    assert cycle.feasible_intent.intent.battery_power_intent_kw == 2.0
+    assert cycle.feasible_intent.intent is not cycle.source_intent
+    assert cycle.explanation.feasible_intent is cycle.feasible_intent
+    assert cycle.explanation.source_intent is cycle.source_intent
 
 
 def test_evaluate_maps_state_and_explicit_facts_without_hidden_defaults() -> None:
@@ -186,7 +208,7 @@ def test_evaluate_reuses_every_boundary_once_and_in_order(
     intent = DecisionIntent(1.0)
     result = DecisionContextResult(intent)
     feasible_intent = FeasibleDecisionIntent(intent)
-    explanation = ConstraintExplanation.create(feasible_intent)
+    explanation = ConstraintExplanation.create(feasible_intent, intent)
     expected = cast(DecisionEvaluationCycle, object())
     order: list[str] = []
 
@@ -219,9 +241,11 @@ def test_evaluate_reuses_every_boundary_once_and_in_order(
 
     def explain(
         supplied_feasible_intent: FeasibleDecisionIntent,
+        supplied_source_intent: DecisionIntent,
     ) -> ConstraintExplanation:
         order.append("explain")
         assert supplied_feasible_intent is feasible_intent
+        assert supplied_source_intent is intent
         return explanation
 
     def create_cycle(

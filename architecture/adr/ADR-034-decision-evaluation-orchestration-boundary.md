@@ -48,11 +48,14 @@ or persist them.
 The returned `DecisionEvaluationCycle` validates the existing identity chain:
 
 ~~~python
-cycle.intent is cycle.result.intent
-cycle.feasible_intent.intent is cycle.intent
+cycle.source_intent is cycle.result.intent
 cycle.explanation.feasible_intent is cycle.feasible_intent
-cycle.explanation.source_intent is cycle.intent
+cycle.explanation.source_intent is cycle.source_intent
 ~~~
+
+The feasible inner intent is the exact constraint output. It may preserve
+`cycle.source_intent` identity when unchanged or differ after an immutable
+constraint adjustment.
 
 The orchestrator has empty slots. It receives policy and constraint instances
 per invocation and retains neither.

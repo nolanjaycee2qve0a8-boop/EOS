@@ -491,7 +491,7 @@ execution state。
 
 **实现内容：** 引入 immutable `ConstraintExplanation`。
 
-**架构意义：** 用只读关系对象连接 feasible intent 与 source intent。
+**架构意义：** 用只读关系对象连接 policy source intent 与 feasible intent。
 
 **新增文件：** `kernel/decision/constraint_explanation.py`、explanation tests、
 `tasks/TASK-033.md`、`ADR-032`。
@@ -507,16 +507,16 @@ execution state。
 
 **实现内容：** 引入 immutable `DecisionEvaluationCycle`。
 
-**架构意义：** 把 context、result、intent、feasible intent 和 explanation 组织为一次
-完整评估证据。
+**架构意义：** 把 context、result、source intent、feasible intent 和 explanation
+组织为一次完整评估证据。
 
 **新增文件：** `kernel/decision/evaluation_cycle.py`、cycle tests、
 `tasks/TASK-034.md`、`ADR-033`。
 
 **验证结果：** 667 tests passed；Ruff、mypy、GitHub Actions 通过。
 
-**关键设计决策：** 使用 `is` 验证完整身份链；cycle 不执行 policy/constraint，不保存
-实现实例。
+**关键设计决策：** 使用 `is` 分别验证 source 与 feasible lineage；cycle 不执行
+policy/constraint，不保存实现实例。
 
 ## TASK-035
 
@@ -722,6 +722,59 @@ Constraint 负责将意图限制在物理可行范围。Battery-specific facts �
 
 约束事实通过构造阶段注入 frozen implementation；通用 `evaluate(intent)` 契约和
 `DecisionEvaluationOrchestrator` 保持不变。
+
+## TASK-039 Decision Intent Lineage
+
+**目标：**
+
+修复 `DecisionEvaluationCycle` 对 policy source intent 与 constraint feasible intent
+错误要求同一身份的问题。
+
+**实现内容：**
+
+- 将 Cycle 公共字段 `intent` 重命名为 `source_intent`；
+- `source_intent` 必须是 `DecisionContextResult.intent` 的 exact reference；
+- 保留 exact `FeasibleDecisionIntent`；
+- `ConstraintExplanation.create()` 显式接收 source 与 feasible artifacts；
+- 不提供旧 `intent` 字段的兼容 alias。
+
+**架构意义：**
+
+TASK-038 首次允许 Constraint 在阻止或裁剪时创建新的 immutable intent。TASK-039
+因此把一条含糊的单身份链升级为两条明确 lineage：
+
+```text
+DecisionContextResult.intent
+        |
+        v
+source_intent
+
+DecisionConstraintBoundary output
+        |
+        v
+FeasibleDecisionIntent.intent
+```
+
+未调整时，两条 lineage 指向同一 `DecisionIntent`；调整时，它们指向两个不同但均为
+exact、immutable 的对象。
+
+**新增文件：**
+
+`tasks/TASK-039.md` 和
+`architecture/adr/ADR-038-decision-intent-lineage.md`。
+
+**验证内容：**
+
+- 无裁剪时 source/feasible identity 保持；
+- Battery Constraint 裁剪后 Cycle 正常创建；
+- source intent lineage 正确；
+- feasible intent lineage 正确；
+- legacy、runtime 和 execution 路径保持不变。
+
+**关键设计决策：**
+
+不修改 `DecisionIntent`、`DecisionConstraintBoundary`、Policy 职责或 Constraint
+职责；Cycle 仍是 frozen、slotted、observation-only 生命周期边界。
 
 ## 2. 后续追加模板
 

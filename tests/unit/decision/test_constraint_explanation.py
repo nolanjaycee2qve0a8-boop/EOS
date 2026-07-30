@@ -20,17 +20,22 @@ def make_feasible_intent(power_kw: float = 0.0) -> FeasibleDecisionIntent:
 
 
 def test_create_preserves_exact_source_identities() -> None:
-    feasible_intent = make_feasible_intent(25.0)
-    source_intent = feasible_intent.intent
+    source_intent = DecisionIntent(25.0)
+    feasible_intent = make_feasible_intent(10.0)
 
-    explanation = ConstraintExplanation.create(feasible_intent)
+    explanation = ConstraintExplanation.create(feasible_intent, source_intent)
 
     assert explanation.feasible_intent is feasible_intent
     assert explanation.source_intent is source_intent
+    assert explanation.feasible_intent.intent is not explanation.source_intent
 
 
 def test_explanation_is_frozen_and_slotted() -> None:
-    explanation = ConstraintExplanation.create(make_feasible_intent())
+    feasible_intent = make_feasible_intent()
+    explanation = ConstraintExplanation.create(
+        feasible_intent,
+        feasible_intent.intent,
+    )
 
     assert is_dataclass(explanation)
     assert cast(Any, ConstraintExplanation).__dataclass_params__.frozen
@@ -44,7 +49,11 @@ def test_explanation_is_frozen_and_slotted() -> None:
 
 
 def test_explanation_contains_only_source_references() -> None:
-    explanation = ConstraintExplanation.create(make_feasible_intent())
+    feasible_intent = make_feasible_intent()
+    explanation = ConstraintExplanation.create(
+        feasible_intent,
+        feasible_intent.intent,
+    )
 
     assert [field.name for field in fields(explanation)] == [
         "feasible_intent",
@@ -69,7 +78,18 @@ def test_explanation_contains_only_source_references() -> None:
 
 def test_create_rejects_invalid_feasible_intent() -> None:
     with pytest.raises(TypeError, match="feasible_intent"):
-        ConstraintExplanation.create(cast(FeasibleDecisionIntent, object()))
+        ConstraintExplanation.create(
+            cast(FeasibleDecisionIntent, object()),
+            DecisionIntent(0.0),
+        )
+
+
+def test_create_rejects_invalid_source_intent() -> None:
+    with pytest.raises(TypeError, match="source_intent"):
+        ConstraintExplanation.create(
+            make_feasible_intent(),
+            cast(DecisionIntent, object()),
+        )
 
 
 def test_constructor_rejects_invalid_source_intent() -> None:
@@ -82,11 +102,15 @@ def test_constructor_rejects_invalid_source_intent() -> None:
         )
 
 
-def test_constructor_rejects_broken_identity_relationship() -> None:
+def test_constructor_preserves_distinct_source_and_feasible_intents() -> None:
     feasible_intent = make_feasible_intent()
+    source_intent = DecisionIntent(1.0)
 
-    with pytest.raises(ValueError, match="exact"):
-        ConstraintExplanation(feasible_intent, DecisionIntent(0.0))
+    explanation = ConstraintExplanation(feasible_intent, source_intent)
+
+    assert explanation.feasible_intent is feasible_intent
+    assert explanation.source_intent is source_intent
+    assert explanation.feasible_intent.intent is not explanation.source_intent
 
 
 def test_explanation_module_has_no_forbidden_dependencies() -> None:

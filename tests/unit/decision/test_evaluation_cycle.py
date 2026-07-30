@@ -47,7 +47,7 @@ def make_artifacts() -> tuple[
     intent = DecisionIntent(5.0)
     result = DecisionContextResult(intent)
     feasible_intent = FeasibleDecisionIntent(intent)
-    explanation = ConstraintExplanation.create(feasible_intent)
+    explanation = ConstraintExplanation.create(feasible_intent, intent)
     return context, result, intent, feasible_intent, explanation
 
 
@@ -73,8 +73,9 @@ def test_create_preserves_every_artifact_identity() -> None:
 
     assert cycle.context is context
     assert cycle.result is result
-    assert cycle.intent is intent
+    assert cycle.source_intent is intent
     assert cycle.feasible_intent is feasible_intent
+    assert cycle.feasible_intent.intent is cycle.source_intent
     assert cycle.explanation is explanation
 
 
@@ -86,7 +87,7 @@ def test_cycle_is_frozen_and_slotted() -> None:
     assert DecisionEvaluationCycle.__slots__ == (
         "context",
         "result",
-        "intent",
+        "source_intent",
         "feasible_intent",
         "explanation",
     )
@@ -101,11 +102,12 @@ def test_cycle_contains_only_lifecycle_references() -> None:
     assert [field.name for field in fields(cycle)] == [
         "context",
         "result",
-        "intent",
+        "source_intent",
         "feasible_intent",
         "explanation",
     ]
     for forbidden in (
+        "intent",
         "policy",
         "commands",
         "events",
@@ -123,7 +125,7 @@ def test_cycle_contains_only_lifecycle_references() -> None:
     [
         ("context", object()),
         ("result", object()),
-        ("intent", object()),
+        ("source_intent", object()),
         ("feasible_intent", object()),
         ("explanation", object()),
     ],
@@ -136,7 +138,7 @@ def test_cycle_rejects_invalid_artifact_types(
     values: dict[str, object] = {
         "context": context,
         "result": result,
-        "intent": intent,
+        "source_intent": intent,
         "feasible_intent": feasible_intent,
         "explanation": explanation,
     }
@@ -146,7 +148,7 @@ def test_cycle_rejects_invalid_artifact_types(
         DecisionEvaluationCycle(
             context=cast(DecisionContext, values["context"]),
             result=cast(DecisionContextResult, values["result"]),
-            intent=cast(DecisionIntent, values["intent"]),
+            source_intent=cast(DecisionIntent, values["source_intent"]),
             feasible_intent=cast(
                 FeasibleDecisionIntent,
                 values["feasible_intent"],
@@ -158,7 +160,7 @@ def test_cycle_rejects_invalid_artifact_types(
         )
 
 
-def test_cycle_rejects_result_intent_identity_mismatch() -> None:
+def test_cycle_rejects_source_result_intent_identity_mismatch() -> None:
     context, result, _, feasible_intent, explanation = make_artifacts()
 
     with pytest.raises(ValueError, match="result intent"):
@@ -171,25 +173,31 @@ def test_cycle_rejects_result_intent_identity_mismatch() -> None:
         )
 
 
-def test_cycle_rejects_feasible_intent_identity_mismatch() -> None:
+def test_cycle_accepts_adjusted_feasible_intent_identity() -> None:
     context, result, intent, _, _ = make_artifacts()
-    other_feasible_intent = FeasibleDecisionIntent(DecisionIntent(5.0))
-    other_explanation = ConstraintExplanation.create(other_feasible_intent)
+    adjusted_intent = DecisionIntent(2.0)
+    feasible_intent = FeasibleDecisionIntent(adjusted_intent)
+    explanation = ConstraintExplanation.create(feasible_intent, intent)
 
-    with pytest.raises(ValueError, match="feasible_intent"):
-        DecisionEvaluationCycle(
-            context,
-            result,
-            intent,
-            other_feasible_intent,
-            other_explanation,
-        )
+    cycle = DecisionEvaluationCycle(
+        context,
+        result,
+        intent,
+        feasible_intent,
+        explanation,
+    )
+
+    assert cycle.source_intent is intent
+    assert cycle.source_intent is cycle.result.intent
+    assert cycle.feasible_intent is feasible_intent
+    assert cycle.feasible_intent.intent is adjusted_intent
+    assert cycle.feasible_intent.intent is not cycle.source_intent
 
 
 def test_cycle_rejects_explanation_identity_mismatch() -> None:
     context, result, intent, feasible_intent, _ = make_artifacts()
     other_feasible_intent = FeasibleDecisionIntent(intent)
-    other_explanation = ConstraintExplanation.create(other_feasible_intent)
+    other_explanation = ConstraintExplanation.create(other_feasible_intent, intent)
 
     with pytest.raises(ValueError, match="explanation"):
         DecisionEvaluationCycle(
@@ -198,6 +206,23 @@ def test_cycle_rejects_explanation_identity_mismatch() -> None:
             intent,
             feasible_intent,
             other_explanation,
+        )
+
+
+def test_cycle_rejects_explanation_source_intent_mismatch() -> None:
+    context, result, intent, feasible_intent, _ = make_artifacts()
+    explanation = ConstraintExplanation.create(
+        feasible_intent,
+        DecisionIntent(5.0),
+    )
+
+    with pytest.raises(ValueError, match="source intent"):
+        DecisionEvaluationCycle(
+            context,
+            result,
+            intent,
+            feasible_intent,
+            explanation,
         )
 
 
