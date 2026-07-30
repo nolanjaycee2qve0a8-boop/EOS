@@ -1146,6 +1146,81 @@ private immutable observing decorator 捕获同一次 Pipeline 执行的阶段�
 strategy、optimization、MPC、forecast、TOU、pricing、runtime、dispatch、device
 control 或 persistence。
 
+## TASK-045 EMS Capability Layer Boundary
+
+**目标：**
+
+建立 Phase 3 EMS Capability Layer 的第一个抽象业务能力扩展入口。
+
+**实现内容：**
+
+- 新增 abstract、empty-slotted `EMSCapabilityBoundary`；
+- 定义 `evaluate(DecisionContext) -> DecisionIntent`；
+- 通过顶层 `capability` package 提供公开导入；
+- 不实现任何 concrete capability 或 EMS algorithm；
+- 不接入现有 Policy、Constraint Pipeline 或 Evaluation Integration。
+
+**架构意义：**
+
+```text
+DecisionContext
+        |
+        v
+EMSCapabilityBoundary
+        |
+        v
+DecisionIntent
+        |
+        v
+future reviewed composition
+```
+
+TASK-001～044 建立稳定 Kernel、Constraint 与 Evaluation Framework。TASK-045 开始
+Phase 3，使业务能力可以在不修改 Kernel 架构的前提下演进。
+
+Capability 表达业务目标希望系统做什么；Constraint 继续决定物理上允许什么；Runtime、
+Dispatch 和 Device 继续负责后续执行职责。
+
+**Public contract：**
+
+```python
+class EMSCapabilityBoundary(ABC):
+    __slots__ = ()
+
+    @abstractmethod
+    def evaluate(
+        self,
+        context: DecisionContext,
+    ) -> DecisionIntent:
+        raise NotImplementedError
+```
+
+**新增文件：**
+
+- `capability/base.py`；
+- `tests/unit/capability/test_boundary.py`；
+- `tasks/TASK-045.md`；
+- `architecture/adr/ADR-044-ems-capability-layer-boundary.md`。
+
+**验证内容：**
+
+- boundary abstract；
+- evaluate 签名与类型合同；
+- exact context 与 intent identity；
+- empty slots、无 `__dict__` 和无 mutable state；
+- 与 `DecisionContextPolicy` 相互独立；
+- 无 runtime、dispatch、device、persistence、optimization 或 forecast 依赖；
+- public import 只导出 `EMSCapabilityBoundary`；
+- 既有 Intent、Policy、Constraint、Integration、legacy、runtime 和 execution 合同不变。
+
+**关键设计决策：**
+
+`EMSCapabilityBoundary` 不继承 `DecisionContextPolicy`，也不返回
+`DecisionContextResult`，从而避免在 boundary introduction task 中迁移 Policy。
+TASK-045 不定义 Capability 如何进入现有 Evaluation Integration；该组合需要未来独立
+review。边界不包含 SOC、功率、Grid limit、PCS/BMS、command、runtime、dispatch、
+optimization、forecast、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
