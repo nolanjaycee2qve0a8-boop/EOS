@@ -47,7 +47,9 @@ Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
 顺序，Policy 和 Runtime 均不感知该顺序。TASK-043 新增 immutable
 `ConstraintExplanationChain`，按完成顺序保存每个 constraint stage 的 exact
 source/feasible identity、adjusted 状态和 caller-supplied reason，但不重新执行或
-解释 constraint。
+解释 constraint。TASK-044 新增独立 `DecisionEvaluationIntegration`，将 Assembler、
+Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一次完整评估，
+并通过 immutable result 同时保存 exact cycle 和 exact chain。
 
 ## 3. 核心架构原则
 
@@ -63,6 +65,7 @@ source/feasible identity、adjusted 状态和 caller-supplied reason，但不重
 - `ConstraintExplanationChain`：多个已完成约束阶段如何形成有序解释证据？
 - `DecisionEvaluationCycle`：一次完成的评估包含哪些证据？
 - `DecisionEvaluationOrchestrator`：这些边界以什么顺序协作？
+- `DecisionEvaluationIntegration`：完整新决策路径如何只执行一次并保存全部证据？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 
@@ -301,6 +304,8 @@ evidence，不从 SOC、power、grid、price 或 device facts 推理。既有
 - `DecisionContextPolicy`
 - `DecisionContextPolicyImplementation`
 - `DecisionEvaluationOrchestrator`
+- `DecisionEvaluationIntegration`
+- `DecisionEvaluationIntegrationResult`
 - `SelfConsumptionPolicy`
 
 **不负责**
@@ -312,6 +317,14 @@ evidence，不从 SOC、power、grid、price 或 device facts 推理。既有
 
 `SelfConsumptionPolicy` 是第一个 concrete implementation。它只输出
 `DecisionContextResult(DecisionIntent)`，不执行 SOC/功率约束，也不生成命令。
+
+TASK-044 的 `DecisionEvaluationIntegration` 接收 caller-supplied Policy、constraint
+tuple、对应 reason tuple 和全部显式 context facts。它调用 Assembler 与 Policy，
+再调用 `ConstraintEvaluationPipeline` 一次；每个底层 Constraint exactly once。
+Immutable observing decorator 在同一次调用中保存 exact stage input/output，不重跑
+constraint。随后创建 exact Explanation Chain、旧 `ConstraintExplanation` 和 Cycle。
+`DecisionEvaluationIntegrationResult` 保存 exact cycle 与 exact chain。既有
+`DecisionEvaluationOrchestrator` 保持不变并继续服务早期单 Constraint 路径。
 
 Policy package 的责任是产生和协调决策意图，不负责执行控制。
 
