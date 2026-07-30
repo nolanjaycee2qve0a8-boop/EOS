@@ -61,7 +61,9 @@ Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一�
 后续生命周期和外部执行。TASK-045 建立抽象边界；TASK-046 在该边界上新增第一个
 concrete `TOUEnergyCapability`，使用显式 immutable 小时、价格阈值和意图功率 facts
 生成 `DecisionIntent`，但不执行 SOC/功率/Grid Constraint，也不接入 Runtime 或
-Device。
+Device。TASK-047 进一步新增 abstract `CapabilityCompositionBoundary`，定义 caller
+ordered capability tuple 的 exactly-once evaluation，并返回同序 exact intent tuple；
+它不选择、排序、去重、评分或合并 intents。
 
 ## 3. 核心架构原则
 
@@ -353,6 +355,7 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 **主要对象**
 
 - `EMSCapabilityBoundary`
+- `CapabilityCompositionBoundary`
 - `TOUCapabilityParameters`
 - `TOUEnergyCapability`
 
@@ -374,6 +377,13 @@ raw kW 意图幅值。它只读取 `DecisionContext.timestamp.hour` 与
 `electricity_price_cny_per_kwh`，返回 charge、discharge 或 idle
 `DecisionIntent`。它不持有系统 clock，不查询 tariff，不预测或优化，也不执行任何
 Constraint、Integration、Runtime、Dispatch 或 Device 行为。
+
+TASK-047 的 `CapabilityCompositionBoundary` 定义
+`evaluate(context, capabilities) -> tuple[DecisionIntent, ...]`。Caller tuple 位置是
+权威顺序；每个位置 exactly once，重复位置不去重，返回 exact intent references。
+Boundary 不把多个 intent 解析为单个结果，不提供 selection、priority、score、
+arbitration 或 conflict resolution。生产 package 中没有 concrete composition
+implementation。
 
 ### 5.5 `kernel/runtime`
 
