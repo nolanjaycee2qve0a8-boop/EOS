@@ -444,7 +444,70 @@ TASK-040 的 boundary 不保存 grid import limit、grid export limit 或 zero-e
 - PCS 控制、device command、dispatch 或 runtime；
 - cache、history、persistence 或 telemetry。
 
-### 4.9 FeasibleDecisionIntent
+### 4.9 Grid Power Limit Constraint
+
+TASK-041 是第一个具体 Grid Constraint 实现。它不把 battery intent 当成 grid power，
+而是显式接收“应用本次 battery intent 前”的并网基准功率。
+
+```text
+source DecisionIntent
+        |
+        v
+GridPowerLimitConstraintImplementation
+        |
+        v
+FeasibleDecisionIntent
+```
+
+**输入**
+
+`DecisionIntent`，其中 `battery_power_intent_kw` 继续保持：
+
+- 正值：电池充电；
+- 负值：电池放电；
+- 零：空闲。
+
+**约束事实**
+
+- `grid_power_baseline_kw`：应用本次 battery intent 前的并网功率，正值进口、负值
+  出口；
+- `max_import_power_kw`：非负进口功率上限；
+- `max_export_power_kw`：非负出口功率幅值上限。
+
+所有值均为未经缩放的 kW。允许的并网区间是：
+
+```text
+[-max_export_power_kw, max_import_power_kw]
+```
+
+**确定性计算**
+
+```python
+projected_grid_power_kw = grid_power_baseline_kw + battery_power_intent_kw
+```
+
+Constraint 将 projected grid power 限制在允许区间，再反推出允许的 battery intent。
+它不进行预测、电价分析或设备控制。
+
+**Identity**
+
+- 无需调整时保留 exact source intent identity；
+- 发生限制时创建新的 immutable `DecisionIntent`；
+- 原始 Policy intent 永不修改。
+
+**为什么不能与其他模块合并**
+
+与 Policy 合并会让策略承担并网物理限制；与 `DecisionIntent` 合并会混淆 battery power
+和 grid power；与 Runtime/Device 合并会让约束读取或控制外部状态。
+
+**刻意不包含**
+
+- 专用 Zero Export 策略或控制器；
+- TOU、电价、optimization、forecasting 或 scheduling；
+- PCS/BMS 控制、command、dispatch 或 runtime；
+- persistence、telemetry、cache 或 history。
+
+### 4.10 FeasibleDecisionIntent
 
 **为什么存在**
 
@@ -471,7 +534,7 @@ immutable 对象。
 若直接覆盖原始 intent，就无法审计策略到底产生了什么；若与 command 合并，就跨越了
 语义决策与设备执行边界。
 
-### 4.10 ConstraintExplanation
+### 4.11 ConstraintExplanation
 
 **为什么存在**
 
@@ -496,7 +559,7 @@ immutable 对象。
 Explanation 不执行约束，也不生成理由或推荐。与约束算法合并会让观察触发计算；
 与持久化合并会让领域对象承担存储职责。
 
-### 4.11 DecisionEvaluationCycle
+### 4.12 DecisionEvaluationCycle
 
 **为什么存在**
 
@@ -542,7 +605,7 @@ cycle.feasible_intent.intent is not cycle.source_intent
 Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会使对象构造产生副作用，
 也会失去“已完成生命周期观察”的语义。
 
-### 4.12 DecisionEvaluationOrchestrator
+### 4.13 DecisionEvaluationOrchestrator
 
 **为什么存在**
 

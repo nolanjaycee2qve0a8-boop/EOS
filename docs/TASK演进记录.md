@@ -831,6 +831,75 @@ zero-export capability，但 TASK-040 不定义这些 facts 的字段、单位�
 本任务不实现 zero export、TOU、optimization、forecast、PCS/device control、
 dispatch、runtime、persistence、cache 或 history。
 
+## TASK-041 Grid Power Limit Constraint Implementation
+
+**目标：**
+
+实现第一个具体 Grid Constraint，根据显式并网基准功率和进出口功率上限产生可行的
+battery intent。
+
+**实现内容：**
+
+- 新增 frozen、slotted `GridPowerLimitConstraintImplementation`；
+- 继承 `GridConstraintBoundary`；
+- 构造注入 `grid_power_baseline_kw`、`max_import_power_kw` 和
+  `max_export_power_kw`；
+- 保持通用 `evaluate(intent) -> FeasibleDecisionIntent` 契约；
+- 通过 `kernel.decision` 提供公开导入。
+
+**架构意义：**
+
+TASK-040 只建立 Grid Constraint 抽象入口。TASK-041 首次在该入口上实现确定性的
+并网功率物理限制：
+
+```text
+source DecisionIntent
+        |
+        v
+GridPowerLimitConstraintImplementation
+        |
+        v
+FeasibleDecisionIntent
+```
+
+`DecisionIntent` 仍只表示 battery power。Grid constraint 使用显式 baseline 将
+battery intent 投影为 grid power，避免把两种功率语义混为一谈。
+
+**物理契约：**
+
+- `grid_power_baseline_kw`：应用 battery intent 前的并网功率，正值进口、负值出口；
+- battery intent：正值充电、负值放电；
+- projected grid power：`baseline + battery intent`；
+- 允许区间：`[-max_export_power_kw, max_import_power_kw]`；
+- 所有数值均为未经缩放的 kW。
+
+**Identity：**
+
+无调整时保留 exact source intent；发生限制时创建新的 immutable intent，并保持原始
+Policy intent 不变。TASK-039 lineage contract 不变。
+
+**新增文件：**
+
+- `kernel/decision/grid_power_limit_constraint.py`；
+- `tests/unit/decision/test_grid_power_limit_constraint.py`；
+- `tasks/TASK-041.md`；
+- `architecture/adr/ADR-040-grid-power-limit-constraint.md`。
+
+**验证内容：**
+
+- import/export limits 的确定性限制；
+- baseline、limits 的类型、有限值、单位和范围；
+- 无调整与调整场景的 identity；
+- frozen/slotted 和无 mutable state；
+- public import 与 dependency isolation；
+- Policy、boundary、lineage、legacy、runtime 和 execution 保持不变。
+
+**关键设计决策：**
+
+不向 `DecisionIntent` 添加 grid 字段，不把 battery intent 解释为 grid power，也不让
+Policy 获取 grid limits。本任务没有专用 Zero Export 策略、TOU、电价、optimization、
+forecast、PCS/device control、runtime、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

@@ -11,6 +11,9 @@ from kernel.decision.context import DecisionContext
 from kernel.decision.context_result import DecisionContextResult
 from kernel.decision.evaluation_cycle import DecisionEvaluationCycle
 from kernel.decision.grid_constraint import GridConstraintBoundary
+from kernel.decision.grid_power_limit_constraint import (
+    GridPowerLimitConstraintImplementation,
+)
 from kernel.decision.intent import DecisionIntent
 from kernel.decision.pipeline import DecisionPipeline
 from kernel.decision.policy import DecisionPolicy
@@ -30,4 +33,5 @@ __all__ = [
     "DecisionResult",
     "FeasibleDecisionIntent",
     "GridConstraintBoundary",
+    "GridPowerLimitConstraintImplementation",
 ]
