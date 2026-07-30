@@ -63,7 +63,11 @@ concrete `TOUEnergyCapability`，使用显式 immutable 小时、价格阈值和
 生成 `DecisionIntent`，但不执行 SOC/功率/Grid Constraint，也不接入 Runtime 或
 Device。TASK-047 进一步新增 abstract `CapabilityCompositionBoundary`，定义 caller
 ordered capability tuple 的 exactly-once evaluation，并返回同序 exact intent tuple；
-它不选择、排序、去重、评分或合并 intents。
+它不选择、排序、去重、评分或合并 intents。TASK-048 新增 abstract
+`IntentResolutionBoundary`，只定义
+`tuple[DecisionIntent, ...] -> DecisionIntent` 的未来解析入口；不新增 concrete
+resolver，也不定义 priority、weight、score、ranking、selection、optimization 或
+arbitration algorithm。
 
 ## 3. 核心架构原则
 
@@ -81,6 +85,7 @@ ordered capability tuple 的 exactly-once evaluation，并返回同序 exact int
 - `DecisionEvaluationOrchestrator`：这些边界以什么顺序协作？
 - `DecisionEvaluationIntegration`：完整新决策路径如何只执行一次并保存全部证据？
 - `EMSCapabilityBoundary`：业务能力如何在不修改 Kernel 的情况下表达决策意图？
+- `IntentResolutionBoundary`：多个 capability candidates 如何进入未来单一意图解析入口？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 
@@ -350,12 +355,14 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 - 定义 EMS 业务能力的稳定扩展入口；
 - 接收 immutable `DecisionContext`；
 - 返回 semantic `DecisionIntent`；
+- 为多个独立 candidate intents 定义未来单一 intent resolution seam；
 - 允许未来业务能力独立演进。
 
 **主要对象**
 
 - `EMSCapabilityBoundary`
 - `CapabilityCompositionBoundary`
+- `IntentResolutionBoundary`
 - `TOUCapabilityParameters`
 - `TOUEnergyCapability`
 
@@ -384,6 +391,13 @@ TASK-047 的 `CapabilityCompositionBoundary` 定义
 Boundary 不把多个 intent 解析为单个结果，不提供 selection、priority、score、
 arbitration 或 conflict resolution。生产 package 中没有 concrete composition
 implementation。
+
+TASK-048 的 `IntentResolutionBoundary` 定义
+`resolve(candidates: tuple[DecisionIntent, ...]) -> DecisionIntent`。该抽象边界位于
+composition candidates 与 Constraint source intent 之间，只固定 immutable tuple
+输入和单一 intent 输出类型。它不规定 empty/single/conflicting candidates 的行为，
+不规定输出 identity，也不实现 priority、weight、score、ranking、selection、merge、
+optimization 或 arbitration。生产 package 中没有 concrete resolver。
 
 ### 5.5 `kernel/runtime`
 

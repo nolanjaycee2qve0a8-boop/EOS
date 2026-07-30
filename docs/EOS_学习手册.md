@@ -1020,6 +1020,63 @@ pipeline。边界不保存 capability、context、intent、cache、history 或 r
 - runtime、command、dispatch、PCS/BMS 或 device control；
 - persistence、telemetry、cache 或 history。
 
+### 4.20 IntentResolutionBoundary
+
+TASK-048 在 capability candidates 与 Constraint 之间建立 intent resolution 的抽象扩展
+入口。
+
+```text
+tuple[DecisionIntent, ...]
+        |
+        v
+IntentResolutionBoundary
+        |
+        v
+DecisionIntent
+        |
+        v
+Constraint Layer
+```
+
+**为什么存在**
+
+Capability Composition 可以确定性地产生多个独立 intent，但 Constraint 接收的是一个
+source intent。如果让 Composition 直接选出结果，就会破坏“执行多个能力”与“处理业务
+冲突”的职责分离；如果让 Constraint 选择，则会让物理可行性层决定业务目标。
+
+**输入**
+
+`tuple[DecisionIntent, ...]`。Tuple 是已有 candidate artifacts 的 immutable 容器。
+Resolution boundary 不重新执行 Capability，不修改 candidate，也不保存候选历史。
+
+**输出**
+
+一个 `DecisionIntent`，作为未来进入 Constraint 层的 source intent。
+
+TASK-048 只固定类型边界，不决定输出是否必须是某个 exact candidate，也不授权构造新的
+intent。空 tuple、冲突 candidates、identity 和失败语义必须由未来具体 resolver 的独立
+TASK 与 ADR 明确。
+
+**为什么不能与 Composition 合并**
+
+Composition 回答“哪些 Capability 被调用、以什么顺序产生了哪些独立结果”。Resolution
+未来回答“多个业务候选如何得到一个结果”。前者是确定性执行合同，后者需要业务规则；
+合并两者会隐藏 priority、selection 或 arbitration。
+
+**Stateless boundary**
+
+生产代码只新增 abstract、empty-slotted boundary。它不保存 candidates、resolved
+intent、cache、history 或 runtime state，也没有 concrete production resolver。
+
+**刻意不包含**
+
+- priority、weight、score、ranking 或 automatic selection；
+- averaging、summation、intent merging 或 conflict arbitration；
+- optimization、MPC、forecast、scheduling 或 AI selection；
+- TOU、SOC、Battery、Grid、PCS/BMS 或 device logic；
+- Constraint 执行、Evaluation Integration、Runtime 或 Dispatch；
+- persistence、telemetry、cache 或 history。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

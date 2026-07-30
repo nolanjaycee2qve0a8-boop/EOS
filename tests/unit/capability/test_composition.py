@@ -217,6 +217,7 @@ def test_public_import() -> None:
     assert public_names == [
         "CapabilityCompositionBoundary",
         "EMSCapabilityBoundary",
+        "IntentResolutionBoundary",
         "TOUCapabilityParameters",
         "TOUEnergyCapability",
     ]

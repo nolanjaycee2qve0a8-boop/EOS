@@ -1379,6 +1379,81 @@ implementation 和 intent resolution 均需要未来独立 review。本任务不
 SOC、Grid、PCS/BMS、runtime、forecast、optimization、dispatch、device control、
 persistence、cache 或 history。
 
+## TASK-048 Intent Resolution Boundary
+
+**目标：**
+
+建立多个 capability candidate intents 进入单一 resolved `DecisionIntent` 的抽象扩展
+入口，但不实现任何 resolution 或 arbitration 算法。
+
+**实现内容：**
+
+- 新增 abstract、empty-slotted `IntentResolutionBoundary`；
+- 定义
+  `resolve(candidates: tuple[DecisionIntent, ...]) -> DecisionIntent`；
+- 使用 immutable tuple 表达既有 candidate artifacts；
+- 不重新执行 Capability；
+- 不修改或保存 candidates；
+- 不新增 concrete production resolver；
+- 通过顶层 `capability` package 提供公开导入。
+
+**架构意义：**
+
+```text
+CapabilityCompositionBoundary
+        |
+        v
+tuple[DecisionIntent, ...]
+        |
+        v
+IntentResolutionBoundary
+        |
+        v
+DecisionIntent
+        |
+        v
+Constraint Layer
+```
+
+TASK-048 把“确定性地产生多个独立 capability 输出”与“未来根据业务规则得到一个
+source intent”分成两个边界。Constraint 继续只处理物理可行性，不负责选择业务目标。
+
+**Boundary-only contract：**
+
+- 输入为 immutable candidate tuple；
+- 输出类型为一个 immutable `DecisionIntent`；
+- boundary 本身不实现 priority、weight、score 或 ranking；
+- 不自动选择 candidate；
+- 不相加、平均、裁剪或 merge intent；
+- 不实现 optimization、fallback 或 AI selection；
+- empty、single、conflicting candidates 的行为留给未来具体 resolver task；
+- resolved identity 与错误合同也由未来实现明确。
+
+**新增文件：**
+
+- `capability/resolution.py`；
+- `tests/unit/capability/test_resolution.py`；
+- `tasks/TASK-048.md`；
+- `architecture/adr/ADR-047-intent-resolution-boundary.md`。
+
+**验证内容：**
+
+- abstract boundary 与 exact signature；
+- tuple candidate input 与 `DecisionIntent` output annotation；
+- test-only single candidate exact identity；
+- empty slots、无 `__dict__`、cache、history 或 runtime state；
+- production package 无 concrete resolver；
+- 无 Constraint、Evaluation、Runtime、Dispatch、Device dependency；
+- Intent、Capability、Constraint、Evaluation 与 Legacy contracts 保持不变；
+- public import。
+
+**关键设计决策：**
+
+Resolution 独立于 Composition 与 Constraint。TASK-048 只为未来 business-resolution
+策略保留明确 seam，不声明 tuple 顺序就是 priority，也不规定返回现有 candidate 或
+构造新 intent。本任务不实现 TOU、SOC、Grid、PCS/BMS、runtime、forecast、
+optimization、dispatch、device control、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
