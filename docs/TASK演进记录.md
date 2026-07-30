@@ -776,6 +776,61 @@ exact、immutable 的对象。
 不修改 `DecisionIntent`、`DecisionConstraintBoundary`、Policy 职责或 Constraint
 职责；Cycle 仍是 frozen、slotted、observation-only 生命周期边界。
 
+## TASK-040 Grid Constraint Boundary
+
+**目标：**
+
+建立并网侧物理约束的抽象扩展入口，不实现具体限制算法。
+
+**实现内容：**
+
+- 新增 abstract、stateless `GridConstraintBoundary`；
+- 继承现有 `DecisionConstraintBoundary`；
+- 保持 `evaluate(intent: DecisionIntent) -> FeasibleDecisionIntent` 签名；
+- 通过 `kernel.decision` 提供公开导入；
+- 不在抽象边界中保存任何 grid facts。
+
+**架构意义：**
+
+TASK-038 建立第一个电池物理约束实现，TASK-039 稳定 source/feasible lineage。
+TASK-040 将并网侧物理能力定义为独立扩展方向：
+
+```text
+source DecisionIntent
+        |
+        v
+GridConstraintBoundary
+        |
+        v
+FeasibleDecisionIntent
+```
+
+Battery Constraint 与 Grid Constraint 共享通用 constraint 契约，但分别拥有不同的
+物理事实和未来实现，避免把 grid import/export capability 泄漏到电池约束、Policy
+或 Orchestrator。
+
+**新增文件：**
+
+- `kernel/decision/grid_constraint.py`；
+- `tests/unit/decision/test_grid_constraint.py`；
+- `tasks/TASK-040.md`；
+- `architecture/adr/ADR-039-grid-constraint-boundary.md`。
+
+**验证内容：**
+
+- boundary 是 abstract、empty-slotted 和 stateless；
+- evaluate 签名与通用 constraint contract 完全一致；
+- public import 可用；
+- 无具体生产实现、grid facts、算法或 forbidden dependencies；
+- intent、policy、lineage、legacy、runtime 和 execution 契约保持不变。
+
+**关键设计决策：**
+
+未来具体 Grid Constraint 可以通过构造阶段接收 immutable import/export limits 或
+zero-export capability，但 TASK-040 不定义这些 facts 的字段、单位、范围或算法。
+本任务不实现 zero export、TOU、optimization、forecast、PCS/device control、
+dispatch、runtime、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

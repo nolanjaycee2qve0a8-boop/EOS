@@ -10,6 +10,7 @@ from kernel.decision.constraint_explanation import ConstraintExplanation
 from kernel.decision.context import DecisionContext
 from kernel.decision.context_result import DecisionContextResult
 from kernel.decision.evaluation_cycle import DecisionEvaluationCycle
+from kernel.decision.grid_constraint import GridConstraintBoundary
 from kernel.decision.intent import DecisionIntent
 from kernel.decision.pipeline import DecisionPipeline
 from kernel.decision.policy import DecisionPolicy
@@ -28,4 +29,5 @@ __all__ = [
     "DecisionPolicy",
     "DecisionResult",
     "FeasibleDecisionIntent",
+    "GridConstraintBoundary",
 ]

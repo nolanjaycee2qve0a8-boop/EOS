@@ -394,7 +394,57 @@ facts：
 - optimization 或 forecasting；
 - SOC 计算、history、cache 或 mutable runtime state。
 
-### 4.8 FeasibleDecisionIntent
+### 4.8 Grid Constraint Boundary
+
+TASK-040 建立并网侧物理约束的抽象入口，但不实现任何限制算法。
+
+```text
+source DecisionIntent
+        |
+        v
+GridConstraintBoundary
+        |
+        v
+FeasibleDecisionIntent
+```
+
+**为什么存在**
+
+电池能力与并网能力是不同的物理责任。电池约束关注 SOC 和充放电能力；并网约束未来
+可能关注进口功率、出口功率和 zero-export capability。它们不应被塞入同一个具体类。
+
+**解决什么工程问题**
+
+- 为未来 grid import/export constraints 提供稳定扩展点；
+- 保持通用 `DecisionConstraintBoundary.evaluate(intent)` 契约不变；
+- 防止 grid-specific facts 泄漏到 Policy、Orchestrator 或通用约束接口。
+
+**输入**
+
+已有的 immutable `DecisionIntent`。
+
+**输出**
+
+`FeasibleDecisionIntent`。
+
+**为什么不能与其他模块合并**
+
+与 Policy 合并会让策略承担并网物理可行性；与 Battery Constraint 合并会混淆电池和
+并网点的能力所有权；与 Runtime、PCS 或 device adapter 合并会把约束判断绑定到执行。
+
+TASK-040 的 boundary 不保存 grid import limit、grid export limit 或 zero-export flag。
+未来具体实现可以通过构造阶段接收明确定义的 immutable grid facts，但必须继续保持
+通用 `evaluate(intent)` 签名。
+
+**刻意不包含**
+
+- grid import/export limit 算法；
+- zero-export 或防逆流算法；
+- TOU、电价策略、optimization 或 forecasting；
+- PCS 控制、device command、dispatch 或 runtime；
+- cache、history、persistence 或 telemetry。
+
+### 4.9 FeasibleDecisionIntent
 
 **为什么存在**
 
@@ -421,7 +471,7 @@ immutable 对象。
 若直接覆盖原始 intent，就无法审计策略到底产生了什么；若与 command 合并，就跨越了
 语义决策与设备执行边界。
 
-### 4.9 ConstraintExplanation
+### 4.10 ConstraintExplanation
 
 **为什么存在**
 
@@ -446,7 +496,7 @@ immutable 对象。
 Explanation 不执行约束，也不生成理由或推荐。与约束算法合并会让观察触发计算；
 与持久化合并会让领域对象承担存储职责。
 
-### 4.10 DecisionEvaluationCycle
+### 4.11 DecisionEvaluationCycle
 
 **为什么存在**
 
@@ -492,7 +542,7 @@ cycle.feasible_intent.intent is not cycle.source_intent
 Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会使对象构造产生副作用，
 也会失去“已完成生命周期观察”的语义。
 
-### 4.11 DecisionEvaluationOrchestrator
+### 4.12 DecisionEvaluationOrchestrator
 
 **为什么存在**
 
