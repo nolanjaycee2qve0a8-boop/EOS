@@ -832,6 +832,66 @@ Explanation Entry，不重跑 Constraint。
 - runtime、command、dispatch、PCS/BMS 或 device control；
 - persistence、telemetry、cache、history、retry 或 rollback。
 
+### 4.17 EMSCapabilityBoundary
+
+TASK-045 建立 Phase 3 EMS Capability Layer 的第一个抽象扩展入口。
+
+```text
+DecisionContext
+        |
+        v
+EMSCapabilityBoundary
+        |
+        v
+DecisionIntent
+        |
+        v
+future reviewed composition
+```
+
+**为什么存在**
+
+Policy、Constraint 和 Integration 已经形成稳定合同，但未来自发自用、峰值管理、TOU
+等业务能力仍需要独立演进。如果业务目标直接进入 Constraint，会混淆“希望做什么”和
+“物理上允许什么”；如果进入 Runtime 或 Device，会把语义意图与执行绑定。
+
+**输入**
+
+一个 exact、immutable `DecisionContext`。它包含本次决策可见的物理观测、外部事实和
+显式约束输入。
+
+**输出**
+
+一个 `DecisionIntent`。TASK-045 只定义返回类型和扩展位置，不实现任何具体 EMS
+算法。
+
+**与 Policy 的关系**
+
+现有 `DecisionContextPolicy.evaluate(context) -> DecisionContextResult` 保持不变。
+`EMSCapabilityBoundary` 不继承 Policy，不包装 Policy，也没有被
+`DecisionEvaluationIntegration` 自动调用。未来如何组合必须通过独立 TASK 和 ADR
+明确决定。
+
+**Stateless contract**
+
+边界是 abstract、empty-slotted，并且没有 `__dict__`、cache、history 或 runtime
+state。它不保存 Policy、Constraint、Dispatcher 或 Device 实例。
+
+**为什么不能与其他模块合并**
+
+- 与 Policy 合并会在 TASK-045 中隐式迁移已接受的 Policy contract；
+- 与 Constraint 合并会让业务目标负责 SOC、功率或 Grid 可行性；
+- 与 Runtime/Device 合并会让能力层拥有生命周期或控制责任；
+- 与 `DecisionContext` 合并会让不可变事实对象拥有行为。
+
+**刻意不包含**
+
+- 具体 EMS capability 或 strategy；
+- SOC、功率、Grid limit 或 Constraint 执行；
+- optimization、MPC、forecast、TOU 或 pricing；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache、history 或 scheduling。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

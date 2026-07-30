@@ -33,7 +33,7 @@ EOS 的目标不是提供一个不可拆分的“万能 EMS 类”，而是提�
 的决策基础设施。TASK-037 的 `SelfConsumptionPolicy` 在这些边界上首次产生真实
 能源管理意图，但仍然只负责表达策略意图。
 
-#### Phase 2：TASK-038+ — Physical Constraint Layer
+#### Phase 2：TASK-038～TASK-044 — Physical Constraint + Decision Evaluation Framework
 
 该阶段从 TASK-038 开始，将策略意图限制到物理可行范围。
 `BatteryConstraintImplementation` 是第一个具体物理约束实现：它根据 SOC、
@@ -51,6 +51,15 @@ source/feasible identity、adjusted 状态和 caller-supplied reason，但不重
 Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一次完整评估，
 并通过 immutable result 同时保存 exact cycle 和 exact chain。
 
+#### Phase 3：TASK-045+ — EMS Capability Layer
+
+该阶段从 TASK-045 开始，为可独立演进的 EMS 业务能力建立稳定扩展入口。
+`EMSCapabilityBoundary` 定义
+`evaluate(DecisionContext) -> DecisionIntent`，但不继承或修改
+`DecisionContextPolicy`，也不自动接入 Evaluation Integration。Capability 表达业务
+目标希望系统做什么；Constraint 继续决定物理上允许什么；Runtime 与 Device 继续负责
+后续生命周期和外部执行。TASK-045 仅建立抽象边界，不实现具体 EMS 算法。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -66,6 +75,7 @@ Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一�
 - `DecisionEvaluationCycle`：一次完成的评估包含哪些证据？
 - `DecisionEvaluationOrchestrator`：这些边界以什么顺序协作？
 - `DecisionEvaluationIntegration`：完整新决策路径如何只执行一次并保存全部证据？
+- `EMSCapabilityBoundary`：业务能力如何在不修改 Kernel 的情况下表达决策意图？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 
@@ -192,7 +202,7 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 
 多一个明确边界，通常比少一个隐式责任更便宜。
 
-## 5. Kernel 包职责
+## 5. Kernel 与 Capability 包职责
 
 ### 5.1 `kernel/system_state`
 
@@ -328,7 +338,32 @@ constraint。随后创建 exact Explanation Chain、旧 `ConstraintExplanation` 
 
 Policy package 的责任是产生和协调决策意图，不负责执行控制。
 
-### 5.4 `kernel/runtime`
+### 5.4 `capability`
+
+**职责**
+
+- 定义 EMS 业务能力的稳定扩展入口；
+- 接收 immutable `DecisionContext`；
+- 返回 semantic `DecisionIntent`；
+- 允许未来业务能力独立演进。
+
+**主要对象**
+
+- `EMSCapabilityBoundary`
+
+**不负责**
+
+- 修改或继承 `DecisionContextPolicy`；
+- 执行 Battery/Grid/SOC/功率约束；
+- 拥有 runtime、dispatcher、device、cache 或 history；
+- 生成 command 或控制 PCS/BMS；
+- 在 TASK-045 中实现 optimization、forecast、TOU 或具体 EMS 算法。
+
+TASK-045 只建立 abstract、empty-slotted contract。依赖方向是
+`capability -> kernel.decision`；Kernel 不反向导入 Capability。现有 Policy 与
+Evaluation Integration 均保持不变，未来组合必须由单独 TASK 和 ADR 批准。
+
+### 5.5 `kernel/runtime`
 
 **当前职责**
 
@@ -349,7 +384,7 @@ audit 和 explanation 等生命周期边界。
 - 隐式缓存或全局运行状态；
 - 在观察对象构造时推进系统。
 
-### 5.5 `kernel/execution`
+### 5.6 `kernel/execution`
 
 **当前职责**
 
