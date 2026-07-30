@@ -1541,6 +1541,95 @@ Policy 两条已接受 extension contract 独立。本任务不实现 SOC、Batt
 zero-export、TOU、optimization、forecast、runtime、dispatch、PCS/BMS、device
 control、persistence、cache 或 history。
 
+## TASK-050 Deterministic Intent Resolution Implementation
+
+**目标：**
+
+实现第一个 concrete、replaceable Intent Resolver，使用 caller 显式注入的 immutable
+规则把 candidate tuple 解析为一个 `DecisionIntent`。
+
+**实现内容：**
+
+- 新增 frozen/slotted `DeterministicIntentResolutionParameters`；
+- 参数只包含 required `selected_candidate_index`；
+- index 是 unitless、zero-based、non-negative integer；
+- 新增 frozen/slotted `DeterministicIntentResolutionImplementation`；
+- 继承并保持 `IntentResolutionBoundary.resolve(candidates)`；
+- 校验 tuple、全部 candidate 类型和 index range；
+- 返回指定 tuple position 的 exact `DecisionIntent`；
+- 保持 exact immutable parameter identity；
+- 通过顶层 `capability` package 提供公开导入。
+
+**架构意义：**
+
+```text
+tuple[DecisionIntent, ...]
+        +
+immutable selected_candidate_index
+        |
+        v
+DeterministicIntentResolutionImplementation
+        |
+        v
+exact selected DecisionIntent
+        |
+        v
+Constraint Layer
+```
+
+TASK-050 证明 Resolution Boundary 可以被具体实现替换，同时不让 Resolver 知道 TOU、
+Self Consumption 或未来 capability 名称。
+
+**Explicit rule：**
+
+- candidate 顺序由 caller 提供；
+- selected index 由 caller 通过 immutable parameters 提供；
+- 没有默认 index；
+- 不隐式选择 first/last；
+- 不从 capability name、type 或 intent value 推断 priority；
+- 同样的 parameters 与 candidate tuple 返回同一个 exact candidate reference。
+
+**Identity 与 Validation：**
+
+```python
+resolved is candidates[selected_candidate_index]
+```
+
+Resolver 不 copy、reconstruct、serialize、sort、deduplicate、sum、average、clip 或
+normalize intents。错误 container/element 类型抛出 `TypeError`；错误 index 参数或
+不存在的位置抛出 `ValueError`，错误消息包含字段名。
+
+**新增文件：**
+
+- `capability/deterministic_resolution.py`；
+- `tests/unit/capability/test_deterministic_resolution.py`；
+- `tasks/TASK-050.md`；
+- `architecture/adr/ADR-049-deterministic-intent-resolution.md`。
+
+**验证内容：**
+
+- unchanged boundary inheritance 与 exact signature；
+- 多个 index 的 deterministic selection；
+- exact candidate identity；
+- tuple order 与 repeated positions；
+- index type、non-negative 与 range validation；
+- candidate tuple/element validation；
+- parameters/implementation frozen、slotted、无 `__dict__`；
+- exact parameter identity；
+- 无 cache、history 或 runtime state；
+- 无 capability name、TOU/Self Consumption special case；
+- 无 Constraint、Evaluation、Runtime、Dispatch、Device dependency；
+- Intent、Boundary、Capability、Constraint、Evaluation 与 Legacy contracts 保持不变；
+- public import。
+
+**关键设计决策：**
+
+选择规则必须公开存在于 required immutable parameters，而不是隐藏在 resolver control
+flow 中。TASK-050 使用最小的 zero-based index configuration，不添加 priority table、
+weight、score、ranking、intent arithmetic、optimization 或 forecast。本任务不处理
+SOC、Battery/Grid limit、zero-export、Constraint/Evaluation execution、runtime、
+dispatch、PCS/BMS、device control、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

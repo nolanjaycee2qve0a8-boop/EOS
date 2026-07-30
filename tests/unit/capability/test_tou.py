@@ -340,6 +340,8 @@ def test_public_imports() -> None:
 
     assert public_names == [
         "CapabilityCompositionBoundary",
+        "DeterministicIntentResolutionImplementation",
+        "DeterministicIntentResolutionParameters",
         "EMSCapabilityBoundary",
         "IntentResolutionBoundary",
         "SelfConsumptionCapability",

@@ -1150,6 +1150,77 @@ runtime state。
 - Runtime、Dispatch、PCS/BMS、communication 或 device control；
 - persistence、telemetry、cache 或 history。
 
+### 4.22 DeterministicIntentResolutionImplementation
+
+TASK-050 实现第一个具体、可替换 Intent Resolver。它用 caller 显式注入的 immutable
+tuple index，从多个 candidate intents 中返回一个 exact intent。
+
+```text
+tuple[DecisionIntent, ...]
+        +
+selected_candidate_index
+        |
+        v
+DeterministicIntentResolutionImplementation
+        |
+        v
+exact selected DecisionIntent
+        |
+        v
+Constraint Layer
+```
+
+**为什么存在**
+
+TASK-048 只定义 candidates 到单一 intent 的抽象入口。TASK-050 证明这个入口可以拥有
+具体实现，同时仍不依赖 capability 名称、SOC、Grid 或 Runtime。
+
+**Immutable parameters**
+
+`DeterministicIntentResolutionParameters` 只包含
+`selected_candidate_index`：
+
+- unitless、零基整数；
+- 必须大于或等于零；
+- 没有默认值；
+- 调用 `resolve()` 时必须对应现有 tuple 位置；
+- frozen、slotted，创建后不可修改。
+
+Caller 同时控制 candidate tuple 顺序和选择 index，因此规则是公开配置，不是隐藏在
+resolver 代码中的 priority。
+
+**输入与输出**
+
+输入必须是只包含 `DecisionIntent` 的 tuple。输出满足：
+
+```python
+resolved is candidates[selected_candidate_index]
+```
+
+Resolver 不复制、重建、序列化、相加、平均、裁剪或修改 intents。重复 object reference
+仍然可以出现在不同 tuple positions。
+
+**为什么不是 capability 特例**
+
+实现不知道 candidate 来自 TOU、Self Consumption 还是未来 Capability。它不导入具体
+Capability，也不检查 capability name、type 或 intent value。
+
+**为什么不能处理物理限制**
+
+Resolution 只决定哪个语义候选继续前进。SOC、battery power、Grid/export limit 和
+zero-export 仍由 Constraint 处理；Resolver 不执行 Constraint 或 Evaluation。
+
+**刻意不包含**
+
+- hidden priority、capability name 或 hard-coded first/last；
+- weight、score、ranking 或 value-based arbitration；
+- intent summation、averaging、clipping 或 normalization；
+- TOU/Self Consumption special case；
+- optimization、MPC、forecast、schedule 或 AI selection；
+- SOC、Battery/Grid limit 或 zero-export；
+- Runtime、Dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache 或 history。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
