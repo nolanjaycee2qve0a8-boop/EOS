@@ -1299,6 +1299,86 @@ Tariff/time facts 通过 immutable parameters 构造注入，保持
 system clock 或 future forecast，不实现 optimizer、SOC/功率/Grid Constraint、
 runtime、dispatch、PCS/BMS、device command、cache 或 history。
 
+## TASK-047 EMS Capability Composition Boundary
+
+**目标：**
+
+建立多个 EMS Capability 的抽象、确定性组合合同。
+
+**实现内容：**
+
+- 新增 abstract、empty-slotted `CapabilityCompositionBoundary`；
+- 定义 `evaluate(context, capabilities) -> tuple[DecisionIntent, ...]`；
+- 固定 caller tuple order；
+- 固定每个 capability tuple position exactly once；
+- 固定 exact context 与 exact returned intent identity；
+- 固定 repeated positions 不自动 deduplicate；
+- 固定异常立即停止并原样传播；
+- 不新增 concrete production composition implementation；
+- 通过顶层 `capability` package 提供公开导入。
+
+**架构意义：**
+
+```text
+DecisionContext
+        +
+caller-ordered tuple[EMSCapabilityBoundary, ...]
+        |
+        v
+CapabilityCompositionBoundary
+        |
+        v
+tuple[DecisionIntent, ...]
+```
+
+TASK-047 只建立 composition seam，不决定多个业务目标中谁获胜。它让未来 resolution
+可以消费有序、exact、只执行一次的 capability artifacts，而不用重新执行 Capability。
+
+**Ordering 与 Identity：**
+
+- caller tuple 位置是唯一权威顺序；
+- 不排序、不选择、不去重；
+- 每个位置接收 exact DecisionContext；
+- 每个位置执行 exactly once；
+- 输出 tuple 与输入 tuple 一一对应；
+- 每个输出保持 Capability 返回的 exact DecisionIntent reference；
+- empty capability tuple 对应 empty intent tuple。
+
+**Resolution exclusion：**
+
+Boundary 不选择 winner，不按 capability class 排序，不相加、平均、裁剪或 normalize
+battery power，不生成 fallback，也不执行评分、优先级或 conflict resolution。TASK-047
+不返回单个 resolved intent。
+
+**新增文件：**
+
+- `capability/composition.py`；
+- `tests/unit/capability/test_composition.py`；
+- `tasks/TASK-047.md`；
+- `architecture/adr/ADR-046-capability-composition-boundary.md`。
+
+**验证内容：**
+
+- abstract boundary 与 exact signature；
+- caller order 和 exactly-once；
+- repeated positions 不去重；
+- exact context/intent identity；
+- empty tuple；
+- exception propagation 与 later-call prevention；
+- empty slots、无 `__dict__`、cache 或 history；
+- production package 无 concrete composition；
+- 无 TOU/Constraint/Integration/Runtime/Device dependency；
+- Intent、Constraint、Evaluation、Legacy contracts 保持不变；
+- public import。
+
+**关键设计决策：**
+
+返回 ordered intent tuple，而不是单个 intent，避免在 boundary task 中暗中加入 selection、
+priority、scoring、optimization 或 business conflict rules。具体 composition
+implementation 和 intent resolution 均需要未来独立 review。本任务不实现 TOU、
+SOC、Grid、PCS/BMS、runtime、forecast、optimization、dispatch、device control、
+persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

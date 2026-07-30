@@ -962,6 +962,64 @@ TOU Capability 产生偏好，不检查 SOC、reserve SOC、电池充放电能�
 - runtime、command、dispatch、PCS/BMS 或 device control；
 - persistence、telemetry、cache 或 history。
 
+### 4.19 CapabilityCompositionBoundary
+
+TASK-047 建立多个 EMS Capability 的抽象组合边界。
+
+```text
+DecisionContext
+        +
+caller-ordered capability tuple
+        |
+        v
+CapabilityCompositionBoundary
+        |
+        v
+tuple[DecisionIntent, ...]
+```
+
+**为什么存在**
+
+未来一个 DecisionContext 可能需要由多个业务 Capability 同时观察。直接让调用者自由
+拼接会导致执行次数、顺序、异常传播和身份保持不一致；但现在把多个 intent 合成一个
+结果，又会提前发明 priority 或 conflict resolution 规则。
+
+**输入**
+
+- exact immutable `DecisionContext`；
+- caller-supplied `tuple[EMSCapabilityBoundary, ...]`。
+
+Tuple 位置就是权威顺序。重复出现同一个 Capability 表示两个调用位置，不能自动去重。
+
+**输出**
+
+`tuple[DecisionIntent, ...]`，与输入 capability tuple 一一对应。每个元素是对应
+Capability 返回的 exact intent reference。
+
+**Exactly once**
+
+一个符合合同的实现必须让每个 tuple 位置执行 exactly once，并把同一个 exact context
+传给每次调用。Capability 失败时立即停止，原异常向上传播，后续位置不执行。
+
+**为什么不返回一个 DecisionIntent**
+
+选择、相加、平均、裁剪或评分都属于新的业务决策。TASK-047 没有这些权限，因此只保留
+有序输出，不进行 resolution。未来 resolution 必须由独立 TASK 与 ADR 定义。
+
+**Stateless boundary**
+
+生产代码只新增 abstract、empty-slotted boundary，不新增 concrete composition
+pipeline。边界不保存 capability、context、intent、cache、history 或 runtime state。
+
+**刻意不包含**
+
+- capability selection、priority、scoring、arbitration 或 conflict resolution；
+- TOU、自发自用、peak shaving、SOC 或 Grid 业务逻辑；
+- optimization、MPC、forecast 或 scheduling；
+- Constraint 执行、Explanation 或 Evaluation Integration；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache 或 history。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
