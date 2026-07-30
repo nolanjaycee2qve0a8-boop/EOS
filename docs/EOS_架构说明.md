@@ -44,7 +44,10 @@ Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
 `GridPowerLimitConstraintImplementation`，通过显式 immutable baseline、进口上限和
 出口上限限制 projected grid exchange。TASK-042 新增无状态
 `ConstraintEvaluationPipeline`，由调用者通过 tuple 显式提供多个 constraint 的确定
-顺序，Policy 和 Runtime 均不感知该顺序。
+顺序，Policy 和 Runtime 均不感知该顺序。TASK-043 新增 immutable
+`ConstraintExplanationChain`，按完成顺序保存每个 constraint stage 的 exact
+source/feasible identity、adjusted 状态和 caller-supplied reason，但不重新执行或
+解释 constraint。
 
 ## 3. 核心架构原则
 
@@ -57,6 +60,7 @@ Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
 - `DecisionContextPolicy`：策略如何被调用？
 - `DecisionIntent`：策略希望系统做什么？
 - `DecisionConstraintBoundary`：意图如何进入可行性判断？
+- `ConstraintExplanationChain`：多个已完成约束阶段如何形成有序解释证据？
 - `DecisionEvaluationCycle`：一次完成的评估包含哪些证据？
 - `DecisionEvaluationOrchestrator`：这些边界以什么顺序协作？
 
@@ -234,6 +238,8 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - `ConstraintEvaluationPipeline`
 - `FeasibleDecisionIntent`
 - `ConstraintExplanation`
+- `ConstraintExplanationEntry`
+- `ConstraintExplanationChain`
 - `DecisionEvaluationCycle`
 - legacy `DecisionResult`、`DecisionPipeline`、`DecisionPolicy`
 
@@ -272,6 +278,14 @@ constraint tuple。Tuple 位置是权威顺序；Pipeline 不排序、不去重�
 实例。每一阶段接收上一阶段的 exact inner intent，最终返回最后一阶段的 exact
 `FeasibleDecisionIntent`。空 tuple 返回引用 exact source intent 的 wrapper。该边界
 不实现 optimization、priority、conflict resolution、runtime 或 device behavior。
+
+TASK-043 的 `ConstraintExplanationEntry` 保存一个 completed constraint stage 的
+exact source、exact feasible、identity-based adjusted flag 与 caller-supplied
+reason。`ConstraintExplanationChain` 使用 tuple 保存多个 Entry，验证首阶段 source、
+逐阶段 feasible-to-source continuity 和 exact final wrapper。Reason 是 opaque
+evidence，不从 SOC、power、grid、price 或 device facts 推理。既有
+`ConstraintExplanation`、`DecisionEvaluationCycle`、Policy 和 Constraint contracts
+均保持不变。
 
 ### 5.3 `kernel/policy`
 

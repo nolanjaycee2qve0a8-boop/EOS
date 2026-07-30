@@ -618,7 +618,70 @@ immutable 对象。
 Explanation 不执行约束，也不生成理由或推荐。与约束算法合并会让观察触发计算；
 与持久化合并会让领域对象承担存储职责。
 
-### 4.13 DecisionEvaluationCycle
+### 4.13 Constraint Explanation Chain
+
+TASK-043 在既有单阶段关系观察之外，增加多 Constraint 的有序解释证据。
+
+```text
+source DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        v
+final FeasibleDecisionIntent
+        |
+        v
+ConstraintExplanationChain
+        |
+        +--> ConstraintExplanationEntry[0]
+        |
+        +--> ConstraintExplanationEntry[1]
+```
+
+**为什么存在**
+
+最终 feasible intent 只能说明“最后允许什么”，不能单独说明每个 Constraint 是否调整
+了输入，以及调用者为该调整提供了什么原因。Chain 将每一阶段的完成证据按原顺序保存。
+
+**输入**
+
+- exact chain source `DecisionIntent`；
+- caller-supplied `tuple[ConstraintExplanationEntry, ...]`；
+- exact final `FeasibleDecisionIntent`。
+
+每个 Entry 保存 exact stage source、exact stage feasible、`adjusted` 和
+`adjustment_reason`。`adjusted` 由对象 identity 定义，而不是数值相等：
+
+```python
+adjusted = feasible_intent.intent is not source_intent
+```
+
+**输出**
+
+一个 frozen、slotted `ConstraintExplanationChain`。它保存 exact tuple 顺序，并验证
+下一 Entry 的 source 是上一 Entry 的 exact feasible inner intent。
+
+**Reason 的边界**
+
+Reason 是调用者显式提供的 opaque evidence。Chain 不读取 SOC、功率限制、电网状态或
+价格来推导原因，也不生成推荐、诊断或新结论。未调整时 reason 必须为 `None`；调整时
+必须提供非空字符串。
+
+**为什么不能与其他模块合并**
+
+修改既有 `ConstraintExplanation` 会破坏 TASK-033 和
+`DecisionEvaluationCycle` 的稳定契约；让 Constraint 返回 reason 会改变通用
+`DecisionConstraintBoundary`；在 Pipeline 中推导 reason 会让执行与观察混合。
+
+**刻意不包含**
+
+- constraint 执行、选择、排序、priority 或冲突解决；
+- TOU、pricing、optimization、MPC 或 forecasting；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、logging、cache 或 history。
+
+### 4.14 DecisionEvaluationCycle
 
 **为什么存在**
 
@@ -664,7 +727,7 @@ cycle.feasible_intent.intent is not cycle.source_intent
 Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会使对象构造产生副作用，
 也会失去“已完成生命周期观察”的语义。
 
-### 4.14 DecisionEvaluationOrchestrator
+### 4.15 DecisionEvaluationOrchestrator
 
 **为什么存在**
 

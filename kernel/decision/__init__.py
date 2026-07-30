@@ -7,6 +7,10 @@ from kernel.decision.constraint import (
     FeasibleDecisionIntent,
 )
 from kernel.decision.constraint_explanation import ConstraintExplanation
+from kernel.decision.constraint_explanation_chain import (
+    ConstraintExplanationChain,
+    ConstraintExplanationEntry,
+)
 from kernel.decision.constraint_pipeline import ConstraintEvaluationPipeline
 from kernel.decision.context import DecisionContext
 from kernel.decision.context_result import DecisionContextResult
@@ -24,6 +28,8 @@ __all__ = [
     "BatteryConstraintImplementation",
     "ConstraintEvaluationPipeline",
     "ConstraintExplanation",
+    "ConstraintExplanationChain",
+    "ConstraintExplanationEntry",
     "DecisionConstraintBoundary",
     "DecisionContext",
     "DecisionContextAssembler",

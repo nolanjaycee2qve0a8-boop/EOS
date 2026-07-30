@@ -969,6 +969,87 @@ Pipeline 是无状态 composition boundary，不是 optimization 或 constraint 
 本任务不实现 priority、conflict resolution、MPC、forecast、TOU、pricing、runtime、
 commands、dispatch、device control、persistence、cache 或 history。
 
+## TASK-043 Constraint Explanation Chain Boundary
+
+**目标：**
+
+建立多个 completed Constraint stage 的 immutable、有序解释证据边界。
+
+**实现内容：**
+
+- 新增 frozen/slotted `ConstraintExplanationEntry`；
+- 保存 exact stage source intent；
+- 保存 exact stage `FeasibleDecisionIntent`；
+- 记录 identity-based `adjusted`；
+- 保存 caller-supplied opaque `adjustment_reason`；
+- 新增 frozen/slotted `ConstraintExplanationChain`；
+- 使用 tuple 保存多个 Entry 的权威顺序；
+- 验证逐阶段 identity continuity；
+- 通过 `kernel.decision` 提供公开导入。
+
+**架构意义：**
+
+TASK-042 定义约束如何按序执行，TASK-043 定义如何在不重新执行的情况下观察每一阶段：
+
+```text
+source DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        v
+final FeasibleDecisionIntent
+        |
+        v
+ConstraintExplanationChain
+        |
+        +--> ConstraintExplanationEntry[0]
+        |
+        +--> ConstraintExplanationEntry[1]
+```
+
+**Identity：**
+
+- Entry source/feasible references 不复制、不重建；
+- `adjusted` 等价于 feasible inner intent 与 stage source 是否为不同对象；
+- 下一 Entry source 必须是上一 Entry 的 exact feasible inner intent；
+- Chain final feasible 必须是最后 Entry 的 exact wrapper；
+- 空 Chain 通过 feasible wrapper 保持 source intent identity；
+- entries tuple 和其中 Entry 均保持 exact identity。
+
+**Reason contract：**
+
+Reason 由调用者显式提供。调整时必须是非空字符串，未调整时必须为 `None`。Artifact
+不生成、标准化、解释或分析 reason，也不读取 SOC、功率、电网、价格或设备状态推理
+原因。
+
+**新增文件：**
+
+- `kernel/decision/constraint_explanation_chain.py`；
+- `tests/unit/decision/test_constraint_explanation_chain.py`；
+- `tasks/TASK-043.md`；
+- `architecture/adr/ADR-042-constraint-explanation-chain-boundary.md`。
+
+**验证内容：**
+
+- adjusted/unchanged stage identity；
+- caller-supplied reason contract；
+- multi-stage order 与 exact continuity；
+- empty chain；
+- broken first/intermediate/final identity rejection；
+- frozen/slotted、tuple-only 与无 mutable state；
+- observation-only dependency isolation；
+- public imports；
+- 既有 Constraint、Intent、Explanation、Cycle、Policy、legacy、runtime 和 execution
+  契约不变。
+
+**关键设计决策：**
+
+不修改 TASK-033 `ConstraintExplanation`，不让
+`DecisionConstraintBoundary.evaluate()` 返回 reason，也不让 Chain 调用 Pipeline。
+本任务没有 derived reasoning、constraint algorithm、TOU、pricing、optimization、
+MPC、forecast、runtime、dispatch、device control、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
