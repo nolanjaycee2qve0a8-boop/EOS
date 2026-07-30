@@ -507,7 +507,66 @@ Constraint 将 projected grid power 限制在允许区间，再反推出允许�
 - PCS/BMS 控制、command、dispatch 或 runtime；
 - persistence、telemetry、cache 或 history。
 
-### 4.10 FeasibleDecisionIntent
+### 4.10 Constraint Evaluation Pipeline
+
+TASK-042 定义多个 Constraint 如何按明确顺序组合，但不选择约束、排序约束或实现新的
+物理算法。
+
+```text
+source DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        +--> Battery Constraint
+        |
+        +--> Grid Constraint
+        |
+        v
+final FeasibleDecisionIntent
+```
+
+**为什么存在**
+
+一个真实意图可能需要同时满足电池能力与并网能力。如果调用顺序散落在 Policy、
+Runtime 或应用代码中，同一组约束可能产生不同生命周期。
+
+**输入**
+
+- exact source `DecisionIntent`；
+- caller supplied `tuple[DecisionConstraintBoundary, ...]`。
+
+Tuple 位置就是完整顺序。Pipeline 不排序、不去重、不并行执行。
+
+**输出**
+
+最后一个 constraint 返回的 exact `FeasibleDecisionIntent`。每个 constraint 接收上一
+阶段返回 wrapper 中的 exact inner intent。
+
+若 tuple 为空，Pipeline 返回一个引用 exact source intent 的
+`FeasibleDecisionIntent`。
+
+**Identity**
+
+- source intent 不复制、不修改；
+- 每一阶段保留上一阶段输出对象身份；
+- 最终 wrapper 不重建；
+- 所有 constraint 都不调整时，最终 inner intent 仍是 source intent。
+
+**为什么不能与其他模块合并**
+
+与 Policy 合并会让策略知道物理约束顺序；与 Runtime 合并会让执行层重新解释可行性；
+让 Pipeline 保存 constraint 列表则会引入运行时所有权和可变顺序。
+
+**刻意不包含**
+
+- constraint priority、排序或冲突解决算法；
+- optimization、MPC、forecast、TOU 或 pricing；
+- async、parallel、retry、rollback 或 partial result；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache 或 history。
+
+### 4.11 FeasibleDecisionIntent
 
 **为什么存在**
 
@@ -534,7 +593,7 @@ immutable 对象。
 若直接覆盖原始 intent，就无法审计策略到底产生了什么；若与 command 合并，就跨越了
 语义决策与设备执行边界。
 
-### 4.11 ConstraintExplanation
+### 4.12 ConstraintExplanation
 
 **为什么存在**
 
@@ -559,7 +618,7 @@ immutable 对象。
 Explanation 不执行约束，也不生成理由或推荐。与约束算法合并会让观察触发计算；
 与持久化合并会让领域对象承担存储职责。
 
-### 4.12 DecisionEvaluationCycle
+### 4.13 DecisionEvaluationCycle
 
 **为什么存在**
 
@@ -605,7 +664,7 @@ cycle.feasible_intent.intent is not cycle.source_intent
 Cycle 是结果边界，不是执行器。让它调用 policy 或 constraint 会使对象构造产生副作用，
 也会失去“已完成生命周期观察”的语义。
 
-### 4.13 DecisionEvaluationOrchestrator
+### 4.14 DecisionEvaluationOrchestrator
 
 **为什么存在**
 
