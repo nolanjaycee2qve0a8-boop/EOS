@@ -123,8 +123,8 @@ def test_boundary_module_has_only_stable_contract_dependencies() -> None:
         )
 
 
-def test_public_import_exports_only_capability_boundary() -> None:
+def test_public_import_includes_capability_boundary() -> None:
     from capability import __all__ as public_names
 
-    assert public_names == ["EMSCapabilityBoundary"]
+    assert "EMSCapabilityBoundary" in public_names
     assert EMSCapabilityBoundary.__name__ == "EMSCapabilityBoundary"

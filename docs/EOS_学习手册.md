@@ -98,7 +98,9 @@ TASK-037 已实现第一个最小策略 `SelfConsumptionPolicy`。它只比较�
 - 对未来时段的规划；
 - 对收益、效率和寿命成本的权衡。
 
-EOS 当前只提供电价事实与策略扩展边界，尚未实现 TOU 策略、调度或优化。
+TASK-046 已提供第一个显式、规则型 TOU Capability：它依据 caller-supplied 小时、
+价格阈值和意图功率生成 `DecisionIntent`。它不是调度器或优化器，也不规划未来时段、
+收益、效率或寿命成本。
 
 ### 3.3 防逆流
 
@@ -891,6 +893,74 @@ state。它不保存 Policy、Constraint、Dispatcher 或 Device 实例。
 - optimization、MPC、forecast、TOU 或 pricing；
 - runtime、command、dispatch、PCS/BMS 或 device control；
 - persistence、telemetry、cache、history 或 scheduling。
+
+### 4.18 TOUEnergyCapability
+
+TASK-046 在 Phase 3 边界上实现第一个具体 EMS Capability。
+
+```text
+DecisionContext
+        |
+        v
+TOUEnergyCapability
+        |
+        v
+DecisionIntent
+        |
+        v
+existing Constraint and Evaluation boundaries
+```
+
+**为什么存在**
+
+TOU 业务目标需要把当前时刻与电价事实转换为充电、放电或空闲意图。该逻辑属于“希望
+系统做什么”，不是电池或电网物理可行性，也不是设备执行。
+
+**输入**
+
+- exact immutable `DecisionContext`；
+- frozen/slotted `TOUCapabilityParameters`。
+
+参数显式包含：
+
+- `charge_hours`、`discharge_hours`：context timestamp 时区内的 0～23 本地小时 tuple；
+- `charge_price_ceiling_cny_per_kwh`：充电价格上限，raw CNY/kWh；
+- `discharge_price_floor_cny_per_kwh`：放电价格下限，raw CNY/kWh；
+- `charge_power_intent_kw`、`discharge_power_intent_kw`：非负 raw kW 意图幅值。
+
+充电与放电小时不得重叠。Capability 不读取系统时钟，不查 tariff database，也不执行
+时区转换。
+
+**输出**
+
+一个新 immutable `DecisionIntent`：
+
+- 处于充电小时且价格不高于 charge ceiling：输出正充电意图；
+- 处于放电小时且价格不低于 discharge floor：输出负放电意图；
+- 其他情况：输出零意图。
+
+阈值比较包含等号。没有默认 tariff、隐藏缩放或自动 schedule。
+
+**Capability 与 Constraint**
+
+TOU Capability 产生偏好，不检查 SOC、reserve SOC、电池充放电能力或 Grid limit。
+这些意图仍必须进入既有 Constraint 层才能成为 `FeasibleDecisionIntent`。
+
+**为什么不能与其他模块合并**
+
+- 与 Constraint 合并会把价格偏好误当成物理安全；
+- 与 Policy 合并会修改已接受的 Policy contract；
+- 与 Runtime 合并会让规则依赖时钟、调度或状态；
+- 与 Device 合并会把 kW 意图变成 PCS/BMS 命令。
+
+**刻意不包含**
+
+- tariff lookup、calendar、minute-level schedule 或时区转换；
+- optimization、MPC、forecast 或收益规划；
+- SOC、电池功率或 Grid Constraint；
+- peak shaving、zero export 或 pricing recommendation；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache 或 history。
 
 ## 5. 学习建议
 
