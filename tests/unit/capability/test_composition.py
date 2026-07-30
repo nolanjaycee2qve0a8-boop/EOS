@@ -218,6 +218,7 @@ def test_public_import() -> None:
         "CapabilityCompositionBoundary",
         "EMSCapabilityBoundary",
         "IntentResolutionBoundary",
+        "SelfConsumptionCapability",
         "TOUCapabilityParameters",
         "TOUEnergyCapability",
     ]
