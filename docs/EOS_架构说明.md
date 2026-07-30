@@ -74,7 +74,10 @@ Constraint、Resolution、Evaluation、Runtime 或 Device 行为。TASK-050 在�
 `IntentResolutionBoundary` 上新增第一个 concrete
 `DeterministicIntentResolutionImplementation`，通过 required immutable
 `selected_candidate_index` 返回 caller tuple 中的 exact candidate；不包含 capability
-name、hidden priority、weight、score、optimization 或物理约束逻辑。
+name、hidden priority、weight、score、optimization 或物理约束逻辑。TASK-051 不新增
+生产边界或算法，而是通过 end-to-end integration tests 验证现有 Capability、
+Composition、Resolution、Constraint Pipeline、Explanation Chain 与 Evaluation Cycle
+可以组成完整 Phase 3 决策链，并保持 exactly-once execution 与 exact identity lineage。
 
 ## 3. 核心架构原则
 

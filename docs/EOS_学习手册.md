@@ -1221,6 +1221,52 @@ zero-export 仍由 Constraint 处理；Resolver 不执行 Constraint 或 Evaluat
 - Runtime、Dispatch、PCS/BMS 或 device control；
 - persistence、telemetry、cache 或 history。
 
+### 4.23 Phase 3 Decision Flow Integration Validation
+
+TASK-051 不增加新的 EMS 算法，而是把已经存在的 Phase 3 组件放入同一条测试链：
+
+```text
+TOU / Self Consumption Capability
+        |
+        v
+Capability Composition
+        |
+        v
+Deterministic Intent Resolution
+        |
+        v
+Battery / Grid Constraint Pipeline
+        |
+        v
+Constraint Explanation Chain
+        |
+        v
+Decision Evaluation Cycle
+```
+
+**为什么需要集成验证**
+
+单元测试可以证明每个边界独立正确，但不能单独证明对象经过多个边界后仍保持原始身份，
+也不能证明 Explanation 或 Cycle 构造没有重复执行 Capability 或 Constraint。
+TASK-051 用两个真实能源场景验证完整关系：
+
+- PV surplus：Self Consumption 产生正值充电 candidate，Resolver 显式选择该对象，
+  Battery Constraint 限制充电功率，Grid Constraint 接收前一阶段 exact intent；
+- PV deficit：Self Consumption 产生负值放电 candidate，Battery Constraint 产生新的
+  immutable feasible intent，后续 Grid、Explanation 和 Cycle 保持完整 lineage。
+
+**验证重点**
+
+- `source_intent` 是 Resolver 选中的 exact candidate；
+- `feasible_intent` 是 Constraint Pipeline 返回的 exact final wrapper；
+- Explanation Entry 按顺序保存每一阶段 exact source/output；
+- Explanation Chain 与 Cycle 引用同一个 final feasible artifact；
+- 每个 Capability 与 Constraint exactly once；
+- Explanation 和 Cycle 只观察已完成对象，不触发重复执行。
+
+测试中的顺序 Composition 与调用探针只用于验证既有抽象合同，不属于生产 Capability、
+Resolver、Constraint 或算法实现。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
