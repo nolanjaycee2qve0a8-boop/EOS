@@ -70,7 +70,11 @@ resolver，也不定义 priority、weight、score、ranking、selection、optimi
 arbitration algorithm。TASK-049 新增第二个 concrete Capability：
 `SelfConsumptionCapability`，只读取 raw kW 的 PV 与 Load，并按 `PV - Load` 产生
 charge、discharge 或 idle candidate intent；它不读取或执行 SOC、Battery/Grid
-Constraint、Resolution、Evaluation、Runtime 或 Device 行为。
+Constraint、Resolution、Evaluation、Runtime 或 Device 行为。TASK-050 在已接受
+`IntentResolutionBoundary` 上新增第一个 concrete
+`DeterministicIntentResolutionImplementation`，通过 required immutable
+`selected_candidate_index` 返回 caller tuple 中的 exact candidate；不包含 capability
+name、hidden priority、weight、score、optimization 或物理约束逻辑。
 
 ## 3. 核心架构原则
 
@@ -365,6 +369,8 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 
 - `EMSCapabilityBoundary`
 - `CapabilityCompositionBoundary`
+- `DeterministicIntentResolutionImplementation`
+- `DeterministicIntentResolutionParameters`
 - `IntentResolutionBoundary`
 - `SelfConsumptionCapability`
 - `TOUCapabilityParameters`
@@ -409,6 +415,14 @@ TASK-049 的 `SelfConsumptionCapability` 继承 `EMSCapabilityBoundary`，使用
 battery limit、Grid/export limit、price 或 time。TASK-037 的
 `SelfConsumptionPolicy` 保持独立，TASK-049 不对 Policy contract 进行迁移、适配或
 替换。
+
+TASK-050 的 `DeterministicIntentResolutionParameters` 是 frozen/slotted 配置，只
+保存 required、unitless、zero-based `selected_candidate_index`。
+`DeterministicIntentResolutionImplementation` 继承并保持
+`IntentResolutionBoundary.resolve(candidates)` 契约，返回
+`candidates[selected_candidate_index]` 的 exact identity。它不检查 capability name
+或 type，不包含 TOU/Self Consumption special case，不比较 intent value，也不执行
+Constraint、Evaluation、Runtime 或 Device。
 
 ### 5.5 `kernel/runtime`
 
