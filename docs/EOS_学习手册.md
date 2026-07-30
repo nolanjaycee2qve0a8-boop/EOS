@@ -757,6 +757,81 @@ Orchestrator 只协调，不拥有 policy、constraint、runtime 或 device。�
 TASK-039 修复后，Orchestrator 会把 policy 的 exact source intent 和 constraint 的
 exact feasible output 同时传入 explanation/cycle，不复制或重建任一对象。
 
+### 4.16 DecisionEvaluationIntegration
+
+TASK-044 建立新决策路径的一次完整评估入口。
+
+```text
+EnergySystemState
+        |
+        v
+DecisionContextAssembler
+        |
+        v
+DecisionContextPolicy
+        |
+        v
+DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        v
+ConstraintExplanationChain
+        |
+        v
+DecisionEvaluationCycle
+        |
+        v
+DecisionEvaluationIntegrationResult
+```
+
+**为什么存在**
+
+Assembler、Policy、Pipeline、Explanation Chain 和 Cycle 都是独立边界。若由每个
+调用者自行拼接，容易重复执行 Constraint、丢失中间 identity 或让 reason 来源不一致。
+
+**输入**
+
+- caller-supplied `EnergySystemState` 与 `DecisionContextPolicy`；
+- caller-supplied constraint tuple；
+- 与 constraint 按索引对应的 adjustment reason tuple；
+- DecisionContext 所需全部显式外部 facts。
+
+**输出**
+
+一个 frozen/slotted `DecisionEvaluationIntegrationResult`，其中保存：
+
+- exact `DecisionEvaluationCycle`；
+- exact `ConstraintExplanationChain`。
+
+Result 验证 Chain 与 Cycle 共享 exact source intent 和 exact final feasible wrapper。
+
+**Exactly once**
+
+Integration 只调用一次 `ConstraintEvaluationPipeline`。每个底层 Constraint 在该次
+Pipeline 调用中只执行一次。每个完成阶段的 exact input/output 同时形成 immutable
+Explanation Entry，不重跑 Constraint。
+
+**Reason ownership**
+
+调用者为每个 Constraint 提供“发生调整时使用的 reason”。Identity 未变化时 Entry
+记录 `None`；发生变化时记录 caller 原始字符串。Integration 不分析 SOC、Grid 或价格
+来生成 reason。
+
+**为什么不能与其他模块合并**
+
+修改 Pipeline 以返回中间值会破坏 TASK-042；修改 Cycle 保存 Chain 会破坏 TASK-034；
+修改旧 Orchestrator 会迁移已接受的单 Constraint 路径。因此 TASK-044 使用独立集成
+边界，并保持旧 Orchestrator 并存。
+
+**刻意不包含**
+
+- EMS strategy、constraint algorithm、optimization、MPC 或 forecast；
+- TOU、pricing 或 scheduling；
+- runtime、command、dispatch、PCS/BMS 或 device control；
+- persistence、telemetry、cache、history、retry 或 rollback。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

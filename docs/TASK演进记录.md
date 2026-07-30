@@ -1050,6 +1050,102 @@ Reason 由调用者显式提供。调整时必须是非空字符串，未调整�
 本任务没有 derived reasoning、constraint algorithm、TOU、pricing、optimization、
 MPC、forecast、runtime、dispatch、device control、persistence、cache 或 history。
 
+## TASK-044 Decision Evaluation Integration Boundary
+
+**目标：**
+
+将现有新决策组件组合为一次完整、确定性、exactly-once 的评估流程。
+
+**实现内容：**
+
+- 新增 stateless `DecisionEvaluationIntegration`；
+- 组合 `DecisionContextAssembler` 与 caller-supplied Policy；
+- 调用 `ConstraintEvaluationPipeline` exactly once；
+- 保证每个 caller constraint exactly once；
+- 在同一次执行中形成 ordered `ConstraintExplanationEntry` tuple；
+- 创建 exact `ConstraintExplanationChain`；
+- 复用既有 `ConstraintExplanation` 与 `DecisionEvaluationCycle`；
+- 新增 frozen/slotted `DecisionEvaluationIntegrationResult`；
+- Result 同时保存 exact cycle 与 exact explanation chain；
+- 通过 `kernel.policy` 提供公开导入。
+
+**架构意义：**
+
+```text
+EnergySystemState
+        |
+        v
+DecisionContextAssembler
+        |
+        v
+DecisionContextPolicy
+        |
+        v
+DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        v
+ConstraintExplanationChain
+        |
+        v
+DecisionEvaluationCycle
+        |
+        v
+DecisionEvaluationIntegrationResult
+```
+
+TASK-044 让 TASK-028、029、042、043 和 034 的独立边界形成一个可调用入口，但不迁移
+旧 Orchestrator、legacy Policy 或 runtime/execution。
+
+**Exactly once 与 Identity：**
+
+- assembled context 是 Policy 收到的 exact object；
+- Pipeline 接收 exact policy intent；
+- Pipeline 只调用一次；
+- 每个 Constraint 只调用一次；
+- 下一 Constraint 接收上一阶段 exact feasible inner intent；
+- Entry 保存 exact stage input/output；
+- Chain 保存 exact entries tuple 和 final wrapper；
+- Cycle 保存 exact context/result/source/final feasible；
+- Integration Result 保存 exact Cycle 与 Chain。
+
+**Reason ownership：**
+
+Caller 提供与 constraint tuple 等长的 reason tuple。Reason 只在该阶段 identity 发生
+变化时写入 Entry；未调整时写入 `None`。Integration 不从 SOC、Grid、电价或设备状态
+自动生成 reason。
+
+**新增文件：**
+
+- `kernel/policy/integration.py`；
+- `tests/unit/policy/test_integration.py`；
+- `tasks/TASK-044.md`；
+- `architecture/adr/ADR-043-decision-evaluation-integration-boundary.md`。
+
+**验证内容：**
+
+- 完整 context-to-cycle identity；
+- multi-constraint order 与 lineage；
+- component exactly-once；
+- empty pipeline；
+- caller reason ownership；
+- policy/constraint failure short-circuit；
+- invalid configuration/result validation；
+- immutable exact integration result；
+- statelessness、dependency isolation 与 public import；
+- Intent、Constraint、Pipeline、Explanation、Cycle、Policy、legacy、runtime 和 execution
+  contracts 保持不变。
+
+**关键设计决策：**
+
+不修改 Pipeline 返回类型，不修改 Cycle 字段，不修改旧 Orchestrator。Integration 使用
+private immutable observing decorator 捕获同一次 Pipeline 执行的阶段证据，并只在
+调用栈内使用 immutable tuple，不保存 cache/history/runtime state。本任务没有 EMS
+strategy、optimization、MPC、forecast、TOU、pricing、runtime、dispatch、device
+control 或 persistence。
+
 ## 2. 后续追加模板
 
 ```markdown
