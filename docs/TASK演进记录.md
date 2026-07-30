@@ -1454,6 +1454,93 @@ Resolution 独立于 Composition 与 Constraint。TASK-048 只为未来 business
 构造新 intent。本任务不实现 TOU、SOC、Grid、PCS/BMS、runtime、forecast、
 optimization、dispatch、device control、persistence、cache 或 history。
 
+## TASK-049 Self Consumption Capability
+
+**目标：**
+
+实现第二个具体 EMS Capability，根据当前 PV 与 Load 事实生成 self-consumption
+`DecisionIntent` candidate。
+
+**实现内容：**
+
+- 新增 fieldless、empty-slotted `SelfConsumptionCapability`；
+- 继承稳定的 `EMSCapabilityBoundary`；
+- 定义 `evaluate(DecisionContext) -> DecisionIntent`；
+- 只读取 `pv_power_kw` 与 `load_power_kw`；
+- 使用 raw kW 公式 `pv_power_kw - load_power_kw`；
+- PV surplus 产生正值 charge intent；
+- PV deficit 产生负值 discharge intent；
+- balanced 产生 zero idle intent；
+- 通过顶层 `capability` package 提供公开导入。
+
+**架构意义：**
+
+```text
+DecisionContext
+        |
+        v
+SelfConsumptionCapability
+        |
+        v
+DecisionIntent candidate
+        |
+        v
+Future Composition / Resolution
+        |
+        v
+Constraint Layer
+```
+
+TASK-049 证明 TOU 与 Self Consumption 等不同业务能力可以在相同 Capability contract
+下独立产生候选意图。它不让 Capability 互相感知，也不提前执行 resolution。
+
+**Physical contract：**
+
+- PV 与 Load 都是 literal、unscaled kW；
+- `battery_power_intent_kw = PV - Load`；
+- 正值表示充电意图；
+- 负值表示放电意图；
+- 零表示空闲意图；
+- 无 conversion、scaling、clipping、saturation 或 rounding。
+
+**Policy / Constraint separation：**
+
+TASK-037 的 `SelfConsumptionPolicy` 保持独立并返回 `DecisionContextResult`。
+TASK-049 的 `SelfConsumptionCapability` 直接返回 `DecisionIntent`。两者无 inheritance、
+adapter、call、migration 或 shared mutable state。
+
+Capability 不读取或执行 SOC、reserve SOC、battery power limit、Grid/export limit 或
+zero-export。完整 PV-load imbalance 作为候选意图输出，物理可行性继续由 Constraint
+负责。
+
+**新增文件：**
+
+- `capability/self_consumption.py`；
+- `tests/unit/capability/test_self_consumption.py`；
+- `tasks/TASK-049.md`；
+- `architecture/adr/ADR-048-self-consumption-capability.md`。
+
+**验证内容：**
+
+- Capability boundary inheritance 与 exact signature；
+- surplus、deficit 与 balanced cases；
+- raw kW 符号语义；
+- 不执行 SOC/battery limit；
+- Grid、price、export facts 不影响输出；
+- context 不变；
+- fieldless slots、无 `__dict__`、cache 或 history；
+- Policy independence；
+- 无 Constraint、Evaluation、Runtime、Dispatch、Device dependency；
+- Intent、Capability Boundary、Constraint、Evaluation 与 Legacy contracts 保持不变；
+- public import。
+
+**关键设计决策：**
+
+实现直接表达 `PV - Load`，不调用已有 `SelfConsumptionPolicy`，保持 Capability 与
+Policy 两条已接受 extension contract 独立。本任务不实现 SOC、Battery/Grid limit、
+zero-export、TOU、optimization、forecast、runtime、dispatch、PCS/BMS、device
+control、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

@@ -1077,6 +1077,79 @@ intent、cache、history 或 runtime state，也没有 concrete production resol
 - Constraint 执行、Evaluation Integration、Runtime 或 Dispatch；
 - persistence、telemetry、cache 或 history。
 
+### 4.21 SelfConsumptionCapability
+
+TASK-049 新增第二个具体 EMS Capability，用当前 PV 与 Load 事实产生一个独立的
+self-consumption candidate intent。
+
+```text
+DecisionContext
+        |
+        v
+SelfConsumptionCapability
+        |
+        v
+DecisionIntent candidate
+        |
+        v
+Future Resolution / Constraint
+```
+
+**为什么存在**
+
+TOU Capability 表达时间与价格目标；Self Consumption Capability 表达“优先使用当前
+PV 覆盖当前 Load”的业务目标。它们应当分别产生 candidate intents，未来再由独立
+resolution 层处理多个目标，而不是让一个 Capability 知道另一个 Capability。
+
+**输入**
+
+只读取：
+
+- `pv_power_kw`：当前 PV 发电功率，raw kW；
+- `load_power_kw`：当前负载功率，raw kW。
+
+它不读取 timestamp、price、SOC、reserve SOC、battery limit、grid power 或 export
+limit。
+
+**输出与符号**
+
+```text
+battery_power_intent_kw = pv_power_kw - load_power_kw
+```
+
+- PV surplus：结果大于零，表示电池充电意图；
+- PV deficit：结果小于零，表示电池放电意图；
+- balanced：结果为零，表示空闲意图。
+
+没有单位转换、隐藏缩放、裁剪、饱和或 rounding。
+
+**为什么不能与 Constraint 合并**
+
+Capability 表达希望吸收全部 PV surplus 或补足全部 Load deficit。即使 SOC 已满、
+reserve SOC 已触发或 power limit 为零，它仍返回完整原始意图；Battery/Grid Constraint
+随后决定物理上允许多少。
+
+**与 SelfConsumptionPolicy 的关系**
+
+TASK-037 的 `SelfConsumptionPolicy` 属于独立 Policy contract，并返回
+`DecisionContextResult`。TASK-049 的 `SelfConsumptionCapability` 属于 Capability
+contract，直接返回 `DecisionIntent`。两者不继承、不调用、不适配、不迁移，也不共享
+mutable state。
+
+**Stateless**
+
+该 Capability fieldless、empty-slotted，不保存 context、intent、cache、history 或
+runtime state。
+
+**刻意不包含**
+
+- SOC、reserve SOC 或 battery power limit；
+- Grid limit、export limit 或 zero-export；
+- TOU、pricing、optimization、MPC 或 forecast；
+- Resolution、Constraint 或 Evaluation 执行；
+- Runtime、Dispatch、PCS/BMS、communication 或 device control；
+- persistence、telemetry、cache 或 history。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

@@ -67,7 +67,10 @@ ordered capability tuple 的 exactly-once evaluation，并返回同序 exact int
 `IntentResolutionBoundary`，只定义
 `tuple[DecisionIntent, ...] -> DecisionIntent` 的未来解析入口；不新增 concrete
 resolver，也不定义 priority、weight、score、ranking、selection、optimization 或
-arbitration algorithm。
+arbitration algorithm。TASK-049 新增第二个 concrete Capability：
+`SelfConsumptionCapability`，只读取 raw kW 的 PV 与 Load，并按 `PV - Load` 产生
+charge、discharge 或 idle candidate intent；它不读取或执行 SOC、Battery/Grid
+Constraint、Resolution、Evaluation、Runtime 或 Device 行为。
 
 ## 3. 核心架构原则
 
@@ -363,6 +366,7 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 - `EMSCapabilityBoundary`
 - `CapabilityCompositionBoundary`
 - `IntentResolutionBoundary`
+- `SelfConsumptionCapability`
 - `TOUCapabilityParameters`
 - `TOUEnergyCapability`
 
@@ -398,6 +402,13 @@ composition candidates 与 Constraint source intent 之间，只固定 immutable
 输入和单一 intent 输出类型。它不规定 empty/single/conflicting candidates 的行为，
 不规定输出 identity，也不实现 priority、weight、score、ranking、selection、merge、
 optimization 或 arbitration。生产 package 中没有 concrete resolver。
+
+TASK-049 的 `SelfConsumptionCapability` 继承 `EMSCapabilityBoundary`，使用
+`battery_power_intent_kw = pv_power_kw - load_power_kw` 生成 raw kW candidate：
+正值充电、负值放电、零值空闲。它只读取 PV 与 Load，不检查 SOC、reserve SOC、
+battery limit、Grid/export limit、price 或 time。TASK-037 的
+`SelfConsumptionPolicy` 保持独立，TASK-049 不对 Policy contract 进行迁移、适配或
+替换。
 
 ### 5.5 `kernel/runtime`
 

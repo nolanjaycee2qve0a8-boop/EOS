@@ -3,12 +3,14 @@
 from capability.base import EMSCapabilityBoundary
 from capability.composition import CapabilityCompositionBoundary
 from capability.resolution import IntentResolutionBoundary
+from capability.self_consumption import SelfConsumptionCapability
 from capability.tou import TOUCapabilityParameters, TOUEnergyCapability
 
 __all__ = [
     "CapabilityCompositionBoundary",
     "EMSCapabilityBoundary",
     "IntentResolutionBoundary",
+    "SelfConsumptionCapability",
     "TOUCapabilityParameters",
     "TOUEnergyCapability",
 ]
