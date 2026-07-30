@@ -1221,6 +1221,84 @@ TASK-045 不定义 Capability 如何进入现有 Evaluation Integration；该组
 review。边界不包含 SOC、功率、Grid limit、PCS/BMS、command、runtime、dispatch、
 optimization、forecast、cache 或 history。
 
+## TASK-046 TOU Energy Capability
+
+**目标：**
+
+在 Phase 3 `EMSCapabilityBoundary` 上实现第一个具体 EMS Capability。
+
+**实现内容：**
+
+- 新增 frozen/slotted `TOUCapabilityParameters`；
+- 显式保存 charge/discharge 本地小时 tuple；
+- 显式保存 CNY/kWh charge ceiling 与 discharge floor；
+- 显式保存非负 raw kW charge/discharge intent magnitudes；
+- 新增 frozen/slotted `TOUEnergyCapability`；
+- 根据 exact `DecisionContext.timestamp.hour` 和
+  `electricity_price_cny_per_kwh` 生成 `DecisionIntent`；
+- 通过顶层 `capability` package 提供公开导入。
+
+**架构意义：**
+
+```text
+DecisionContext
+        |
+        v
+TOUEnergyCapability
+        |
+        v
+DecisionIntent
+        |
+        v
+existing Constraint and Evaluation boundaries
+```
+
+TASK-046 证明 concrete EMS 业务能力可以在顶层 capability package 独立演进，而不
+修改 Kernel、Policy、Constraint、Evaluation、Runtime 或 Device contracts。
+
+**确定性规则：**
+
+- charge hour 且 price <= charge ceiling：positive charging intent；
+- discharge hour 且 price >= discharge floor：negative discharging intent；
+- 其他情况：zero idle intent。
+
+小时使用 context timestamp 自带时区中的 0～23 本地 hour，不做时区转换。价格是
+literal signed finite CNY/kWh；功率是 literal non-negative kW magnitude。所有阈值
+比较包含等号。
+
+**职责分离：**
+
+Capability 只表达基于时间和电价的业务偏好。它不检查 SOC、reserve SOC、电池功率
+能力、Grid import/export limit、PCS/BMS 或 device availability。物理可行性仍由
+Constraint 层处理，Evaluation flow 保持不变。
+
+**新增文件：**
+
+- `capability/tou.py`；
+- `tests/unit/capability/test_tou.py`；
+- `tasks/TASK-046.md`；
+- `architecture/adr/ADR-045-tou-energy-capability.md`。
+
+**验证内容：**
+
+- low-price charge、high-price discharge 与 idle；
+- inclusive price thresholds；
+- hour tuple 类型、范围、唯一性与 non-overlap；
+- signed finite raw CNY/kWh；
+- non-negative raw kW intent magnitudes；
+- parameters/capability frozen、slotted、无 `__dict__`；
+- exact parameter identity 与 context 不变；
+- 无 Constraint、Integration、Runtime、Dispatch、Device 反向依赖；
+- Policy、Intent、Legacy contracts 保持不变；
+- public imports。
+
+**关键设计决策：**
+
+Tariff/time facts 通过 immutable parameters 构造注入，保持
+`EMSCapabilityBoundary.evaluate(context)` 不变。TASK-046 不读取 tariff database、
+system clock 或 future forecast，不实现 optimizer、SOC/功率/Grid Constraint、
+runtime、dispatch、PCS/BMS、device command、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

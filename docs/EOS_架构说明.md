@@ -58,7 +58,10 @@ Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一�
 `evaluate(DecisionContext) -> DecisionIntent`，但不继承或修改
 `DecisionContextPolicy`，也不自动接入 Evaluation Integration。Capability 表达业务
 目标希望系统做什么；Constraint 继续决定物理上允许什么；Runtime 与 Device 继续负责
-后续生命周期和外部执行。TASK-045 仅建立抽象边界，不实现具体 EMS 算法。
+后续生命周期和外部执行。TASK-045 建立抽象边界；TASK-046 在该边界上新增第一个
+concrete `TOUEnergyCapability`，使用显式 immutable 小时、价格阈值和意图功率 facts
+生成 `DecisionIntent`，但不执行 SOC/功率/Grid Constraint，也不接入 Runtime 或
+Device。
 
 ## 3. 核心架构原则
 
@@ -350,6 +353,8 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 **主要对象**
 
 - `EMSCapabilityBoundary`
+- `TOUCapabilityParameters`
+- `TOUEnergyCapability`
 
 **不负责**
 
@@ -357,11 +362,18 @@ Policy package 的责任是产生和协调决策意图，不负责执行控制�
 - 执行 Battery/Grid/SOC/功率约束；
 - 拥有 runtime、dispatcher、device、cache 或 history；
 - 生成 command 或控制 PCS/BMS；
-- 在 TASK-045 中实现 optimization、forecast、TOU 或具体 EMS 算法。
+- 执行 optimization、forecast、tariff lookup 或设备控制。
 
 TASK-045 只建立 abstract、empty-slotted contract。依赖方向是
 `capability -> kernel.decision`；Kernel 不反向导入 Capability。现有 Policy 与
 Evaluation Integration 均保持不变，未来组合必须由单独 TASK 和 ADR 批准。
+
+TASK-046 的 `TOUEnergyCapability` 继承该边界，并通过 frozen/slotted
+`TOUCapabilityParameters` 接收 caller-supplied 本地小时 tuple、CNY/kWh 价格阈值和
+raw kW 意图幅值。它只读取 `DecisionContext.timestamp.hour` 与
+`electricity_price_cny_per_kwh`，返回 charge、discharge 或 idle
+`DecisionIntent`。它不持有系统 clock，不查询 tariff，不预测或优化，也不执行任何
+Constraint、Integration、Runtime、Dispatch 或 Device 行为。
 
 ### 5.5 `kernel/runtime`
 
