@@ -1630,6 +1630,82 @@ weight、score、ranking、intent arithmetic、optimization 或 forecast。本�
 SOC、Battery/Grid limit、zero-export、Constraint/Evaluation execution、runtime、
 dispatch、PCS/BMS、device control、persistence、cache 或 history。
 
+## TASK-051 Phase 3 Decision Flow Integration Validation
+
+**目标：**
+
+使用现有生产组件验证完整 Phase 3 decision flow，不新增算法或生产边界。
+
+**实现内容：**
+
+- 新增 `tests/integration/test_phase3_decision_flow.py`；
+- 使用现有 `SelfConsumptionCapability` 与 `TOUEnergyCapability`；
+- 通过 test-only composition 按 caller order exactly once 执行两个 Capability；
+- 使用现有 `DeterministicIntentResolutionImplementation` 显式选择 candidate；
+- 使用现有 Battery 与 Grid Constraint 和 `ConstraintEvaluationPipeline`；
+- 从 exact stage artifacts 构建 `ConstraintExplanationChain`；
+- 从 exact result、source/feasible intent 和 explanation 构建
+  `DecisionEvaluationCycle`；
+- 使用 test-only probes 记录调用次数和 exact object references。
+
+**架构意义：**
+
+```text
+Capability
+        |
+        v
+Capability Composition
+        |
+        v
+Intent Resolution
+        |
+        v
+DecisionIntent
+        |
+        v
+Constraint Pipeline
+        |
+        v
+Constraint Explanation Chain
+        |
+        v
+Decision Evaluation Cycle
+```
+
+TASK-051 是 Phase 3 的 integration checkpoint。它证明已接受的独立边界可以形成完整
+决策链，同时继续保持 Capability、Resolution、Constraint、Explanation 与 Cycle 的
+职责分离。
+
+**场景：**
+
+- PV surplus：Self Consumption candidate 为正值充电意图，Battery Constraint 限制
+  充电功率，Grid Constraint 接收前一阶段 exact feasible intent；
+- PV deficit：Self Consumption candidate 为负值放电意图，Battery Constraint 创建
+  新 immutable intent，后续 Grid、Explanation 和 Cycle 保持 exact lineage。
+
+**Identity 与 execution 验证：**
+
+- composition candidates 保持 Capability 返回 identity；
+- resolved intent 是 caller index 对应的 exact candidate；
+- `DecisionContextResult.intent` 与 Cycle `source_intent` 保持 exact identity；
+- 每个 Constraint 接收上一阶段 exact feasible inner intent；
+- Explanation Entry、Chain 和 Cycle 保存 exact artifacts；
+- 每个 Capability exactly once；
+- 每个 Constraint exactly once；
+- Explanation 和 Cycle 构建不触发重复执行。
+
+**新增文件：**
+
+- `tests/integration/test_phase3_decision_flow.py`；
+- `tasks/TASK-051.md`。
+
+**关键设计决策：**
+
+只增加 integration validation。顺序 composition 和调用 probes 仅存在于测试文件，
+用于验证既有抽象合同，不成为生产 Capability、Resolver、Constraint 或 orchestration
+实现。本任务不修改 `DecisionIntent`、Policy、Evaluation、Runtime、Legacy 或任何
+现有生产合同，也不增加 optimization、forecast、dispatch 或 device control。
+
 ## 2. 后续追加模板
 
 ```markdown
