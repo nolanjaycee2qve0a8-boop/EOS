@@ -38,7 +38,9 @@ EOS 的目标不是提供一个不可拆分的“万能 EMS 类”，而是提�
 该阶段从 TASK-038 开始，将策略意图限制到物理可行范围。
 `BatteryConstraintImplementation` 是第一个具体物理约束实现：它根据 SOC、
 reserve SOC 和最大充放电功率生成 `FeasibleDecisionIntent`，同时保持 Policy、
-Runtime、Execution 和 Device 边界不变。
+Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
+`GridConstraintBoundary`，为未来并网侧物理约束提供抽象入口，但尚未实现进口限制、
+出口限制或 zero-export 算法。
 
 ## 3. 核心架构原则
 
@@ -223,6 +225,7 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - `DecisionIntent`
 - `DecisionConstraintBoundary`
 - `BatteryConstraintImplementation`
+- `GridConstraintBoundary`
 - `FeasibleDecisionIntent`
 - `ConstraintExplanation`
 - `DecisionEvaluationCycle`
@@ -244,6 +247,12 @@ TASK-039 将 `DecisionEvaluationCycle.intent` 明确升级为 `source_intent`。
 原始意图始终来自 `DecisionContextResult.intent`；constraint 输出通过
 `FeasibleDecisionIntent.intent` 保存。两者在未调整时可以是同一对象，在约束调整后
 可以是两个不同的 immutable 对象。
+
+TASK-040 新增 `GridConstraintBoundary`，它继承并保持
+`DecisionConstraintBoundary.evaluate(intent)` 的通用签名。Boundary 使用空 slots，
+不保存 grid facts，也不实现 import limit、export limit 或 zero-export 行为。未来具体
+实现可通过构造注入明确定义的 immutable grid facts，而不会污染 Policy、Orchestrator
+或通用 constraint contract。
 
 ### 5.3 `kernel/policy`
 
