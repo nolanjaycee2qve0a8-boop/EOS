@@ -40,7 +40,9 @@ EOS 的目标不是提供一个不可拆分的“万能 EMS 类”，而是提�
 reserve SOC 和最大充放电功率生成 `FeasibleDecisionIntent`，同时保持 Policy、
 Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
 `GridConstraintBoundary`，为未来并网侧物理约束提供抽象入口，但尚未实现进口限制、
-出口限制或 zero-export 算法。
+出口限制或 zero-export 算法。TASK-041 在该入口上实现第一个具体
+`GridPowerLimitConstraintImplementation`，通过显式 immutable baseline、进口上限和
+出口上限限制 projected grid exchange。
 
 ## 3. 核心架构原则
 
@@ -226,6 +228,7 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - `DecisionConstraintBoundary`
 - `BatteryConstraintImplementation`
 - `GridConstraintBoundary`
+- `GridPowerLimitConstraintImplementation`
 - `FeasibleDecisionIntent`
 - `ConstraintExplanation`
 - `DecisionEvaluationCycle`
@@ -253,6 +256,13 @@ TASK-040 新增 `GridConstraintBoundary`，它继承并保持
 不保存 grid facts，也不实现 import limit、export limit 或 zero-export 行为。未来具体
 实现可通过构造注入明确定义的 immutable grid facts，而不会污染 Policy、Orchestrator
 或通用 constraint contract。
+
+TASK-041 的 `GridPowerLimitConstraintImplementation` 通过构造接收
+`grid_power_baseline_kw`、`max_import_power_kw` 和 `max_export_power_kw`。所有字段
+都是 literal kW；baseline 正值表示进口、负值表示出口。它使用
+`projected_grid_power_kw = baseline + battery intent`，限制 projected grid power
+后反推出 feasible battery intent。实现不修改 `DecisionIntent`、Policy、两个抽象
+constraint contracts 或 source/feasible lineage。
 
 ### 5.3 `kernel/policy`
 
