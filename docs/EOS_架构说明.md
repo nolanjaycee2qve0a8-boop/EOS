@@ -42,7 +42,9 @@ Runtime、Execution 和 Device 边界不变。TASK-040 进一步建立
 `GridConstraintBoundary`，为未来并网侧物理约束提供抽象入口，但尚未实现进口限制、
 出口限制或 zero-export 算法。TASK-041 在该入口上实现第一个具体
 `GridPowerLimitConstraintImplementation`，通过显式 immutable baseline、进口上限和
-出口上限限制 projected grid exchange。
+出口上限限制 projected grid exchange。TASK-042 新增无状态
+`ConstraintEvaluationPipeline`，由调用者通过 tuple 显式提供多个 constraint 的确定
+顺序，Policy 和 Runtime 均不感知该顺序。
 
 ## 3. 核心架构原则
 
@@ -229,6 +231,7 @@ EOS 采用多个边界对象，是为了让每个层次只有一个变化原因�
 - `BatteryConstraintImplementation`
 - `GridConstraintBoundary`
 - `GridPowerLimitConstraintImplementation`
+- `ConstraintEvaluationPipeline`
 - `FeasibleDecisionIntent`
 - `ConstraintExplanation`
 - `DecisionEvaluationCycle`
@@ -263,6 +266,12 @@ TASK-041 的 `GridPowerLimitConstraintImplementation` 通过构造接收
 `projected_grid_power_kw = baseline + battery intent`，限制 projected grid power
 后反推出 feasible battery intent。实现不修改 `DecisionIntent`、Policy、两个抽象
 constraint contracts 或 source/feasible lineage。
+
+TASK-042 的 `ConstraintEvaluationPipeline` 接收 source intent 和 caller-supplied
+constraint tuple。Tuple 位置是权威顺序；Pipeline 不排序、不去重、不保存 constraint
+实例。每一阶段接收上一阶段的 exact inner intent，最终返回最后一阶段的 exact
+`FeasibleDecisionIntent`。空 tuple 返回引用 exact source intent 的 wrapper。该边界
+不实现 optimization、priority、conflict resolution、runtime 或 device behavior。
 
 ### 5.3 `kernel/policy`
 

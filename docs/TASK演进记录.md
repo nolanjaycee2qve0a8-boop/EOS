@@ -900,6 +900,75 @@ Policy intent 不变。TASK-039 lineage contract 不变。
 Policy 获取 grid limits。本任务没有专用 Zero Export 策略、TOU、电价、optimization、
 forecast、PCS/device control、runtime、persistence、cache 或 history。
 
+## TASK-042 Constraint Composition Boundary
+
+**目标：**
+
+建立多个 `DecisionConstraintBoundary` 的确定性组合入口。
+
+**实现内容：**
+
+- 新增 stateless、empty-slotted `ConstraintEvaluationPipeline`；
+- 接收 exact source `DecisionIntent`；
+- 接收 caller-supplied immutable constraint tuple；
+- 按 tuple 顺序依次调用；
+- 返回最后一阶段的 exact `FeasibleDecisionIntent`；
+- 通过 `kernel.decision` 提供公开导入。
+
+**架构意义：**
+
+TASK-038 和 TASK-041 分别提供 Battery 与 Grid concrete constraints。TASK-042 定义
+这些独立能力如何形成一条确定性可行性链：
+
+```text
+source DecisionIntent
+        |
+        v
+ConstraintEvaluationPipeline
+        |
+        +--> Constraint[0]
+        |
+        +--> Constraint[1]
+        |
+        v
+final FeasibleDecisionIntent
+```
+
+Constraint 顺序由调用者显式提供，Policy 不选择也不感知顺序。Pipeline 不拥有或保存
+constraint instances。
+
+**Identity：**
+
+- source intent 不复制或修改；
+- 每一阶段接收上一阶段 exact inner intent；
+- 最终 wrapper 保持最后一阶段 exact identity；
+- 所有阶段未调整时，最终 inner intent 保持 source identity；
+- 空 tuple 返回引用 source intent 的 wrapper。
+
+**新增文件：**
+
+- `kernel/decision/constraint_pipeline.py`；
+- `tests/unit/decision/test_constraint_pipeline.py`；
+- `tasks/TASK-042.md`；
+- `architecture/adr/ADR-041-constraint-composition-boundary.md`。
+
+**验证内容：**
+
+- caller order 与 exactly-once execution；
+- stage-to-stage exact identity；
+- empty composition；
+- 不排序、不去重；
+- exception propagation 与 failure short-circuit；
+- tuple、member 和 result type validation；
+- public import、empty slots 与 dependency isolation；
+- Policy、boundary、lineage、legacy、runtime 和 execution 保持不变。
+
+**关键设计决策：**
+
+Pipeline 是无状态 composition boundary，不是 optimization 或 constraint strategy。
+本任务不实现 priority、conflict resolution、MPC、forecast、TOU、pricing、runtime、
+commands、dispatch、device control、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
