@@ -1267,6 +1267,33 @@ TASK-051 用两个真实能源场景验证完整关系：
 测试中的顺序 Composition 与调用探针只用于验证既有抽象合同，不属于生产 Capability、
 Resolver、Constraint 或算法实现。
 
+### 4.24 Phase 3 Completion Review
+
+TASK-052 对 TASK-045～051 建立的 EMS Capability Layer 进行冻结审查，结论为 PASS。
+
+冻结后的职责关系是：
+
+```text
+Capability：表达业务希望做什么
+Composition：按 caller 顺序产生独立 candidates
+Resolution：使用显式规则选择一个 source intent
+Constraint：决定物理上允许什么
+Explanation / Cycle：保存已经完成的身份与证据
+Runtime / Device：不属于 Phase 3 决策链
+```
+
+**冻结意味着什么**
+
+- `EMSCapabilityBoundary`、Composition、Resolution 和 Intent contracts 已形成稳定入口；
+- TOU 与 Self Consumption 可以独立演进，但不能把物理限制带入 Capability；
+- Resolver 规则必须显式，不能隐藏 priority、weight、score 或 capability 特例；
+- source/feasible/explanation/cycle 的 exact identity 是架构不变量；
+- Kernel 不依赖 capability implementation；
+- legacy `EMSPolicy`、`DecisionResult`、Runtime 和 Execution 继续隔离。
+
+冻结不代表永远禁止演进，而是任何合同修改都必须通过新的 TASK 与架构审查，不能借具体
+Capability 实现顺便改变 Kernel。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

@@ -5,9 +5,9 @@
 本文是 EOS Reference Implementation 的软件架构设计说明书。它记录稳定的架构原则、
 包职责、依赖方向和演进约束，不替代 TASK 文档或 ADR。
 
-本文描述截至 TASK-037 的架构。TASK-001～036 建立了 EMS 算法运行所需的输入、
-输出、策略、约束、生命周期和编排边界；TASK-037 在这些边界之上首次加入具体但
-严格限域的自发自用策略。
+本文描述截至 TASK-052 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
+建立 Physical Constraint 与 Decision Evaluation Framework，TASK-045～052 建立、
+验证并冻结 EMS Capability Layer。
 
 ## 2. 架构目标
 
@@ -51,7 +51,7 @@ source/feasible identity、adjusted 状态和 caller-supplied reason，但不重
 Policy、单次 Constraint Pipeline、Explanation Chain 与 Cycle 组合为一次完整评估，
 并通过 immutable result 同时保存 exact cycle 和 exact chain。
 
-#### Phase 3：TASK-045+ — EMS Capability Layer
+#### Phase 3：TASK-045～TASK-052 — EMS Capability Layer（Completed）
 
 该阶段从 TASK-045 开始，为可独立演进的 EMS 业务能力建立稳定扩展入口。
 `EMSCapabilityBoundary` 定义
@@ -78,6 +78,9 @@ name、hidden priority、weight、score、optimization 或物理约束逻辑。T
 生产边界或算法，而是通过 end-to-end integration tests 验证现有 Capability、
 Composition、Resolution、Constraint Pipeline、Explanation Chain 与 Evaluation Cycle
 可以组成完整 Phase 3 决策链，并保持 exactly-once execution 与 exact identity lineage。
+TASK-052 对 Phase 3 执行冻结审查：Capability、Composition、Resolution、Constraint、
+Evidence、Dependency Direction 与 Legacy Isolation 全部通过。后续修改这些稳定合同
+必须通过独立 TASK 和架构审查，不能在新 Capability 中隐式迁移。
 
 ## 3. 核心架构原则
 

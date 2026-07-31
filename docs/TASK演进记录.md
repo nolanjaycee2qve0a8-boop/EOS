@@ -1706,6 +1706,96 @@ TASK-051 是 Phase 3 的 integration checkpoint。它证明已接受的独立边
 实现。本任务不修改 `DecisionIntent`、Policy、Evaluation、Runtime、Legacy 或任何
 现有生产合同，也不增加 optimization、forecast、dispatch 或 device control。
 
+## TASK-052 Phase 3 EMS Capability Layer Completion Review
+
+**目标：**
+
+完成 TASK-045～051 的正式架构冻结审查，确认 EMS Capability Layer 可以作为稳定基线
+进入后续阶段。
+
+**审查内容：**
+
+- Capability Boundary、TOU Capability 与 Self Consumption Capability；
+- caller-owned Composition 与 explicit Resolution；
+- source/feasible intent lineage；
+- Battery 与 Grid Constraint 职责；
+- Explanation Chain 与 DecisionEvaluationCycle evidence-only 行为；
+- TASK-051 end-to-end exactly-once evidence；
+- capability-to-contract dependency direction；
+- legacy EMSPolicy、DecisionResult、Runtime 与 Execution isolation；
+- TASK、ADR 和长期文档一致性。
+
+**审查结论：**
+
+Phase 3：PASS。
+
+```text
+DecisionContext
+        |
+        v
+EMS Capability candidates
+        |
+        v
+Composition
+        |
+        v
+Explicit Resolution
+        |
+        v
+source DecisionIntent
+        |
+        v
+Constraint Pipeline
+        |
+        v
+FeasibleDecisionIntent
+        |
+        v
+Explanation Chain
+        |
+        v
+DecisionEvaluationCycle
+```
+
+**Identity 与 execution：**
+
+- resolved intent 是 caller index 选择的 exact candidate；
+- Cycle source intent 是 exact `DecisionContextResult.intent`；
+- 下一 Constraint 输入是上一阶段 exact feasible inner intent；
+- Chain 与 Cycle 保存 exact final feasible wrapper；
+- Capability 与 Constraint exactly once；
+- Explanation 与 Cycle 不重新执行 Capability 或 Constraint。
+
+**Dependency 与 Legacy：**
+
+- `capability -> kernel decision contracts`；
+- kernel 不依赖 capability implementation；
+- Phase 3 未修改 legacy `EMSPolicy`、legacy `DecisionResult`、Runtime 或 Execution。
+
+**文档一致性修正：**
+
+发现 `EOS_架构说明.md` 的开头仍写“截至 TASK-037”，但正文已经覆盖 TASK-051。
+TASK-052 将范围更新为 TASK-052，并明确 Phase 3 为 TASK-045～052、状态 Completed。
+该修正仅涉及文档，没有生产代码或测试变更。
+
+**新增文件：**
+
+- `tasks/TASK-052.md`；
+- `architecture/adr/ADR-050-phase3-completion-review.md`。
+
+**验证结果：**
+
+- pytest：918 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed。
+
+**关键设计决策：**
+
+冻结的是边界、依赖方向和 identity invariants，不是禁止未来增加 Capability。任何未来
+合同修改、legacy migration、Runtime/Device integration 或新的 resolution strategy
+都必须进入独立 TASK 与架构审查，不能隐藏在具体 Capability 中。
+
 ## 2. 后续追加模板
 
 ```markdown
