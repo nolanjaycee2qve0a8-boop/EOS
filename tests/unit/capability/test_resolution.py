@@ -113,8 +113,10 @@ def test_public_import() -> None:
     from capability import __all__ as public_names
 
     assert public_names == [
+        "AvailableCapabilityCollection",
         "CapabilityCompositionBoundary",
         "CapabilityDescriptor",
+        "CapabilityDiscoveryBoundary",
         "DeterministicIntentResolutionImplementation",
         "DeterministicIntentResolutionParameters",
         "EMSCapabilityBoundary",

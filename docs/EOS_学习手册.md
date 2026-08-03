@@ -1421,6 +1421,46 @@ implementation；Capability 也不能反向依赖 Objective。
 - 不进行 intent resolution；
 - 不生成 `DecisionIntent` 或设备命令。
 
+### 4.28 Capability Discovery Boundary
+
+TASK-056 建立 descriptor-only Capability Discovery 边界：
+
+```text
+CapabilityDiscoveryBoundary
+        |
+        v
+AvailableCapabilityCollection
+        |
+        v
+tuple[CapabilityDescriptor, ...]
+```
+
+**为什么需要 Discovery Boundary**
+
+Objective-Capability Mapping 描述“某个 Objective 可以由哪些能力支撑”，但它不说明
+未来 provider 当前报告了哪些 capability descriptors。Discovery 将“可用描述观察”独立
+出来，同时避免把设备扫描、协议访问或 Capability 构造带入描述层。
+
+**不可变输出与 identity**
+
+- `AvailableCapabilityCollection` 是 frozen/slotted；
+- 唯一字段是 `tuple[CapabilityDescriptor, ...]`；
+- exact tuple、caller/provider order 与每个 descriptor identity 原样保存；
+- empty availability 合法；
+- 不 copy、rebuild、sort、deduplicate 或 normalize。
+
+**Discovery 不是什么**
+
+- 不连接设备，不读取 CAN、Modbus、PCS 或 BMS；
+- 不创建、保存或执行 Capability instance；
+- 不进行 Objective-Capability matching；
+- 不进行 selection、ranking、priority、scoring 或 optimization；
+- 不执行 activation；
+- 不生成或解析 `DecisionIntent`。
+
+Discovery 只回答“有哪些 capability descriptors 被报告为 available”，不回答“应该选择
+哪个能力”或“电池应该做什么”。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
