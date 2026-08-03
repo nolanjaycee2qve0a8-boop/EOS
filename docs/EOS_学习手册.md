@@ -1374,6 +1374,53 @@ ActiveObjectiveCollection
 - 不是 resolver；
 - 不产生 `DecisionIntent`，更不产生设备命令。
 
+### 4.27 Objective-Capability Mapping Boundary
+
+TASK-055 只增加 Objective 与 Capability descriptor 之间的关系表达：
+
+```text
+ObjectiveDescriptor
+        |
+        v
+ObjectiveCapabilityMapping
+        |
+        v
+tuple[CapabilityDescriptor, ...]
+```
+
+**为什么需要 CapabilityDescriptor**
+
+Objective Layer 需要说明哪些业务能力可以支撑某个关注事项，但不能保存
+`TOUEnergyCapability()` 等实现实例。`CapabilityDescriptor` 只有非空 `name` 和
+`description`，因此它能表达能力语义，却不能被执行。
+
+**输入与输出**
+
+- Boundary 输入 exact `ObjectiveCollection` 或 `ActiveObjectiveCollection`；
+- 输出 immutable `ObjectiveCapabilityMappingCollection`；
+- 每个 mapping 保存 exact Objective descriptor；
+- `capabilities` 只接受 `tuple[CapabilityDescriptor, ...]`；
+- empty mapping 与 empty capability tuple 均合法；
+- caller order 和 exact identities 原样保存。
+
+**依赖方向**
+
+```text
+objective.mapping -> capability.descriptor
+capability -X-> objective
+```
+
+Objective 只依赖窄 Capability contract，不依赖 TOU、Self Consumption 或 Resolver
+implementation；Capability 也不能反向依赖 Objective。
+
+**Mapping 不是什么**
+
+- 不是 capability selection、ranking 或 priority；
+- 不是 scoring、weighting 或 optimization；
+- 不执行 Capability；
+- 不进行 intent resolution；
+- 不生成 `DecisionIntent` 或设备命令。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

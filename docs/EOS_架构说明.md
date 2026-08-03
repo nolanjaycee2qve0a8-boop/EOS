@@ -5,10 +5,10 @@
 本文是 EOS Reference Implementation 的软件架构设计说明书。它记录稳定的架构原则、
 包职责、依赖方向和演进约束，不替代 TASK 文档或 ADR。
 
-本文描述截至 TASK-054 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
+本文描述截至 TASK-055 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
 建立 Physical Constraint 与 Decision Evaluation Framework，TASK-045～052 建立、
-验证并冻结 EMS Capability Layer；TASK-053～054 建立独立 Objective Description 与
-Activation Boundary。
+验证并冻结 EMS Capability Layer；TASK-053～055 建立独立 Objective Description、
+Activation 与 Objective-Capability Mapping Boundary。
 
 ## 2. 架构目标
 
@@ -98,6 +98,11 @@ TASK-054 在同一独立 package 中增加 abstract `ObjectiveActivationBoundary
 Activation 保持 source collection、active tuple 与 descriptor identity，不排序、不去重、
 不调用 description，也不引入 priority、ranking、conflict resolution、weight、score、
 optimization 或 intent generation。
+TASK-055 增加 immutable `CapabilityDescriptor` 和 Objective-Capability Mapping contracts，
+只表达 exact Objective descriptor 可以由哪些 Capability descriptors 支撑。依赖方向固定为
+`objective.mapping -> capability.descriptor`；Capability package 不依赖 Objective。
+Mapping 不持有 Capability implementation，不选择、不排序、不评分、不优化、不执行，
+也不产生 `DecisionIntent`。
 
 ## 3. 核心架构原则
 
@@ -118,6 +123,7 @@ optimization 或 intent generation。
 - `IntentResolutionBoundary`：多个 capability candidates 如何进入未来单一意图解析入口？
 - `EMSObjectiveBoundary`：EMS 关注事项如何以不可变描述表达，而不产生决策意图？
 - `ObjectiveActivationBoundary`：哪些已描述 objective 处于 active 集合，如何保持其身份？
+- `ObjectiveCapabilityMappingBoundary`：Objective 与 Capability descriptors 如何表达关系？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 
