@@ -181,6 +181,9 @@ def test_public_exports_include_activation_contracts() -> None:
         "ActiveObjectiveCollection",
         "EMSObjectiveBoundary",
         "ObjectiveActivationBoundary",
+        "ObjectiveCapabilityMapping",
+        "ObjectiveCapabilityMappingBoundary",
+        "ObjectiveCapabilityMappingCollection",
         "ObjectiveCollection",
         "ObjectiveDescriptor",
     ]

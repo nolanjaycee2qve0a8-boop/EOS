@@ -1911,6 +1911,69 @@ Capability、Constraint、Evaluation、Runtime 或 legacy 路径。
 - Ruff format：passed；
 - mypy：passed。
 
+## TASK-055 Objective-Capability Mapping Boundary
+
+**目标：**
+
+在 Phase 4 Objective Layer 中建立 Objective 与 Capability descriptor 的 immutable
+mapping seam，只表达支撑关系，不实现决策逻辑。
+
+**实现内容：**
+
+- 新增 frozen/slotted `CapabilityDescriptor` contract；
+- 新增 frozen/slotted `ObjectiveCapabilityMapping`；
+- 新增 frozen/slotted `ObjectiveCapabilityMappingCollection`；
+- 新增 abstract、stateless `ObjectiveCapabilityMappingBoundary`；
+- 更新 Objective 与 Capability public API；
+- 增加 identity、immutability、empty/multiple mapping 与 dependency direction 测试。
+
+**架构意义：**
+
+```text
+ObjectiveCollection / ActiveObjectiveCollection
+        |
+        v
+ObjectiveCapabilityMappingBoundary
+        |
+        v
+ObjectiveCapabilityMappingCollection
+        |
+        v
+ObjectiveDescriptor -> tuple[CapabilityDescriptor, ...]
+```
+
+Mapping output 停留在 descriptor 层，不保存、构造或执行 Capability implementation。
+
+**Identity 与 dependency：**
+
+- mapping 保存 exact Objective 与 Capability descriptors；
+- collection 保存 exact source 与 mappings tuple；
+- equal-but-reconstructed Objective 被拒绝；
+- `objective.mapping -> capability.descriptor`；
+- Capability package 不依赖 Objective。
+
+**新增文件：**
+
+- `capability/descriptor.py`；
+- `objective/mapping.py`；
+- `tests/unit/capability/test_descriptor.py`；
+- `tests/unit/objective/test_mapping.py`；
+- `tasks/TASK-055.md`；
+- `architecture/adr/ADR-053-objective-capability-mapping-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete mapping、Capability instance/class/factory、selection、ranking、priority、
+score、weight、optimization、execution、resolver 或 intent generation。不修改 Kernel、
+DecisionContext、DecisionIntent、Constraint、Evaluation、Runtime、Execution 或 legacy。
+
+**验证结果：**
+
+- pytest：971 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed。
+
 ## 2. 后续追加模板
 
 ```markdown
