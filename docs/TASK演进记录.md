@@ -1854,6 +1854,63 @@ Runtime 或 legacy 路径，也不能决定充电、放电或空闲。
 - Ruff format：passed；
 - mypy：passed。
 
+## TASK-054 Objective Activation Boundary
+
+**目标：**
+
+在独立 Objective Layer 中建立最小 activation seam，表达哪些已描述 Objective 处于
+active 集合，同时保持 Objective 不决定电池行为。
+
+**实现内容：**
+
+- 新增 abstract、stateless `ObjectiveActivationBoundary`；
+- 新增 frozen/slotted `ActiveObjectiveCollection`；
+- 更新 objective public API；
+- 增加 identity、immutability、exactly-once 和 dependency isolation 单元测试。
+
+**架构意义：**
+
+```text
+ObjectiveCollection
+        |
+        v
+ObjectiveActivationBoundary
+        |
+        v
+ActiveObjectiveCollection
+```
+
+Description 与 Activation 被明确分离：前者说明 EMS 关注事项，后者只记录哪些 exact
+descriptors 处于 active 集合。两者都不产生策略、意图或设备行为。
+
+**Identity 与 exactly once：**
+
+- `active.source_collection` 是 exact input collection；
+- `active.active_objectives` 是 exact caller tuple；
+- 每个 active descriptor 必须以 `is` 关系来自 source；
+- equal-but-reconstructed descriptor 被拒绝；
+- 一次调用产生一个 result，不调用 `describe()` 或其他 EOS layer。
+
+**新增文件：**
+
+- `objective/activation.py`；
+- `tests/unit/objective/test_activation.py`；
+- `tasks/TASK-054.md`；
+- `architecture/adr/ADR-052-objective-activation-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete activation、objective priority、ranking、conflict resolution、weight、
+score、optimization、resolver 或 intent generation。不修改 Kernel、DecisionContext、
+Capability、Constraint、Evaluation、Runtime 或 legacy 路径。
+
+**验证结果：**
+
+- pytest：948 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed。
+
 ## 2. 后续追加模板
 
 ```markdown
