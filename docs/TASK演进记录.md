@@ -1796,6 +1796,64 @@ TASK-052 将范围更新为 TASK-052，并明确 Phase 3 为 TASK-045～052、�
 合同修改、legacy migration、Runtime/Device integration 或新的 resolution strategy
 都必须进入独立 TASK 与架构审查，不能隐藏在具体 Capability 中。
 
+## TASK-053 EMS Objective Boundary
+
+**目标：**
+
+建立独立 Objective Description Layer，只描述 EMS 关注什么，不决定电池应该做什么。
+
+**实现内容：**
+
+- 新增 abstract、stateless `EMSObjectiveBoundary`；
+- 新增 frozen/slotted `ObjectiveDescriptor`；
+- 新增 frozen/slotted `ObjectiveCollection`；
+- 公开 API 只导出上述三个合同；
+- 将独立 `objective` package 纳入构建与 coverage 配置。
+
+**架构意义：**
+
+```text
+EMSObjectiveBoundary
+        |
+        v
+ObjectiveCollection
+        |
+        v
+ObjectiveDescriptor tuple
+```
+
+Objective 与 Capability 的职责不同：Objective 描述关注事项，Capability 才可能在未来
+根据事实产生意图。TASK-053 不连接两层，也不新增任何 concrete objective。
+
+**不可变与身份：**
+
+- descriptor 和 collection 均 frozen/slotted；
+- collection 只接受 tuple；
+- 保留 caller-supplied tuple 与 descriptor exact identity；
+- boundary 使用 empty slots，无 instance state、cache 或 history。
+
+**新增文件：**
+
+- `objective/__init__.py`；
+- `objective/base.py`；
+- `objective/model.py`；
+- `tests/unit/objective/`；
+- `tasks/TASK-053.md`；
+- `architecture/adr/ADR-051-ems-objective-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete objectives、priority、weight、score、optimization、resolver 或 intent
+generation。Objective 不能读取或修改 Kernel、Capability、Constraint、Evaluation、
+Runtime 或 legacy 路径，也不能决定充电、放电或空闲。
+
+**验证结果：**
+
+- pytest：936 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed。
+
 ## 2. 后续追加模板
 
 ```markdown

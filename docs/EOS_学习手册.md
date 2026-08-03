@@ -1294,6 +1294,46 @@ Runtime / Device：不属于 Phase 3 决策链
 冻结不代表永远禁止演进，而是任何合同修改都必须通过新的 TASK 与架构审查，不能借具体
 Capability 实现顺便改变 Kernel。
 
+### 4.25 EMS Objective Boundary
+
+TASK-053 在 Phase 3 冻结后建立独立 Objective Description Layer：
+
+```text
+EMSObjectiveBoundary
+        |
+        v
+ObjectiveCollection
+        |
+        v
+tuple[ObjectiveDescriptor, ...]
+```
+
+**Objective 为什么存在**
+
+Objective 只回答“EMS 关注什么”。这个问题与 Capability 的“根据事实产生什么意图”、
+Constraint 的“物理上允许什么”以及 Runtime 的“如何执行和推进状态”都不同。
+独立边界可以防止业务关注事项被误写成电池动作。
+
+**输入与输出**
+
+- `EMSObjectiveBoundary.describe()` 不读取 `DecisionContext`，也不读取系统状态；
+- 输出是 immutable `ObjectiveCollection`；
+- 每个 `ObjectiveDescriptor` 只有非空 `name` 和 `description`；
+- Collection 保持 caller 提供的 tuple 与 descriptor exact identity。
+
+**为什么不能与 Capability 合并**
+
+Capability 可以产生 `DecisionIntent`，Objective 不可以。Objective 若直接返回充电、
+放电或空闲意图，就已经回答了“电池应该做什么”，越过了本层职责。
+
+**刻意不包含**
+
+- concrete objective；
+- priority、weight、score 或 ranking；
+- optimization 或 resolver；
+- intent generation；
+- Constraint、Evaluation、Runtime 或 Device 行为。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

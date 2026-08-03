@@ -9,7 +9,7 @@ repos:
     rev: v1.16.1
     hooks:
       - id: mypy
-        args: [kernel, capability, simulator, tests]
+        args: [kernel, capability, objective, simulator, tests]
         additional_dependencies: ["pytest>=8.2,<9"]
         pass_filenames: false
   - repo: local

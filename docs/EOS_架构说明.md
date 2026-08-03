@@ -5,9 +5,9 @@
 本文是 EOS Reference Implementation 的软件架构设计说明书。它记录稳定的架构原则、
 包职责、依赖方向和演进约束，不替代 TASK 文档或 ADR。
 
-本文描述截至 TASK-052 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
+本文描述截至 TASK-053 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
 建立 Physical Constraint 与 Decision Evaluation Framework，TASK-045～052 建立、
-验证并冻结 EMS Capability Layer。
+验证并冻结 EMS Capability Layer；TASK-053 开始建立独立 Objective Description Layer。
 
 ## 2. 架构目标
 
@@ -82,6 +82,17 @@ TASK-052 对 Phase 3 执行冻结审查：Capability、Composition、Resolution�
 Evidence、Dependency Direction 与 Legacy Isolation 全部通过。后续修改这些稳定合同
 必须通过独立 TASK 和架构审查，不能在新 Capability 中隐式迁移。
 
+#### Phase 4：TASK-053+ — Objective Description Layer
+
+TASK-053 只建立 EMS Objective 的描述边界。`EMSObjectiveBoundary` 通过
+`describe() -> ObjectiveCollection` 返回 immutable objective descriptions；
+`ObjectiveDescriptor` 只包含非空的 `name` 与 `description`，
+`ObjectiveCollection` 只保存 caller-supplied descriptor tuple。
+
+Objective 回答“EMS 关注什么”，不回答“电池应该做什么”。因此该层没有 concrete
+objective、priority、weight、score、optimization、resolver 或 `DecisionIntent`
+生成，也不依赖 Kernel、Capability、Constraint、Evaluation、Runtime 或 legacy。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -99,6 +110,7 @@ Evidence、Dependency Direction 与 Legacy Isolation 全部通过。后续修改
 - `DecisionEvaluationIntegration`：完整新决策路径如何只执行一次并保存全部证据？
 - `EMSCapabilityBoundary`：业务能力如何在不修改 Kernel 的情况下表达决策意图？
 - `IntentResolutionBoundary`：多个 capability candidates 如何进入未来单一意图解析入口？
+- `EMSObjectiveBoundary`：EMS 关注事项如何以不可变描述表达，而不产生决策意图？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 
