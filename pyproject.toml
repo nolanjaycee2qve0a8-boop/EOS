@@ -27,7 +27,7 @@ dev = [
 ]
 
 [tool.hatch.build.targets.wheel]
-packages = ["kernel", "capability", "simulator"]
+packages = ["kernel", "capability", "objective", "simulator"]
 
 [tool.pytest.ini_options]
 addopts = "--strict-config --strict-markers"
@@ -35,4 +35,4 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["kernel", "capability", "simulator"]
+source = ["kernel", "capability", "objective", "simulator"]
