@@ -88,7 +88,9 @@ def test_public_imports_are_exact() -> None:
     from objective import __all__ as public_names
 
     assert public_names == [
+        "ActiveObjectiveCollection",
         "EMSObjectiveBoundary",
+        "ObjectiveActivationBoundary",
         "ObjectiveCollection",
         "ObjectiveDescriptor",
     ]

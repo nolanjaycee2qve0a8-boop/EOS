@@ -1334,6 +1334,46 @@ Capability 可以产生 `DecisionIntent`，Objective 不可以。Objective 若�
 - intent generation；
 - Constraint、Evaluation、Runtime 或 Device 行为。
 
+### 4.26 Objective Activation Boundary
+
+TASK-054 在 Objective Description 之上增加最小 Activation 边界：
+
+```text
+ObjectiveCollection
+        |
+        v
+ObjectiveActivationBoundary
+        |
+        v
+ActiveObjectiveCollection
+```
+
+**Activation 为什么存在**
+
+完整的 Objective 描述集合与某次使用中处于 active 状态的 Objective 集合不是同一个
+概念。Activation 只表达这个集合关系，不解释为什么 active，也不决定谁更重要。
+
+**输入与输出**
+
+- 输入是 exact immutable `ObjectiveCollection`；
+- 输出是 frozen/slotted `ActiveObjectiveCollection`；
+- 输出保存 exact `source_collection`；
+- `active_objectives` 是 caller-produced tuple，其中每个元素必须以 `is` 关系来自 source；
+- empty active tuple 合法，caller order 原样保留。
+
+**Exactly once 与只读语义**
+
+一次 `activate()` 调用接收一次 source reference 并返回一个 artifact。边界不会调用
+`describe()`，不会重复 activation，也不会运行 Capability、Constraint 或 Evaluation。
+
+**Activation 不是什么**
+
+- 不是 objective priority 或 ranking；
+- 不是 objective conflict resolution；
+- 不是 weighting、scoring 或 optimization；
+- 不是 resolver；
+- 不产生 `DecisionIntent`，更不产生设备命令。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
