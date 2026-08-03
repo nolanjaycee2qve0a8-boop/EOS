@@ -1974,6 +1974,65 @@ DecisionContext、DecisionIntent、Constraint、Evaluation、Runtime、Execution
 - Ruff format：passed；
 - mypy：passed。
 
+## TASK-056 Capability Discovery Boundary
+
+**目标：**
+
+建立 descriptor-only Capability Discovery 抽象边界，以不可变集合报告可用的
+`CapabilityDescriptor` references，不引入设备或行为发现。
+
+**实现内容：**
+
+- 新增 frozen/slotted `AvailableCapabilityCollection`；
+- 新增 abstract、stateless `CapabilityDiscoveryBoundary`；
+- 更新 Capability public API；
+- 增加 tuple/descriptor identity、immutability、empty collection、dependency isolation
+  和无 concrete production implementation 测试。
+
+**架构意义：**
+
+```text
+CapabilityDiscoveryBoundary
+        |
+        v
+AvailableCapabilityCollection
+        |
+        v
+tuple[CapabilityDescriptor, ...]
+```
+
+Discovery 只报告 descriptor availability。它不把 Capability implementation、设备访问、
+协议扫描、matching、selection、activation 或 intent generation 带入稳定契约。
+
+**Identity 与 dependency：**
+
+- collection 保存 exact caller/provider descriptor tuple；
+- tuple order 与每个 descriptor identity 原样保持；
+- `capability.discovery -> capability.descriptor`；
+- 不依赖 Objective、Kernel、Constraint、Evaluation、Runtime、Execution 或 Device。
+
+**新增文件：**
+
+- `capability/discovery.py`；
+- `tests/unit/capability/test_discovery.py`；
+- `tasks/TASK-056.md`；
+- `architecture/adr/ADR-054-capability-discovery-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete discovery provider、Capability instance/class/factory、device connection、
+CAN/Modbus、matching、selection、ranking、priority、activation、optimization、resolver 或
+`DecisionIntent` generation。不修改既有 Capability behavior、Objective mapping、Constraint、
+Evaluation、Runtime、Execution 或 legacy。
+
+**验证结果：**
+
+- pytest：981 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed；
+- pre-commit：passed。
+
 ## 2. 后续追加模板
 
 ```markdown
