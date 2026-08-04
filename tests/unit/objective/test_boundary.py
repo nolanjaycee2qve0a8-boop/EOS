@@ -91,6 +91,8 @@ def test_public_imports_are_exact() -> None:
         "ActiveObjectiveCollection",
         "EMSObjectiveBoundary",
         "ObjectiveActivationBoundary",
+        "ObjectiveCapabilityActivationComposition",
+        "ObjectiveCapabilityActivationCompositionBoundary",
         "ObjectiveCapabilityMapping",
         "ObjectiveCapabilityMappingBoundary",
         "ObjectiveCapabilityMappingCollection",

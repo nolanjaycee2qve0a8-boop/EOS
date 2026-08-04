@@ -1,6 +1,10 @@
 """Stable public contracts for EOS objective descriptions."""
 
 from objective.activation import ActiveObjectiveCollection, ObjectiveActivationBoundary
+from objective.activation_composition import (
+    ObjectiveCapabilityActivationComposition,
+    ObjectiveCapabilityActivationCompositionBoundary,
+)
 from objective.base import EMSObjectiveBoundary
 from objective.mapping import (
     ObjectiveCapabilityMapping,
@@ -13,6 +17,8 @@ __all__ = [
     "ActiveObjectiveCollection",
     "EMSObjectiveBoundary",
     "ObjectiveActivationBoundary",
+    "ObjectiveCapabilityActivationComposition",
+    "ObjectiveCapabilityActivationCompositionBoundary",
     "ObjectiveCapabilityMapping",
     "ObjectiveCapabilityMappingBoundary",
     "ObjectiveCapabilityMappingCollection",
