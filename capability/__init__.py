@@ -11,6 +11,12 @@ from capability.discovery import (
     AvailableCapabilityCollection,
     CapabilityDiscoveryBoundary,
 )
+from capability.matching import (
+    CapabilityMatch,
+    CapabilityMatchCollection,
+    CapabilityMatchingBoundary,
+    RequiredCapabilityCollection,
+)
 from capability.resolution import IntentResolutionBoundary
 from capability.self_consumption import SelfConsumptionCapability
 from capability.tou import TOUCapabilityParameters, TOUEnergyCapability
@@ -20,10 +26,14 @@ __all__ = [
     "CapabilityCompositionBoundary",
     "CapabilityDescriptor",
     "CapabilityDiscoveryBoundary",
+    "CapabilityMatch",
+    "CapabilityMatchCollection",
+    "CapabilityMatchingBoundary",
     "DeterministicIntentResolutionImplementation",
     "DeterministicIntentResolutionParameters",
     "EMSCapabilityBoundary",
     "IntentResolutionBoundary",
+    "RequiredCapabilityCollection",
     "SelfConsumptionCapability",
     "TOUCapabilityParameters",
     "TOUEnergyCapability",

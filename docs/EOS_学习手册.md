@@ -1461,6 +1461,49 @@ Objective-Capability Mapping 描述“某个 Objective 可以由哪些能力支�
 Discovery 只回答“有哪些 capability descriptors 被报告为 available”，不回答“应该选择
 哪个能力”或“电池应该做什么”。
 
+### 4.29 Capability Matching Boundary
+
+TASK-057 在 Required 与 Available descriptor collections 之间建立关系事实边界：
+
+```text
+RequiredCapabilityCollection
+        |                         AvailableCapabilityCollection
+        +-------------------------+
+                                  |
+                                  v
+                    CapabilityMatchingBoundary
+                                  |
+                                  v
+                    CapabilityMatchCollection
+```
+
+**为什么 Matching 与 Selection 分离**
+
+Matching 只陈述“这个 exact required descriptor 与这个 exact available descriptor 存在
+关系”。Selection 则要回答“最终使用哪个能力”。如果 Matching 模型包含 score、priority、
+selected flag 或 fallback，它就已经越过关系证据边界，开始承担仲裁职责。
+
+**不可变关系与 identity**
+
+- Required 与 Available collections 都只保存 descriptor tuples；
+- `CapabilityMatch` 保存 exact required/available descriptor references；
+- `CapabilityMatchCollection` 保存 exact source collections、exact match tuple 与
+  exact `missing_required` tuple；
+- 每个 match 必须以 `is` 关系来自对应 source collection；
+- 每个 missing descriptor 必须以 `is` 关系来自 required source collection；
+- 每个 required descriptor 必须且只能属于 matched 或 `missing_required`，不允许遗漏或重叠；
+- equal-but-reconstructed descriptor 被拒绝；
+- empty required、available、matches 与 missing tuples 在满足完备性契约时合法。
+
+**Matching 不是什么**
+
+- 不根据 name 自动比较；
+- 不 ranking、scoring、priority、weighting 或 selection；
+- 不 optimization、conflict resolution 或 fallback；
+- 不 activation 或执行 Capability；
+- 不连接设备，不读取 CAN/Modbus；
+- 不生成或解析 `DecisionIntent`。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

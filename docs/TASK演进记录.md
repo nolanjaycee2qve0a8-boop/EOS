@@ -2033,6 +2033,74 @@ Evaluation、Runtime、Execution 或 legacy。
 - mypy：passed；
 - pre-commit：passed。
 
+## TASK-057 Capability Matching Boundary
+
+**目标：**
+
+建立 Required Capability 与 Available Capability descriptors 的 immutable matching seam，
+只表达关系事实，不实现匹配、仲裁或执行算法。
+
+**实现内容：**
+
+- 新增 frozen/slotted `RequiredCapabilityCollection`；
+- 新增 frozen/slotted `CapabilityMatch`；
+- 新增 frozen/slotted `CapabilityMatchCollection`，包含 immutable
+  `missing_required: tuple[CapabilityDescriptor, ...]`；
+- 新增 abstract、stateless `CapabilityMatchingBoundary`；
+- 更新 Capability public API；
+- 增加 all matched、partially matched、fully missing、source/descriptor/match/missing
+  identity、互斥完备性、immutability、empty collection、dependency isolation 与无
+  concrete production implementation 测试。
+
+**架构意义：**
+
+```text
+RequiredCapabilityCollection
+        |                         AvailableCapabilityCollection
+        +-------------------------+
+                                  |
+                                  v
+                    CapabilityMatchingBoundary
+                                  |
+                                  v
+                    CapabilityMatchCollection
+```
+
+Matching output 停留在 descriptor relationship 层，不包含 Capability implementation、
+设备事实、选择结果、激活状态或电池意图。
+
+**Identity 与 dependency：**
+
+- required/available source collections 保持 exact identity；
+- match 保存 exact required 与 available descriptors；
+- matches tuple、caller order 与 match identities 原样保持；
+- missing-required tuple 与 descriptor identities 原样保持；
+- 每个 required descriptor 必须且只能属于 matched 或 missing 类别；
+- `capability.matching` 只依赖 descriptor 与 discovery contracts；
+- 不依赖 Objective、Kernel、Constraint、Evaluation、Runtime、Execution 或 Device。
+
+**新增文件：**
+
+- `capability/matching.py`；
+- `tests/unit/capability/test_matching.py`；
+- `tasks/TASK-057.md`；
+- `architecture/adr/ADR-055-capability-matching-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete matching algorithm、Capability instance、device/CAN/Modbus dependency、
+ranking、scoring、priority、selection、optimization、fallback、activation、resolver 或
+`DecisionIntent` generation。不修改 Discovery、Objective mapping、Constraint、Evaluation、
+Runtime、Execution 或 legacy。
+
+**验证结果：**
+
+- pytest：999 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed；
+- pre-commit：passed。
+
 ## 2. 后续追加模板
 
 ```markdown
