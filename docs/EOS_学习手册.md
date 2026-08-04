@@ -1678,7 +1678,7 @@ Activation 和 Composition 都能通过 `is` 判断自己观察的是不是同�
 
 | 阶段 | 核心问题 | 输入 | 输出 | 非职责 |
 | --- | --- | --- | --- | --- |
-| Discovery | 当前报告有哪些能力描述可用？ | provider boundary | `AvailableCapabilityCollection` | 匹配和选择 |
+| Discovery | 当前报告有哪些能力描述可用？ | 无调用参数 | `AvailableCapabilityCollection` | 匹配和选择 |
 | Matching | required 与 available 之间有哪些关系，哪些 required 缺失？ | required + available | `CapabilityMatchCollection` | 排名和激活 |
 | Activation | 已匹配能力处于 active 还是 inactive？ | matching result | `ActiveCapabilityCollection` | 激活算法和执行 |
 
@@ -1689,6 +1689,10 @@ Activation 和 Composition 都能通过 `is` 判断自己观察的是不是同�
 - Activation 只表达 matched descriptor status。
 
 把三者合并会让“没有发现”“没有匹配”“没有激活”变成同一种空值，系统将失去可解释性。
+
+`CapabilityDiscoveryBoundary.discover()` 没有调用参数；该 boundary 本身定义 provider contract，
+并返回 `AvailableCapabilityCollection`。调用方负责提供具体 provider implementation，但 Phase 4
+没有建立 Mapping、Required Capability、Discovery 与 Matching 之间的自动连接。
 
 ### 5.6 Available ≠ Matched ≠ Active
 

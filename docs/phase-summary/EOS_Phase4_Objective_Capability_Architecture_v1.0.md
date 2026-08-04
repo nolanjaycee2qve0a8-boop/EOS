@@ -72,7 +72,12 @@ Mapped Capability Descriptor
         -> Objective-Active-Capability Composition
 ```
 
-每一步都保留前一步对象身份，避免用一个布尔值或空 tuple 混合多个不同语义。
+每个 boundary 只保证其直接输入与输出之间的 identity preservation。Phase 4 当前没有建立
+Mapping → Required Capability → Discovery → Matching 的自动连接链，也不存在跨这些边界的
+自动 identity contract；caller 必须显式提供每个 boundary 所需的 source artifacts。
+
+`CapabilityDiscoveryBoundary.discover()` 无调用参数。该 boundary 本身定义 provider contract，
+输出 `AvailableCapabilityCollection`，而不是接收 provider boundary 或 provider contract 作为输入。
 
 ## 4. 核心设计原则
 
@@ -88,8 +93,9 @@ Device handle 或 protocol frame 进入 Objective 架构。
 
 ### 4.3 Identity Preservation
 
-Source collection、tuple、descriptor、match 和 composition references 都以 `is` 保持。值相等的
-reconstructed descriptor 不能替代 source identity。
+在单个 boundary 的直接输入/输出合同内，source collection、tuple、descriptor、match 和
+composition references 以 `is` 保持。值相等的 reconstructed descriptor 不能替代 source
+identity；该规则不声明 Mapping、Discovery 与 Matching 之间存在自动 identity lineage。
 
 ### 4.4 Immutable Contract
 

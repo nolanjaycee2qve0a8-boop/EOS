@@ -156,15 +156,22 @@ Future Decision Layer
 该图描述 dependency 与 evidence progression，不表示一个自动执行的 runtime pipeline。
 Phase 4 没有调用 Policy、Constraint、Runtime 或 Device。
 
+每个 boundary 只保证其直接输入与输出之间的 identity preservation。Phase 4 没有建立
+Mapping → Required Capability → Discovery → Matching 的自动连接链，也不存在跨这些边界的
+自动 identity contract；各阶段所需对象均由 caller 显式提供。
+
 | Boundary | 输入 | 输出 | 职责 | 非职责 |
 | --- | --- | --- | --- | --- |
 | `EMSObjectiveBoundary` | 无运行时输入 | `ObjectiveCollection` | 描述 EMS 关注事项 | 策略、意图、优化 |
 | `ObjectiveActivationBoundary` | `ObjectiveCollection` | `ActiveObjectiveCollection` | 表达 exact objectives 的 active 集合 | priority、conflict resolution |
 | `ObjectiveCapabilityMappingBoundary` | Objective collection | `ObjectiveCapabilityMappingCollection` | 表达 Objective 可由哪些 Capability descriptors 支撑 | Capability selection/execution |
-| `CapabilityDiscoveryBoundary` | provider contract | `AvailableCapabilityCollection` | 报告 available descriptors | 设备扫描、matching、activation |
+| `CapabilityDiscoveryBoundary` | 无调用参数 | `AvailableCapabilityCollection` | 作为 provider contract 报告 available descriptors | 设备扫描、matching、activation |
 | `CapabilityMatchingBoundary` | required + available collections | `CapabilityMatchCollection` | 表达 matched relationships 与 explicit missing requirements | ranking、fallback、selection |
 | `CapabilityActivationBoundary` | `CapabilityMatchCollection` | `ActiveCapabilityCollection` | 表达 matched descriptors 的 active/inactive 状态 | activation algorithm、execution |
 | `ObjectiveCapabilityActivationCompositionBoundary` | Objective + active collection | `ObjectiveCapabilityActivationComposition` | 保存完整 Objective-to-active-Capability 关系 | subset selection、DecisionIntent |
+
+`CapabilityDiscoveryBoundary.discover()` 不接收参数；该 abstract boundary 本身定义 provider
+contract，而不是把 provider 作为输入参数。
 
 #### Phase 4 完整性规则
 
