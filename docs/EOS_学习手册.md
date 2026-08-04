@@ -1778,7 +1778,75 @@ Capability discovery、matching、activation 和 composition，但明确没有�
 因此 Phase 4 的最终产物是“可审查的 Objective 与 Capability 证据结构”，不是完整 EMS
 执行链。
 
-## 6. 学习建议
+## 6. Phase 5：Decision Formation
+
+Phase 5 从 TASK-061 开始建立决策形成语义。它不会把 Phase 4 Objective/Capability evidence
+直接变成设备动作，而是先冻结“意图是什么”的最小语言。
+
+### 6.1 TASK-061 DecisionIntent Contract
+
+Phase 5 的 `decision_formation.DecisionIntent` 只有一个 immutable 字段：
+
+```text
+action = charge | discharge | idle
+```
+
+- `charge`：语义上希望充电；
+- `discharge`：语义上希望放电；
+- `idle`：语义上不希望充电或放电。
+
+这些 action 不定义功率大小，也不通过正负功率表达设备方向。不同 PCS、BMS 或协议可能采用
+不同 sign convention，Decision Formation 不能把这些设备语义固化进 Intent。
+
+### 6.2 DecisionIntent 不等于 Command
+
+```text
+DecisionIntent
+    表达希望做什么
+
+Command
+    表达未来提交什么操作
+```
+
+TASK-061 不生成 Command，不包含 device address、CAN/Modbus frame、执行状态或 Runtime 所有权。
+未来从可行 Intent 到 Command 的转换必须由新的独立边界定义。
+
+### 6.3 为什么建立独立合同
+
+Phase 3 已有 `kernel.decision.DecisionIntent`，它保存
+`battery_power_intent_kw`，并被 Capability、Constraint 和 Evaluation 使用。直接把该字段改为
+action 会破坏已审查的路径。
+
+因此 TASK-061 新增独立合同：
+
+```text
+Phase 3: kernel.decision.DecisionIntent(battery_power_intent_kw)
+Phase 5: decision_formation.DecisionIntent(action)
+```
+
+两者没有 inheritance、adapter、alias 或自动转换。TASK-061 只建立 artifact，不生成实际决策，
+也不访问 Objective、Capability implementation、Constraint、Optimization、Runtime 或 Device。
+
+### 6.4 后续边界
+
+Phase 5 计划按独立 TASK 继续审查：
+
+```text
+TASK-061 Intent Contract
+        |
+        v
+TASK-062 Formation Boundary
+        |
+        v
+TASK-063 Resolution
+        |
+        v
+TASK-064 Constraint Evaluation
+```
+
+当前只有 TASK-061 artifact 已进入实现阶段，后续能力不能从文档描述推断为已经存在。
+
+## 7. 学习建议
 
 建议按以下顺序理解 EOS：
 
@@ -1796,7 +1864,7 @@ Capability discovery、matching、activation 和 composition，但明确没有�
 - 哪些安全约束不属于策略？
 - 谁最终负责设备执行和失败处理？
 
-## 7. 文档维护规则
+## 8. 文档维护规则
 
 以后每完成一个 TASK：
 
