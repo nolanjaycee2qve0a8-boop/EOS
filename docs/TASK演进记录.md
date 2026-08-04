@@ -2164,6 +2164,72 @@ Constraint、Device/CAN/Modbus dependency、Runtime 或 persistence。
 - mypy：passed；
 - pre-commit：passed。
 
+## TASK-059 Objective-Capability Activation Composition
+
+**目标：**
+
+建立 Objective 与完整 `ActiveCapabilityCollection` 之间的 immutable composition seam，只
+表达该 Objective 使用哪些已经 active 的 capability descriptors。
+
+**实现内容：**
+
+- 新增 frozen/slotted `ObjectiveCapabilityActivationComposition`；
+- 新增 abstract、stateless
+  `ObjectiveCapabilityActivationCompositionBoundary`；
+- composition 直接保存 exact Objective 与 exact Active Capability Collection；
+- 完整保留 nested active tuple，拒绝重复 descriptor identity；
+- 更新 Objective public API；
+- 增加 objective/capability identity、completeness、duplicate rejection、reconstructed
+  descriptor rejection、immutability、dependency isolation 与无 concrete production
+  implementation 测试。
+
+**架构意义：**
+
+```text
+ObjectiveDescriptor             ActiveCapabilityCollection
+        |                                  |
+        +----------------------------------+
+                                           |
+                                           v
+          ObjectiveCapabilityActivationCompositionBoundary
+                                           |
+                                           v
+             ObjectiveCapabilityActivationComposition
+```
+
+Composition 不定义第二个 capability subset，因此不会隐式选择或遗漏 active descriptors。
+Objective package 只依赖稳定 Capability contract；Capability package 不反向依赖 Objective。
+
+**Identity 与 dependency：**
+
+- Objective 与 Active Capability Collection 保持 exact identity；
+- nested active tuple、caller order 与 descriptor identities 原样保持；
+- duplicate active descriptor identity 被拒绝；
+- reconstructed capability descriptor 无法进入有效 active source；
+- `objective.activation_composition` 只依赖 objective model 与 capability activation contract；
+- 不依赖 Constraint、Evaluation、Runtime、Execution 或 Device。
+
+**新增文件：**
+
+- `objective/activation_composition.py`；
+- `tests/unit/objective/test_activation_composition.py`；
+- `tasks/TASK-059.md`；
+- `architecture/adr/ADR-057-objective-capability-activation-composition.md`。
+
+**关键设计决策：**
+
+不增加 capability subset、selection、ranking、priority、scoring、optimization、conflict
+resolution、fallback、activation logic、Capability execution、`DecisionIntent` generation、
+Constraint、Runtime、Device 或 persistence。
+
+**验证结果：**
+
+- pytest：1027 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed；
+- pre-commit：passed。
+
 ## 2. 后续追加模板
 
 ```markdown

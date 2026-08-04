@@ -1545,6 +1545,46 @@ Matching 回答“required descriptor 与 available descriptor 是否存在关�
 - 不调用 Constraint、Runtime、Execution 或 Device；
 - 不连接 CAN、Modbus、PCS 或 BMS。
 
+### 4.31 Objective-Capability Activation Composition
+
+TASK-059 将一个 exact Objective descriptor 与一个已经完成的
+`ActiveCapabilityCollection` 组合成 immutable relationship artifact：
+
+```text
+ObjectiveDescriptor             ActiveCapabilityCollection
+        |                                  |
+        +----------------------------------+
+                                           |
+                                           v
+          ObjectiveCapabilityActivationCompositionBoundary
+                                           |
+                                           v
+             ObjectiveCapabilityActivationComposition
+```
+
+**为什么直接保存完整 ActiveCapabilityCollection**
+
+Composition 的职责是表达关系，不是从 active capabilities 中再次挑选。如果再接受一个
+capability subset，composition 就会隐式承担 selection，并可能遗漏已经 active 的 descriptor。
+因此结果直接保存 exact `ActiveCapabilityCollection` reference，完整性由对象结构保证。
+
+**Identity 与重复保护**
+
+- `composition.objective is original_objective`；
+- `composition.active_capabilities is original_active_collection`；
+- nested active tuple、顺序和 descriptor identities 原样保持；
+- 同一个 descriptor identity 不能在 active tuple 中重复；
+- reconstructed descriptor 无法通过 `ActiveCapabilityCollection` 的 source identity 验证；
+- empty active collection 仍是完整且合法的 composition。
+
+**Composition 不是什么**
+
+- 不 selection、ranking、priority、scoring 或 weighting；
+- 不 optimization、conflict resolution 或 fallback；
+- 不执行 Capability activation 或 Capability implementation；
+- 不生成 `DecisionIntent`；
+- 不调用 Constraint、Evaluation、Runtime、Execution 或 Device。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：
