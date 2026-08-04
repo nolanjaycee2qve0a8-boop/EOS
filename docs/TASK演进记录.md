@@ -2230,6 +2230,107 @@ Constraint、Runtime、Device 或 persistence。
 - mypy：passed；
 - pre-commit：passed。
 
+## Phase 4 Objective & Capability Architecture 回顾
+
+### TASK-053 Objective Boundary
+
+**背景：** Decision Kernel 已能表达策略输入与输出，但缺少独立的“EMS 关注什么”描述。
+
+**设计目的：** 将业务 Objective 从 Strategy、Intent 与 Runtime 中分离。
+
+**核心契约：** `ObjectiveDescriptor`、`ObjectiveCollection` 与 abstract
+`EMSObjectiveBoundary`；仅保存 immutable name/description descriptors。
+
+**架构收益：** 业务目标获得稳定身份，可以独立演进并成为后续 Mapping 的 source evidence。
+
+### TASK-054 Objective Activation Boundary
+
+**背景：** 已描述 Objective 不等于当前 active Objective，需要独立状态边界。
+
+**设计目的：** 表达 exact source objectives 的 active 集合，而不引入优先级或冲突处理。
+
+**核心契约：** `ObjectiveActivationBoundary` 接收 `ObjectiveCollection`，返回保存 exact source
+与 descriptor tuple 的 `ActiveObjectiveCollection`。
+
+**架构收益：** Objective description 与 activation 生命周期分离，identity lineage 可验证。
+
+### TASK-055 Objective-Capability Mapping
+
+**背景：** Objective 需要描述可由哪些业务能力支撑，但不能依赖 Capability implementation。
+
+**设计目的：** 在 descriptor 层表达 Objective-to-Capability support relationships。
+
+**核心契约：** immutable `ObjectiveCapabilityMapping`、mapping collection 与 abstract mapping
+boundary；输出只包含 `CapabilityDescriptor`。
+
+**架构收益：** 依赖方向保持 `objective -> capability contracts`，Capability package 不反向依赖
+Objective，也没有 selection、ranking 或 intent generation。
+
+### TASK-056 Capability Discovery
+
+**背景：** Mapping 描述理论支持关系，但不能说明 provider 当前报告哪些 capabilities available。
+
+**设计目的：** 独立表达 available capability descriptor observation。
+
+**核心契约：** abstract `CapabilityDiscoveryBoundary` 返回 immutable
+`AvailableCapabilityCollection`，保持 exact tuple、order 与 descriptor identity。
+
+**架构收益：** Availability 与设备扫描、matching、activation 和执行解耦。
+
+### TASK-057 Capability Matching
+
+**背景：** Required 与 Available descriptors 需要关系事实边界，同时必须显式表达未满足需求。
+
+**设计目的：** 输出完整、不可变且 identity-based 的 matched/missing result。
+
+**核心契约：** `RequiredCapabilityCollection`、`CapabilityMatch`、
+`CapabilityMatchCollection` 与 abstract `CapabilityMatchingBoundary`。每个 required descriptor
+必须且只能属于 `matches` 或 `missing_required`。
+
+**架构收益：** Matching evidence 不再用缺席暗示 missing；后续层能够区分明确缺失与处理遗漏。
+
+**首次审查失败与修复：** 第一版只有 `matches`。虽然当时测试全部通过，但模型无法表达
+“required capability 明确 missing”，也无法区分 missing 与遗漏处理，因此正式架构审查判定
+FAIL / BLOCK MERGE。修复增加：
+
+```python
+missing_required: tuple[CapabilityDescriptor, ...]
+```
+
+同时增加 complete coverage validation：每个 required descriptor 必须进入 matched 或 missing
+类别之一，不能遗漏，也不能同时属于两类；missing descriptor 必须保持 source identity。新增
+all matched、partially matched、fully missing、identity、omission 与 overlap tests 后重新审查通过。
+
+该事件形成 Phase 4 的重要工程结论：
+
+> 测试通过不等于架构完整。测试只能验证当前可表达的行为；架构审查还必须验证必要状态是否
+> 都能被模型明确表达。
+
+### TASK-058 Capability Activation
+
+**背景：** Matched capability 不等于 Active capability，需要在 relationship facts 之后表达状态。
+
+**设计目的：** 对 matched available descriptors 提供 active/inactive 完整互斥分类。
+
+**核心契约：** abstract `CapabilityActivationBoundary` 接收 `CapabilityMatchCollection`，返回
+frozen/slotted `ActiveCapabilityCollection`，保存 exact source 与两个 status tuples。
+
+**架构收益：** Discovery、Matching 与 Activation 成为三个可独立审查的证据阶段；无具体
+activation algorithm、Capability execution 或 Device dependency。
+
+### TASK-059 Objective-Capability Activation Composition
+
+**背景：** Objective 与已完成的 active Capability evidence 需要一个最终 relationship artifact。
+
+**设计目的：** 在不选择 capability subset 的前提下保存完整 Objective-to-active-Capability
+关系。
+
+**核心契约：** frozen/slotted `ObjectiveCapabilityActivationComposition` 直接保存 exact
+Objective 与 exact `ActiveCapabilityCollection`；abstract composition boundary 不提供算法。
+
+**架构收益：** Composition completeness 由保留整个 active collection 保证；重复 capability
+identity 被拒绝，selection、DecisionIntent、Runtime 与 Device 继续留在边界之外。
+
 ## 2. 后续追加模板
 
 ```markdown

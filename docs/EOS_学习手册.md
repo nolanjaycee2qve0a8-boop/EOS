@@ -1585,7 +1585,196 @@ capability subset，composition 就会隐式承担 selection，并可能遗漏�
 - 不生成 `DecisionIntent`；
 - 不调用 Constraint、Evaluation、Runtime、Execution 或 Device。
 
-## 5. 学习建议
+## 5. Phase 4：Objective & Capability Architecture
+
+Phase 4 解决的不是“电池现在充电还是放电”，而是更靠前的两个问题：
+
+1. EMS 当前关心什么目标？
+2. 系统拥有哪些可描述、可匹配、可激活并能与目标建立关系的能力？
+
+如果不先回答这两个问题，策略通常会把业务目标、设备能力、算法选择和执行状态塞进同一个
+对象。短期看调用简单，长期却很难解释某个决策到底来自目标、能力、约束还是设备状态。
+
+Phase 4 用一组不可变边界把这段语义拆开：
+
+```text
+Objective Layer
+        |
+        v
+Objective-Capability Mapping
+        |
+        v
+Capability Discovery
+        |
+        v
+Capability Matching
+        |
+        v
+Capability Activation
+        |
+        v
+Objective Capability Composition
+        |
+        v
+Future Decision Layer
+```
+
+这里的箭头表示语义演进顺序，不表示 Phase 4 已经建立自动运行流水线。所有边界都停留在
+descriptor、relationship 和 status 层。
+
+### 5.1 为什么 EMS 需要 Objective 层
+
+EMS 会面对多种业务关注点，例如降低购电成本、提高光伏自用率、限制需量或保持备用容量。
+这些关注点首先是“系统为什么要决策”，并不是“电池应该输出多少 kW”。
+
+`ObjectiveDescriptor` 只保存目标名称和描述，使目标可以被：
+
+- 明确命名，而不是隐藏在策略类名中；
+- 作为 immutable evidence 被其他边界引用；
+- 与 Capability descriptor 建立关系；
+- 在不触碰 Kernel、Runtime 或 Device 的情况下演进。
+
+如果没有 Objective 层，业务目标往往只能从策略分支、配置键或设备命令反推。这样既不利于
+审查，也不利于未来解释“为什么这次决策使用了某种能力”。
+
+### 5.2 Objective 与 Strategy 的区别
+
+| 概念 | 回答的问题 | 典型输入 | 典型输出 | 不负责 |
+| --- | --- | --- | --- | --- |
+| Objective | EMS 关心什么 | 描述事实 | `ObjectiveDescriptor` | 计算电池动作 |
+| Strategy/Policy | 根据事实希望系统做什么 | `DecisionContext` | `DecisionIntent` | 设备执行与物理约束 |
+
+“降低成本”是 Objective；“低价时产生充电意图”是 Strategy。把两者合并会让目标描述携带算法，
+也会让算法成为目标的唯一实现。EOS 将二者分离，使同一个 Objective 将来可以由不同
+Capability 支撑，而同一个 Capability 也可以服务多个 Objective。
+
+### 5.3 为什么 Capability 要独立建模
+
+Capability 表达“系统具备哪一种业务能力”，而不是某个 Python 对象正在运行。独立建模有
+三个工程收益：
+
+- Objective 可以依赖稳定的 Capability contract，而不是具体实现；
+- Discovery、Matching、Activation 可以分别留下证据；
+- Capability implementation 可以变化，而 Objective 和 Kernel contract 不必变化。
+
+Phase 4 不创建或执行 Capability instance。它只处理 `CapabilityDescriptor`，从而避免把设备
+连接、运行时生命周期或策略状态带入 Objective 架构。
+
+### 5.4 CapabilityDescriptor 的作用
+
+`CapabilityDescriptor` 是能力的稳定描述身份，字段只有非空 `name` 与 `description`。它不是：
+
+- Capability implementation；
+- 可调用函数或 factory；
+- Device/PCS/BMS 句柄；
+- 优先级、评分或选择结果；
+- `DecisionIntent`。
+
+Descriptor 的价值在于让边界之间传递同一个对象引用。Mapping、Discovery、Matching、
+Activation 和 Composition 都能通过 `is` 判断自己观察的是不是同一个能力描述，而不是一个
+值相等但来源不明的重建对象。
+
+### 5.5 Discovery、Matching 与 Activation 的区别
+
+| 阶段 | 核心问题 | 输入 | 输出 | 非职责 |
+| --- | --- | --- | --- | --- |
+| Discovery | 当前报告有哪些能力描述可用？ | provider boundary | `AvailableCapabilityCollection` | 匹配和选择 |
+| Matching | required 与 available 之间有哪些关系，哪些 required 缺失？ | required + available | `CapabilityMatchCollection` | 排名和激活 |
+| Activation | 已匹配能力处于 active 还是 inactive？ | matching result | `ActiveCapabilityCollection` | 激活算法和执行 |
+
+三者不能合并，因为它们表达不同时间点和不同证据：
+
+- Discovery 只观察 availability；
+- Matching 只表达 required-to-available relationship；
+- Activation 只表达 matched descriptor status。
+
+把三者合并会让“没有发现”“没有匹配”“没有激活”变成同一种空值，系统将失去可解释性。
+
+### 5.6 Available ≠ Matched ≠ Active
+
+一个 Capability 可以 available，但没有任何当前 Objective 要求它，因此未 matched；也可以
+已经 matched，但当前状态为 inactive。反过来说，active descriptor 必须来自已匹配结果，不能
+凭空重建。
+
+```text
+Available
+   |  只说明被报告可用
+   v
+Matched
+   |  说明满足了某个 required descriptor relationship
+   v
+Active
+      说明已匹配 descriptor 的当前激活状态
+```
+
+这三个集合不是同义词，也不能用一个布尔字段替代。分别建模后，审查者可以准确判断缺口发生
+在哪一层。
+
+### 5.7 Identity Preservation 为什么重要
+
+EOS 使用 immutable object identity 建立证据链。以 Capability 为例：
+
+```python
+match.available is available_collection.capabilities[index]
+active_capability is match.available
+composition.active_capabilities is original_active_collection
+```
+
+如果边界复制或序列化后重建 descriptor，即使字段值相等，也无法证明它来自原始 Discovery 或
+Matching 结果。Identity preservation 因此不是性能优化，而是 lineage contract：它让后续层
+可以证明自己引用的是哪个已完成事实。
+
+### 5.8 Immutable Contract 为什么重要
+
+Phase 4 的 collection 全部使用 tuple，数据模型使用 frozen/slotted dataclass。这样做保证：
+
+- Mapping 关系不会在 Matching 后被悄悄修改；
+- Matching 结果不会在 Activation 后改变；
+- Activation 状态不会在 Composition 中被追加或删除；
+- 同一个对象引用在审查、测试和未来 replay 中具有稳定含义；
+- 边界无需拥有 cache、history 或 runtime state。
+
+`frozen=True` 本身并不足够；如果字段中放入 list 或 dict，内部仍可变化。因此 EOS 同时要求
+tuple-only collection，并显式拒绝 mutable container。
+
+### 5.9 TASK-057 missing_required 契约修复案例
+
+TASK-057 的第一版 `CapabilityMatchCollection` 只有 `matches`。测试可以验证已有 match 的类型、
+identity 和 immutability，但无法表达 required capability 没有匹配结果。
+
+这会产生一个架构歧义：某个 required descriptor 不在 `matches` 中，究竟表示“明确缺失”，还是
+“调用方忘记处理”？两种状态在数据上完全相同。
+
+正式审查因此判定 BLOCK MERGE。修复增加：
+
+```python
+missing_required: tuple[CapabilityDescriptor, ...]
+```
+
+并建立 complete coverage contract：每个 required descriptor 必须且只能属于 `matches` 或
+`missing_required`。遗漏和跨类别重叠都会被拒绝，所有引用继续保持 exact identity。
+
+这个案例说明：
+
+> 测试通过只能证明已写出的行为符合测试，不能证明架构契约已经覆盖所有必要状态。
+
+架构审查必须继续追问“哪些业务事实目前无法表达”。只有可表达状态完整，immutable model 才能
+成为可靠边界。
+
+### 5.10 Phase 4 的边界
+
+Phase 4 已完成 Objective description、Objective activation、Objective-Capability mapping、
+Capability discovery、matching、activation 和 composition，但明确没有实现：
+
+- `DecisionIntent` generation；
+- optimization、ranking 或 conflict resolution；
+- Runtime orchestration；
+- Device、CAN、Modbus、PCS 或 BMS integration。
+
+因此 Phase 4 的最终产物是“可审查的 Objective 与 Capability 证据结构”，不是完整 EMS
+执行链。
+
+## 6. 学习建议
 
 建议按以下顺序理解 EOS：
 
@@ -1603,7 +1792,7 @@ capability subset，composition 就会隐式承担 selection，并可能遗漏�
 - 哪些安全约束不属于策略？
 - 谁最终负责设备执行和失败处理？
 
-## 6. 文档维护规则
+## 7. 文档维护规则
 
 以后每完成一个 TASK：
 
