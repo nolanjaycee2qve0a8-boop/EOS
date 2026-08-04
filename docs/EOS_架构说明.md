@@ -195,6 +195,31 @@ Phase 4 不包含：
 Future Decision Layer 只是后续演进位置，不属于 Phase 4 已实现能力。任何连接都必须通过新的
 独立 TASK 和架构审查，不能修改已冻结的 Objective/Capability contracts。
 
+### 2.3 Phase 5 Decision Formation（TASK-061 started）
+
+TASK-061 建立独立的 `decision_formation.DecisionIntent` immutable artifact，使用显式
+`charge`、`discharge`、`idle` action 表达决策语义。该 action 不定义设备功率正负方向、功率
+大小、物理可行性、优化结果或执行状态。
+
+```text
+Future Decision Formation
+        |
+        v
+decision_formation.DecisionIntent(action)
+        |
+        v
+Future Formation / Resolution / Constraint Boundaries
+```
+
+`DecisionIntent` 不等于 `Command`。TASK-061 不形成实际决策、不生成命令、不调用 Capability
+implementation，也不依赖 Objective、Constraint、Optimization、Runtime、Execution、Device、
+PCS 或 BMS。
+
+现有 `kernel.decision.DecisionIntent(battery_power_intent_kw)` 保持不变。新旧合同位于显式不同
+package，没有 inheritance、adapter、alias、automatic conversion 或 migration。Phase 5 后续顺序
+规划为 TASK-062 Formation Boundary、TASK-063 Resolution 和 TASK-064 Constraint Evaluation；
+这些后续边界尚未实现。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -550,7 +575,18 @@ TASK-050 的 `DeterministicIntentResolutionParameters` 是 frozen/slotted 配置
 或 type，不包含 TOU/Self Consumption special case，不比较 intent value，也不执行
 Constraint、Evaluation、Runtime 或 Device。
 
-### 5.5 `kernel/runtime`
+### 5.5 `decision_formation`
+
+Phase 5 决策形成语义合同包。TASK-061 当前只包含：
+
+- frozen/slotted `DecisionIntent`；
+- exact `charge`、`discharge`、`idle` action validation；
+- 与 Command、设备方向和既有 numeric Intent 的显式分离。
+
+该 package 只依赖 Python standard library，不依赖 Kernel、Objective、Capability、Constraint、
+Optimization、Runtime、Execution 或 Device。
+
+### 5.6 `kernel/runtime`
 
 **当前职责**
 
@@ -571,7 +607,7 @@ audit 和 explanation 等生命周期边界。
 - 隐式缓存或全局运行状态；
 - 在观察对象构造时推进系统。
 
-### 5.6 `kernel/execution`
+### 5.7 `kernel/execution`
 
 **当前职责**
 

@@ -2331,6 +2331,51 @@ Objective 与 exact `ActiveCapabilityCollection`；abstract composition boundary
 **架构收益：** Composition completeness 由保留整个 active collection 保证；重复 capability
 identity 被拒绝，selection、DecisionIntent、Runtime 与 Device 继续留在边界之外。
 
+## TASK-061 DecisionIntent Contract
+
+**目标：** 建立 Phase 5 Decision Formation 的最小 immutable 语义意图合同。
+
+**实现内容：**
+
+- 新增独立 top-level `decision_formation` package；
+- 新增 frozen/slotted `DecisionIntent`；
+- 定义 exact `charge`、`discharge`、`idle` action；
+- 拒绝非字符串、未知值、大小写别名与空白变体；
+- 新增 public import、immutability、invalid input、dependency 和 legacy isolation tests；
+- 将新 package 加入 distribution 与 coverage configuration。
+
+**架构意义：** Phase 5 获得不依赖设备功率正负方向的语义 action vocabulary，并在 Formation、
+Resolution 和 Constraint 之前冻结稳定输入类型。
+
+**核心契约：**
+
+```text
+decision_formation.DecisionIntent
+└── action: charge | discharge | idle
+```
+
+Intent 只表达“希望做什么”，不是 `Command`，也不包含功率大小、设备协议、执行状态、Constraint
+或 Optimization 结果。
+
+**Legacy isolation：** 现有 `kernel.decision.DecisionIntent(battery_power_intent_kw)` 与全部
+Capability、Constraint、Evaluation consumers 保持不变。Phase 5 合同没有 inheritance、adapter、
+alias、conversion 或 migration。
+
+**Identity：** TASK-061 artifact 没有引用字段，因此不声明 object-reference lineage。未来 wrapper
+必须在自己的直接输入/输出合同中保持 exact Intent identity。
+
+**新增文件：**
+
+- `decision_formation/__init__.py`；
+- `decision_formation/intent.py`；
+- `tests/unit/decision_formation/`；
+- `tasks/TASK-061.md`；
+- `architecture/adr/ADR-059-decision-intent-contract.md`。
+
+**关键设计决策：** Objective 不生成 Intent；`CapabilityDescriptor` 不等于 implementation；
+Optimization 不等于 Decision；`DecisionIntent` 不等于 Command。TASK-061 不生成实际决策、不访问
+设备状态，也不连接 Runtime、Device、PCS 或 BMS。
+
 ## 2. 后续追加模板
 
 ```markdown
