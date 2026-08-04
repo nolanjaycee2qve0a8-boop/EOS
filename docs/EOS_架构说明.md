@@ -86,7 +86,7 @@ TASK-052 对 Phase 3 执行冻结审查：Capability、Composition、Resolution�
 Evidence、Dependency Direction 与 Legacy Isolation 全部通过。后续修改这些稳定合同
 必须通过独立 TASK 和架构审查，不能在新 Capability 中隐式迁移。
 
-#### Phase 4：TASK-053+ — Objective Description Layer
+#### Phase 4：TASK-053～TASK-059 — Objective & Capability Architecture（Completed）
 
 TASK-053 只建立 EMS Objective 的描述边界。`EMSObjectiveBoundary` 通过
 `describe() -> ObjectiveCollection` 返回 immutable objective descriptions；
@@ -126,6 +126,74 @@ TASK-059 增加 immutable `ObjectiveCapabilityActivationComposition` 与 abstrac
 exact `ActiveCapabilityCollection`。Composition 不接收第二套 capability subset，因而完整保留
 全部 active descriptors；重复 descriptor identity 被拒绝。该边界不进行 selection、ranking、
 priority、scoring、optimization、conflict resolution 或 intent generation。
+
+### 2.2 Phase 4 Objective & Capability Architecture
+
+Phase 4 的稳定架构链为：
+
+```text
+Objective Layer
+        |
+        v
+Objective-Capability Mapping
+        |
+        v
+Capability Discovery
+        |
+        v
+Capability Matching
+        |
+        v
+Capability Activation
+        |
+        v
+Objective Capability Composition
+        |
+        v
+Future Decision Layer
+```
+
+该图描述 dependency 与 evidence progression，不表示一个自动执行的 runtime pipeline。
+Phase 4 没有调用 Policy、Constraint、Runtime 或 Device。
+
+每个 boundary 只保证其直接输入与输出之间的 identity preservation。Phase 4 没有建立
+Mapping → Required Capability → Discovery → Matching 的自动连接链，也不存在跨这些边界的
+自动 identity contract；各阶段所需对象均由 caller 显式提供。
+
+| Boundary | 输入 | 输出 | 职责 | 非职责 |
+| --- | --- | --- | --- | --- |
+| `EMSObjectiveBoundary` | 无运行时输入 | `ObjectiveCollection` | 描述 EMS 关注事项 | 策略、意图、优化 |
+| `ObjectiveActivationBoundary` | `ObjectiveCollection` | `ActiveObjectiveCollection` | 表达 exact objectives 的 active 集合 | priority、conflict resolution |
+| `ObjectiveCapabilityMappingBoundary` | Objective collection | `ObjectiveCapabilityMappingCollection` | 表达 Objective 可由哪些 Capability descriptors 支撑 | Capability selection/execution |
+| `CapabilityDiscoveryBoundary` | 无调用参数 | `AvailableCapabilityCollection` | 作为 provider contract 报告 available descriptors | 设备扫描、matching、activation |
+| `CapabilityMatchingBoundary` | required + available collections | `CapabilityMatchCollection` | 表达 matched relationships 与 explicit missing requirements | ranking、fallback、selection |
+| `CapabilityActivationBoundary` | `CapabilityMatchCollection` | `ActiveCapabilityCollection` | 表达 matched descriptors 的 active/inactive 状态 | activation algorithm、execution |
+| `ObjectiveCapabilityActivationCompositionBoundary` | Objective + active collection | `ObjectiveCapabilityActivationComposition` | 保存完整 Objective-to-active-Capability 关系 | subset selection、DecisionIntent |
+
+`CapabilityDiscoveryBoundary.discover()` 不接收参数；该 abstract boundary 本身定义 provider
+contract，而不是把 provider 作为输入参数。
+
+#### Phase 4 完整性规则
+
+- Objective、Capability 和 relationship artifacts 均为 frozen/slotted immutable contracts；
+- 所有 collection 使用 tuple，不接受 list、dict 或 set；
+- descriptor 与 source collection 通过 `is` 保持 lineage；
+- `CapabilityMatchCollection` 对每个 required descriptor 提供 matched/missing 完整互斥覆盖；
+- `ActiveCapabilityCollection` 对每个 matched descriptor 提供 active/inactive 完整互斥覆盖；
+- Composition 保存整个 exact active collection，不重建 capability subset；
+- Capability package 不反向依赖 Objective package。
+
+#### Phase 4 明确非职责
+
+Phase 4 不包含：
+
+- `DecisionIntent` 或 command generation；
+- optimization、ranking、scoring、priority 或 conflict resolution；
+- Runtime、scheduler、cache、history 或 persistence；
+- Device integration、CAN、Modbus、PCS 或 BMS control。
+
+Future Decision Layer 只是后续演进位置，不属于 Phase 4 已实现能力。任何连接都必须通过新的
+独立 TASK 和架构审查，不能修改已冻结的 Objective/Capability contracts。
 
 ## 3. 核心架构原则
 
