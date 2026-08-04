@@ -2044,11 +2044,13 @@ Evaluation、Runtime、Execution 或 legacy。
 
 - 新增 frozen/slotted `RequiredCapabilityCollection`；
 - 新增 frozen/slotted `CapabilityMatch`；
-- 新增 frozen/slotted `CapabilityMatchCollection`；
+- 新增 frozen/slotted `CapabilityMatchCollection`，包含 immutable
+  `missing_required: tuple[CapabilityDescriptor, ...]`；
 - 新增 abstract、stateless `CapabilityMatchingBoundary`；
 - 更新 Capability public API；
-- 增加 source/descriptor/match identity、immutability、empty collection、dependency
-  isolation 与无 concrete production implementation 测试。
+- 增加 all matched、partially matched、fully missing、source/descriptor/match/missing
+  identity、互斥完备性、immutability、empty collection、dependency isolation 与无
+  concrete production implementation 测试。
 
 **架构意义：**
 
@@ -2072,6 +2074,8 @@ Matching output 停留在 descriptor relationship 层，不包含 Capability imp
 - required/available source collections 保持 exact identity；
 - match 保存 exact required 与 available descriptors；
 - matches tuple、caller order 与 match identities 原样保持；
+- missing-required tuple 与 descriptor identities 原样保持；
+- 每个 required descriptor 必须且只能属于 matched 或 missing 类别；
 - `capability.matching` 只依赖 descriptor 与 discovery contracts；
 - 不依赖 Objective、Kernel、Constraint、Evaluation、Runtime、Execution 或 Device。
 
@@ -2091,7 +2095,7 @@ Runtime、Execution 或 legacy。
 
 **验证结果：**
 
-- pytest：995 passed；
+- pytest：999 passed；
 - Ruff check：passed；
 - Ruff format：passed；
 - mypy：passed；

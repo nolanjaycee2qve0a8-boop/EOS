@@ -51,12 +51,20 @@ An immutable artifact containing exactly:
 
 - `required_collection: RequiredCapabilityCollection`;
 - `available_collection: AvailableCapabilityCollection`;
-- `matches: tuple[CapabilityMatch, ...]`.
+- `matches: tuple[CapabilityMatch, ...]`;
+- `missing_required: tuple[CapabilityDescriptor, ...]`.
 
 Every match must reference exact descriptors from its respective source
-collection. Equal-but-reconstructed descriptors are rejected. The exact source
-collections, match tuple, order, match objects, and descriptor identities are
-preserved. Empty matches are valid.
+collection. Every missing descriptor must preserve the exact identity of a
+descriptor in the required collection. Equal-but-reconstructed descriptors are
+rejected. The exact source collections, tuples, order, match objects, and
+descriptor identities are preserved.
+
+Every required descriptor must belong to exactly one result category: it is
+either referenced by `matches` or present in `missing_required`. Omission and
+overlap are rejected. Empty matches remain valid when all required descriptors
+are represented by `missing_required`; both result tuples are empty when there
+are no requirements.
 
 ### CapabilityMatchingBoundary
 
@@ -74,9 +82,11 @@ No concrete production matching implementation is introduced.
 
 ## Matching meaning
 
-The output records caller/provider-produced facts of the form:
+The output records caller/provider-produced facts of the forms:
 
 > This exact required descriptor is related to this exact available descriptor.
+
+> This exact required descriptor is explicitly missing.
 
 The boundary does not define comparison rules, name equality, compatibility,
 selection, conflict handling, or behavior.
@@ -116,7 +126,7 @@ from capability import (
 ## Validation
 
 ```text
-pytest: 995 passed
+pytest: 999 passed
 ruff check .: passed
 ruff format --check .: passed
 mypy .: passed

@@ -111,8 +111,10 @@ Discovery 不连接设备、不读取 CAN/Modbus、不创建 Capability instance
 selection、activation、optimization 或 intent generation。
 TASK-057 增加 immutable `RequiredCapabilityCollection`、`CapabilityMatch`、
 `CapabilityMatchCollection` 与 abstract `CapabilityMatchingBoundary`，只保存 exact
-required/available descriptor 关系事实。Matching 不定义名称比较规则，也不进行 ranking、
-scoring、priority、selection、optimization、fallback、activation 或 intent generation。
+required/available descriptor 关系事实，并通过 immutable `missing_required` tuple 显式记录
+未匹配 requirements。每个 required descriptor 必须且只能属于 matched 或 missing 类别，
+身份以 `is` 保持。Matching 不定义名称比较规则，也不进行 ranking、scoring、priority、
+selection、optimization、fallback、activation 或 intent generation。
 
 ## 3. 核心架构原则
 

@@ -47,8 +47,12 @@ available descriptor reference. It does not store a score, rank, priority,
 weight, reason, fallback, selected flag, activation state, executable object,
 or intent.
 
-`CapabilityMatchCollection` validates that each relationship points into the
-exact supplied source collections using identity comparisons.
+`CapabilityMatchCollection` contains both matched relationships and an explicit
+`missing_required: tuple[CapabilityDescriptor, ...]`. It validates that each
+relationship and missing descriptor points into the exact supplied source
+collections using identity comparisons. Every required descriptor must belong
+to exactly one of the matched or missing categories; omission and overlap are
+invalid.
 
 ## Identity and immutability decision
 
@@ -57,7 +61,9 @@ exact supplied source collections using identity comparisons.
 - Required and available source collection identities are preserved.
 - Required and available descriptor identities are preserved.
 - Match tuple, order, and match object identities are preserved.
-- Empty required, available, and match collections are valid.
+- The missing-required tuple, order, and descriptor identities are preserved.
+- Empty required, available, match, and missing collections are valid when the
+  complete-result invariant is satisfied.
 - Equal-but-reconstructed source descriptors are rejected.
 - No copying, reconstruction, sorting, deduplication, or normalization occurs.
 
@@ -90,6 +96,8 @@ TASK-057 establishes only the seam and immutable relationship artifacts.
 ## Consequences
 
 - Required-to-available relationships gain a stable identity-based contract.
+- Missing requirements are represented explicitly rather than inferred from an
+  incomplete match tuple.
 - Future matching implementations can evolve behind an abstract boundary.
 - Selection and activation remain separate future responsibilities.
 - Capability implementations, devices, and runtime state remain isolated.

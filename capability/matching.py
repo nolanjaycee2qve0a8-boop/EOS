@@ -44,6 +44,7 @@ class CapabilityMatchCollection:
     required_collection: RequiredCapabilityCollection
     available_collection: AvailableCapabilityCollection
     matches: tuple[CapabilityMatch, ...]
+    missing_required: tuple[CapabilityDescriptor, ...]
 
     def __post_init__(self) -> None:
         if not isinstance(self.required_collection, RequiredCapabilityCollection):
@@ -56,6 +57,8 @@ class CapabilityMatchCollection:
             )
         if not isinstance(self.matches, tuple):
             raise TypeError("matches must be a tuple")
+        if not isinstance(self.missing_required, tuple):
+            raise TypeError("missing_required must be a tuple")
         for capability_match in self.matches:
             if not isinstance(capability_match, CapabilityMatch):
                 raise TypeError("matches must contain CapabilityMatch instances")
@@ -72,6 +75,29 @@ class CapabilityMatchCollection:
             ):
                 raise ValueError(
                     "match available descriptor must preserve available identity"
+                )
+        for missing in self.missing_required:
+            if not isinstance(missing, CapabilityDescriptor):
+                raise TypeError(
+                    "missing_required must contain CapabilityDescriptor instances"
+                )
+            if not any(
+                missing is required
+                for required in self.required_collection.capabilities
+            ):
+                raise ValueError(
+                    "missing_required descriptor must preserve required identity"
+                )
+        for required in self.required_collection.capabilities:
+            is_matched = any(
+                capability_match.required is required
+                for capability_match in self.matches
+            )
+            is_missing = any(missing is required for missing in self.missing_required)
+            if is_matched == is_missing:
+                raise ValueError(
+                    "each required descriptor must belong to exactly one of "
+                    "matches or missing_required"
                 )
 
 

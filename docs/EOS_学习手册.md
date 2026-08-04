@@ -1487,10 +1487,13 @@ selected flag 或 fallback，它就已经越过关系证据边界，开始承担
 
 - Required 与 Available collections 都只保存 descriptor tuples；
 - `CapabilityMatch` 保存 exact required/available descriptor references；
-- `CapabilityMatchCollection` 保存 exact source collections 与 exact match tuple；
+- `CapabilityMatchCollection` 保存 exact source collections、exact match tuple 与
+  exact `missing_required` tuple；
 - 每个 match 必须以 `is` 关系来自对应 source collection；
+- 每个 missing descriptor 必须以 `is` 关系来自 required source collection；
+- 每个 required descriptor 必须且只能属于 matched 或 `missing_required`，不允许遗漏或重叠；
 - equal-but-reconstructed descriptor 被拒绝；
-- empty required、available 与 matches 均合法。
+- empty required、available、matches 与 missing tuples 在满足完备性契约时合法。
 
 **Matching 不是什么**
 

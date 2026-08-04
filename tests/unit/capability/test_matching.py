@@ -82,7 +82,7 @@ def test_match_preserves_required_and_available_descriptor_identities() -> None:
     assert capability_match.available is available_descriptor
 
 
-def test_match_collection_preserves_all_source_and_match_identities() -> None:
+def test_all_matched_preserves_all_source_and_match_identities() -> None:
     required_first, required_second, available_first, available_second = (
         make_descriptors()
     )
@@ -92,13 +92,17 @@ def test_match_collection_preserves_all_source_and_match_identities() -> None:
     second_match = CapabilityMatch(required_second, available_first)
     matches = (first_match, second_match)
 
-    collection = CapabilityMatchCollection(required, available, matches)
+    missing_required: tuple[CapabilityDescriptor, ...] = ()
+    collection = CapabilityMatchCollection(
+        required, available, matches, missing_required
+    )
 
     assert collection.required_collection is required
     assert collection.available_collection is available
     assert collection.matches is matches
     assert collection.matches[0] is first_match
     assert collection.matches[1] is second_match
+    assert collection.missing_required is missing_required
 
 
 def test_empty_match_collection_is_valid() -> None:
@@ -106,9 +110,47 @@ def test_empty_match_collection_is_valid() -> None:
     available = AvailableCapabilityCollection(())
     matches: tuple[CapabilityMatch, ...] = ()
 
-    collection = CapabilityMatchCollection(required, available, matches)
+    missing_required: tuple[CapabilityDescriptor, ...] = ()
+    collection = CapabilityMatchCollection(
+        required, available, matches, missing_required
+    )
 
     assert collection.matches is matches
+    assert collection.missing_required is missing_required
+
+
+def test_partially_matched_explicitly_preserves_missing_identity() -> None:
+    required_first, required_second, available_first, _ = make_descriptors()
+    required = RequiredCapabilityCollection((required_first, required_second))
+    available = AvailableCapabilityCollection((available_first,))
+    matches = (CapabilityMatch(required_first, available_first),)
+    missing_required = (required_second,)
+
+    collection = CapabilityMatchCollection(
+        required, available, matches, missing_required
+    )
+
+    assert collection.matches is matches
+    assert collection.matches[0].required is required_first
+    assert collection.missing_required is missing_required
+    assert collection.missing_required[0] is required_second
+
+
+def test_fully_missing_explicitly_preserves_all_required_identities() -> None:
+    required_first, required_second, _, _ = make_descriptors()
+    required = RequiredCapabilityCollection((required_first, required_second))
+    available = AvailableCapabilityCollection(())
+    matches: tuple[CapabilityMatch, ...] = ()
+    missing_required = (required_first, required_second)
+
+    collection = CapabilityMatchCollection(
+        required, available, matches, missing_required
+    )
+
+    assert collection.matches is matches
+    assert collection.missing_required is missing_required
+    assert collection.missing_required[0] is required_first
+    assert collection.missing_required[1] is required_second
 
 
 def test_models_reject_mutable_or_wrong_typed_values() -> None:
@@ -126,13 +168,23 @@ def test_models_reject_mutable_or_wrong_typed_values() -> None:
     with pytest.raises(TypeError, match="available"):
         CapabilityMatch(required_descriptor, cast(Any, None))
     with pytest.raises(TypeError, match="required_collection"):
-        CapabilityMatchCollection(cast(Any, None), available, ())
+        CapabilityMatchCollection(cast(Any, None), available, (), ())
     with pytest.raises(TypeError, match="available_collection"):
-        CapabilityMatchCollection(required, cast(Any, None), ())
+        CapabilityMatchCollection(required, cast(Any, None), (), ())
     with pytest.raises(TypeError, match="matches"):
-        CapabilityMatchCollection(required, available, cast(Any, [capability_match]))
+        CapabilityMatchCollection(
+            required, available, cast(Any, [capability_match]), ()
+        )
     with pytest.raises(TypeError, match="CapabilityMatch"):
-        CapabilityMatchCollection(required, available, cast(Any, (object(),)))
+        CapabilityMatchCollection(required, available, cast(Any, (object(),)), ())
+    with pytest.raises(TypeError, match="missing_required"):
+        CapabilityMatchCollection(
+            required, available, (capability_match,), cast(Any, [])
+        )
+    with pytest.raises(TypeError, match="CapabilityDescriptor"):
+        CapabilityMatchCollection(
+            required, available, (capability_match,), cast(Any, (object(),))
+        )
 
 
 def test_collection_rejects_descriptors_outside_exact_sources() -> None:
@@ -153,13 +205,43 @@ def test_collection_rejects_descriptors_outside_exact_sources() -> None:
             required,
             available,
             (CapabilityMatch(reconstructed_required, available_descriptor),),
+            (),
         )
     with pytest.raises(ValueError, match="available identity"):
         CapabilityMatchCollection(
             required,
             available,
             (CapabilityMatch(required_descriptor, reconstructed_available),),
+            (),
         )
+
+    with pytest.raises(ValueError, match="missing_required"):
+        CapabilityMatchCollection(
+            required,
+            available,
+            (CapabilityMatch(required_descriptor, available_descriptor),),
+            (reconstructed_required,),
+        )
+
+
+def test_required_descriptor_cannot_be_omitted() -> None:
+    required_first, required_second, available_first, _ = make_descriptors()
+    required = RequiredCapabilityCollection((required_first, required_second))
+    available = AvailableCapabilityCollection((available_first,))
+    matches = (CapabilityMatch(required_first, available_first),)
+
+    with pytest.raises(ValueError, match="exactly one"):
+        CapabilityMatchCollection(required, available, matches, ())
+
+
+def test_required_descriptor_cannot_be_both_matched_and_missing() -> None:
+    required_descriptor, _, available_descriptor, _ = make_descriptors()
+    required = RequiredCapabilityCollection((required_descriptor,))
+    available = AvailableCapabilityCollection((available_descriptor,))
+    matches = (CapabilityMatch(required_descriptor, available_descriptor),)
+
+    with pytest.raises(ValueError, match="exactly one"):
+        CapabilityMatchCollection(required, available, matches, (required_descriptor,))
 
 
 def test_models_are_frozen_slotted_and_tuple_only() -> None:
@@ -167,7 +249,7 @@ def test_models_are_frozen_slotted_and_tuple_only() -> None:
     required = RequiredCapabilityCollection((required_descriptor,))
     available = AvailableCapabilityCollection((available_descriptor,))
     capability_match = CapabilityMatch(required_descriptor, available_descriptor)
-    collection = CapabilityMatchCollection(required, available, (capability_match,))
+    collection = CapabilityMatchCollection(required, available, (capability_match,), ())
 
     assert [field.name for field in fields(RequiredCapabilityCollection)] == [
         "capabilities"
@@ -180,6 +262,7 @@ def test_models_are_frozen_slotted_and_tuple_only() -> None:
         "required_collection",
         "available_collection",
         "matches",
+        "missing_required",
     ]
     assert RequiredCapabilityCollection.__slots__ == ("capabilities",)
     assert CapabilityMatch.__slots__ == ("required", "available")
@@ -187,11 +270,13 @@ def test_models_are_frozen_slotted_and_tuple_only() -> None:
         "required_collection",
         "available_collection",
         "matches",
+        "missing_required",
     )
     for model in (required, capability_match, collection):
         assert not hasattr(model, "__dict__")
     assert isinstance(required.capabilities, tuple)
     assert isinstance(collection.matches, tuple)
+    assert isinstance(collection.missing_required, tuple)
     with pytest.raises(FrozenInstanceError):
         cast(Any, collection).matches = ()
 
