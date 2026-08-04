@@ -1504,6 +1504,47 @@ selected flag 或 fallback，它就已经越过关系证据边界，开始承担
 - 不连接设备，不读取 CAN/Modbus；
 - 不生成或解析 `DecisionIntent`。
 
+### 4.30 Capability Activation Boundary
+
+TASK-058 在已完成的 matching facts 之上建立 descriptor-only activation 状态边界：
+
+```text
+CapabilityMatchCollection
+        |
+        v
+CapabilityActivationBoundary
+        |
+        v
+ActiveCapabilityCollection
+        |-- active_capabilities
+        `-- inactive_capabilities
+```
+
+**为什么 Activation 与 Matching 分离**
+
+Matching 回答“required descriptor 与 available descriptor 是否存在关系”；Activation 回答
+“已匹配的 available descriptor 当前被表达为 active 还是 inactive”。如果把 active 状态写入
+`CapabilityMatch`，关系事实就会被后续生命周期状态污染。
+
+**不可变状态与 identity**
+
+- `ActiveCapabilityCollection` 是 frozen/slotted；
+- source 是 exact `CapabilityMatchCollection` reference；
+- active 与 inactive 都是 caller-supplied descriptor tuples；
+- tuple、顺序和 descriptor identity 原样保持；
+- 每个 descriptor 必须以 `is` 来自 source matches 的 available descriptor；
+- 每个 matched descriptor 必须且只能属于 active 或 inactive，不能遗漏或重叠；
+- 不 copy、rebuild、sort、deduplicate 或 normalize。
+
+**Activation 不是什么**
+
+- 不实现 priority、ranking、scoring、weighting 或 selection；
+- 不实现 optimization、conflict resolution 或 fallback；
+- 不创建或执行 Capability instance；
+- 不生成或解析 `DecisionIntent`；
+- 不调用 Constraint、Runtime、Execution 或 Device；
+- 不连接 CAN、Modbus、PCS 或 BMS。
+
 ## 5. 学习建议
 
 建议按以下顺序理解 EOS：

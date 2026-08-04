@@ -5,12 +5,12 @@
 本文是 EOS Reference Implementation 的软件架构设计说明书。它记录稳定的架构原则、
 包职责、依赖方向和演进约束，不替代 TASK 文档或 ADR。
 
-本文描述截至 TASK-057 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
+本文描述截至 TASK-058 的架构。TASK-001～037 建立 Decision Kernel，TASK-038～044
 建立 Physical Constraint 与 Decision Evaluation Framework，TASK-045～052 建立、
 验证并冻结 EMS Capability Layer；TASK-053～055 建立独立 Objective Description、
 Activation 与 Objective-Capability Mapping Boundary；TASK-056 建立 descriptor-only
 Capability Discovery Boundary；TASK-057 建立 Required-to-Available Capability Matching
-Boundary。
+Boundary；TASK-058 建立 matched Capability descriptor Activation Boundary。
 
 ## 2. 架构目标
 
@@ -115,6 +115,11 @@ required/available descriptor 关系事实，并通过 immutable `missing_requir
 未匹配 requirements。每个 required descriptor 必须且只能属于 matched 或 missing 类别，
 身份以 `is` 保持。Matching 不定义名称比较规则，也不进行 ranking、scoring、priority、
 selection、optimization、fallback、activation 或 intent generation。
+TASK-058 增加 immutable `ActiveCapabilityCollection` 与 abstract
+`CapabilityActivationBoundary`，以 exact `CapabilityMatchCollection` 为输入，显式保存
+matched available descriptors 的 active/inactive 状态。每个 matched descriptor 必须且只能
+属于一个状态类别。Activation 不实现 priority、ranking、scoring、selection、optimization、
+conflict resolution、fallback、Capability execution 或 `DecisionIntent` generation。
 
 ## 3. 核心架构原则
 
@@ -138,6 +143,7 @@ selection、optimization、fallback、activation 或 intent generation。
 - `ObjectiveCapabilityMappingBoundary`：Objective 与 Capability descriptors 如何表达关系？
 - `CapabilityDiscoveryBoundary`：哪些 Capability descriptors 被报告为 available？
 - `CapabilityMatchingBoundary`：Required 与 Available descriptors 的关系事实如何表达？
+- `CapabilityActivationBoundary`：已匹配 Capability descriptors 的 active/inactive 状态如何表达？
 
 边界稳定以后，具体策略、约束和设备适配器可以独立演进。
 

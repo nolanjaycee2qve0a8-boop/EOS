@@ -2101,6 +2101,69 @@ Runtime、Execution 或 legacy。
 - mypy：passed；
 - pre-commit：passed。
 
+## TASK-058 Capability Activation Boundary
+
+**目标：**
+
+在已完成的 Capability matching facts 之上建立 immutable activation seam，只表达 exact
+matched available descriptors 的 active/inactive 状态。
+
+**实现内容：**
+
+- 新增 frozen/slotted `ActiveCapabilityCollection`；
+- 新增 abstract、stateless `CapabilityActivationBoundary`；
+- active/inactive 使用 tuple-only descriptor references；
+- 每个 matched descriptor 必须且只能属于一个状态类别；
+- 更新 Capability public API；
+- 增加 exactly-once、identity、完整状态覆盖、immutability、dependency isolation 与无
+  concrete production implementation 测试。
+
+**架构意义：**
+
+```text
+CapabilityMatchCollection
+        |
+        v
+CapabilityActivationBoundary
+        |
+        v
+ActiveCapabilityCollection
+        |-- active_capabilities
+        `-- inactive_capabilities
+```
+
+Matching 继续只保存 relationship facts；Activation 独立保存后续 descriptor status，二者不
+混合，也不连接 executable Capability、Decision、Constraint、Runtime 或 Device。
+
+**Identity 与 dependency：**
+
+- source match collection 保持 exact identity；
+- active/inactive tuples、caller order 与 descriptor identities 原样保持；
+- equal-but-reconstructed 或 unrelated descriptor 被拒绝；
+- `capability.activation` 只依赖 descriptor 与 matching contracts；
+- 不依赖 Objective、Kernel、Constraint、Evaluation、Runtime、Execution 或 Device。
+
+**新增文件：**
+
+- `capability/activation.py`；
+- `tests/unit/capability/test_activation.py`；
+- `tasks/TASK-058.md`；
+- `architecture/adr/ADR-056-capability-activation-boundary.md`。
+
+**关键设计决策：**
+
+不增加 concrete activation algorithm、Capability instance、priority、ranking、scoring、
+selection、optimization、conflict resolution、fallback、`DecisionIntent` generation、
+Constraint、Device/CAN/Modbus dependency、Runtime 或 persistence。
+
+**验证结果：**
+
+- pytest：1012 passed；
+- Ruff check：passed；
+- Ruff format：passed；
+- mypy：passed；
+- pre-commit：passed。
+
 ## 2. 后续追加模板
 
 ```markdown
