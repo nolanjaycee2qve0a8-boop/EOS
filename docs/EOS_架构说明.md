@@ -248,6 +248,18 @@ aggregate contracts。
 `SimulationStepIdentity` 不读取 clock、不生成 UUID、不保存 Runtime state。其 duration 单位是 raw
 seconds，无隐式缩放；timezone-aware datetime 保持 caller exact identity。
 
+TASK-066 在该 core 之上新增 abstract PV component contract：
+
+```text
+SimulationStepIdentity + available_power_kw
+        -> PVSimulationInput
+        -> PVSimulationModelBoundary
+        -> PVSimulationResult(actual_power_kw)
+```
+
+该 boundary 不包含 concrete physics、MPPT、inverter、device parameters、Runtime 或 Command。
+Result 保持 exact Input identity，actual generation 仅受非负 finite kW 和显式 availability 上界约束。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -632,6 +644,10 @@ simulator.core -> simulator.validation -> Python standard library
 - Runtime、scheduler、thread 或自动 step progression；
 - Device、Command、Dispatch、PCS/BMS 或协议；
 - Optimization、forecast、persistence、cache 或 history。
+
+TASK-066 进一步提供 `PVSimulationInput`、`PVSimulationResult` 与 abstract
+`PVSimulationModelBoundary`。PV package 只依赖 simulation core/local validation，不访问 Runtime、
+Device、Command、weather、MPPT 或 inverter，也不提供 concrete model。
 
 ### 5.7 `kernel/runtime`
 

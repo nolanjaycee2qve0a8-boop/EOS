@@ -1883,6 +1883,34 @@ PV、Load、Tariff、Battery 和 Grid 模型都需要共享明确的 step durati
 后续顺序保持：component contracts 在 TASK-066～071 定义，aggregate contracts 只在 TASK-072
 建立。
 
+### 7.3 TASK-066 PV Model Contract
+
+TASK-066 把“PV 模拟输入是什么”和“某个模型如何计算”分开。Input 只保存 exact step identity 与
+caller 显式提供的 `available_power_kw`；Result 保存 exact Input 与 `actual_power_kw`。
+
+```text
+PVSimulationInput(step, available_power_kw)
+        |
+        v
+abstract PVSimulationModelBoundary
+        |
+        v
+PVSimulationResult(actual_power_kw)
+```
+
+两个功率字段都使用非负 finite raw kW。`actual_power_kw` 不能超过 availability，但 contract 不计算
+actual 值。它不读取 irradiance、天气、MPPT、逆变器或设备遥测。
+
+Identity 关系：
+
+```text
+input.step_identity is original_step
+result.simulation_input is original_input
+```
+
+这让未来不同 PV physics implementation 可以替换，同时 aggregate Simulator 仍能证明每个输出来自
+哪一个 exact step 输入。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

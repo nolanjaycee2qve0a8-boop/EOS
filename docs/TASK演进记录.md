@@ -2416,6 +2416,44 @@ Validation 不复制 datetime、不转换 timezone，也不生成 timestamp。
 Step Input/Result、Runtime、Scheduler、Device、Command、Optimization、cache 或 history。Component
 contracts 保留给 TASK-066～071，aggregate contracts 保留给 TASK-072。
 
+## TASK-066 PV Simulation Model Contract
+
+**背景：** Simulation core 已定义 step identity/time，但 aggregate contracts 之前需要先冻结独立 PV
+component 输入、输出和 model extension seam。
+
+**目标：** 只定义 PV simulation boundary contract，不实现 irradiance、MPPT、inverter 或其他 physics。
+
+**实现内容：**
+
+- 新增 frozen/slotted `PVSimulationInput`；
+- 新增 frozen/slotted `PVSimulationResult`；
+- 新增 abstract/stateless/empty-slotted `PVSimulationModelBoundary`；
+- 输入使用 caller-supplied non-negative finite `available_power_kw`；
+- 输出使用 non-negative finite `actual_power_kw`，且不超过 availability；
+- 保存 exact step/input identities；
+- 新增 focused validation、public API 和 unit tests。
+
+**Identity：**
+
+```text
+simulation_input.step_identity is original_step_identity
+result.simulation_input is original_simulation_input
+```
+
+**架构意义：** PV component output 具有稳定 provenance，未来具体 physics model 可以替换而不修改
+aggregate contracts。Availability 是显式 simulation fact，不是预测、MPPT 结果或设备读取。
+
+**新增文件：**
+
+- `simulator/pv.py`；
+- `tests/unit/simulator/test_pv.py`；
+- `tasks/TASK-066.md`；
+- `architecture/adr/ADR-064-pv-simulation-model-contract.md`。
+
+**关键设计决策：** 不增加 concrete PV model、irradiance conversion、temperature efficiency、MPPT、
+inverter、PCS、Device、Runtime、Command、aggregate State/Scenario/Step Result、Optimization、cache 或
+history。
+
 ## 2. 后续追加模板
 
 ```markdown

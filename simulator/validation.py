@@ -25,6 +25,18 @@ def require_positive_number(value: object, field_name: str) -> float:
     return normalized
 
 
+def require_non_negative_number(value: object, field_name: str) -> float:
+    """Require a finite, non-boolean number greater than or equal to zero."""
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError(f"{field_name} must be a number")
+    normalized = float(value)
+    if not isfinite(normalized):
+        raise ValueError(f"{field_name} must be finite")
+    if normalized < 0:
+        raise ValueError(f"{field_name} must be greater than or equal to 0")
+    return normalized
+
+
 def require_optional_timezone_aware_datetime(
     value: object,
     field_name: str,
