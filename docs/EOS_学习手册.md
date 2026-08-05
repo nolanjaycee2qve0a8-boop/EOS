@@ -1911,6 +1911,34 @@ result.simulation_input is original_input
 这让未来不同 PV physics implementation 可以替换，同时 aggregate Simulator 仍能证明每个输出来自
 哪一个 exact step 输入。
 
+### 7.4 TASK-067 Load Model Contract
+
+Load boundary 使用 caller 显式提供的 `demand_power_kw`，而不是在 contract 内预测负载或模拟用户
+行为。Result 的 `actual_power_kw` 表示该 step 的模拟消费 observation。
+
+```text
+LoadSimulationInput(step, demand_power_kw)
+        |
+        v
+abstract LoadSimulationModelBoundary
+        |
+        v
+LoadSimulationResult(actual_power_kw)
+```
+
+Demand 与 actual 都是非负 finite raw kW，actual 不得超过 explicit demand。这个上界是 artifact
+完整性规则，不是 load shedding、Demand Response 或用户行为算法。
+
+Identity 保持：
+
+```text
+input.step_identity is original_step
+result.simulation_input is original_input
+```
+
+因此未来预测、profile generation 或行为模型若需要加入，必须作为独立实现或输入来源，不得改变
+基础 Load boundary。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

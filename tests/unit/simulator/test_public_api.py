@@ -1,6 +1,9 @@
 """Tests for the Phase 6 simulation public API."""
 
 from simulator import (
+    LoadSimulationInput,
+    LoadSimulationModelBoundary,
+    LoadSimulationResult,
     PVSimulationInput,
     PVSimulationModelBoundary,
     PVSimulationResult,
@@ -14,6 +17,9 @@ def test_simulation_step_identity_public_import() -> None:
 
     assert step.sequence == 0
     assert public_names == [
+        "LoadSimulationInput",
+        "LoadSimulationModelBoundary",
+        "LoadSimulationResult",
         "PVSimulationInput",
         "PVSimulationModelBoundary",
         "PVSimulationResult",
@@ -31,3 +37,14 @@ def test_pv_contract_public_imports() -> None:
 
     assert result.simulation_input is simulation_input
     assert PVSimulationModelBoundary.__name__ == "PVSimulationModelBoundary"
+
+
+def test_load_contract_public_imports() -> None:
+    simulation_input = LoadSimulationInput(
+        SimulationStepIdentity(0, 1.0, None),
+        2.0,
+    )
+    result = LoadSimulationResult(simulation_input, 1.0)
+
+    assert result.simulation_input is simulation_input
+    assert LoadSimulationModelBoundary.__name__ == "LoadSimulationModelBoundary"
