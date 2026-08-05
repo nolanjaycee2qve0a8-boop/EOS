@@ -220,6 +220,34 @@ package，没有 inheritance、adapter、alias、automatic conversion 或 migrat
 规划为 TASK-062 Formation Boundary、TASK-063 Resolution 和 TASK-064 Constraint Evaluation；
 这些后续边界尚未实现。
 
+### 2.4 Phase 6 Simulation Core（TASK-065 started）
+
+Phase 6 的依赖方向是：
+
+```text
+Future Feasible Decision Artifact
+        |
+        v
+Simulator
+        |
+        v
+Immutable Simulation Observation / Next State
+```
+
+Simulation 不调用 Runtime，也不执行 Device。TASK-065 当前只建立：
+
+- explicit zero-based `sequence`；
+- explicit positive `duration_seconds`；
+- explicit timezone-aware timestamp 或 explicit `None`；
+- frozen/slotted `SimulationStepIdentity`。
+
+TASK-065 不定义 PV、Load、Tariff、Battery、Grid、aggregate state、scenario、step result 或 model
+composition。Component contracts 必须先在 TASK-066～071 独立完成，TASK-072 才能建立依赖它们的
+aggregate contracts。
+
+`SimulationStepIdentity` 不读取 clock、不生成 UUID、不保存 Runtime state。其 duration 单位是 raw
+seconds，无隐式缩放；timezone-aware datetime 保持 caller exact identity。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -586,7 +614,26 @@ Phase 5 决策形成语义合同包。TASK-061 当前只包含：
 该 package 只依赖 Python standard library，不依赖 Kernel、Objective、Capability、Constraint、
 Optimization、Runtime、Execution 或 Device。
 
-### 5.6 `kernel/runtime`
+### 5.6 `simulator`
+
+Phase 6 deterministic simulation package。TASK-065 当前只公开 frozen/slotted
+`SimulationStepIdentity`，提供显式 sequence、seconds duration 和 optional aware timestamp contracts。
+
+**依赖方向**
+
+```text
+simulator.core -> simulator.validation -> Python standard library
+```
+
+**当前不负责**
+
+- PV、Load、Tariff、Battery 或 Grid modeling；
+- aggregate Simulation State、Scenario、Step Input 或 Result；
+- Runtime、scheduler、thread 或自动 step progression；
+- Device、Command、Dispatch、PCS/BMS 或协议；
+- Optimization、forecast、persistence、cache 或 history。
+
+### 5.7 `kernel/runtime`
 
 **当前职责**
 
@@ -607,7 +654,7 @@ audit 和 explanation 等生命周期边界。
 - 隐式缓存或全局运行状态；
 - 在观察对象构造时推进系统。
 
-### 5.7 `kernel/execution`
+### 5.8 `kernel/execution`
 
 **当前职责**
 
