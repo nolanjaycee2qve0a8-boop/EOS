@@ -2454,6 +2454,44 @@ aggregate contracts。Availability 是显式 simulation fact，不是预测、MP
 inverter、PCS、Device、Runtime、Command、aggregate State/Scenario/Step Result、Optimization、cache 或
 history。
 
+## TASK-067 Load Simulation Model Contract
+
+**背景：** Aggregate Simulation contracts 之前需要独立冻结 Load component 的输入、输出和 extension
+seam，避免把 prediction 或 user behavior 固化进基础模型。
+
+**目标：** 只定义 Load simulation contract，不实现负载预测、profile generation、用户行为、Demand
+Response 或设备读取。
+
+**实现内容：**
+
+- 新增 frozen/slotted `LoadSimulationInput`；
+- 新增 frozen/slotted `LoadSimulationResult`；
+- 新增 abstract/stateless/empty-slotted `LoadSimulationModelBoundary`；
+- 输入使用 caller-supplied non-negative finite `demand_power_kw`；
+- 输出使用 non-negative finite `actual_power_kw`，且不超过 demand；
+- 保存 exact step/input identities；
+- 新增 focused validation、public API 和 unit tests。
+
+**Identity：**
+
+```text
+simulation_input.step_identity is original_step_identity
+result.simulation_input is original_simulation_input
+```
+
+**架构意义：** Load observation 获得稳定 provenance。未来 prediction 或 behavior implementation 可
+独立演进，不能污染 Simulator core、Runtime 或 aggregate contracts。
+
+**新增文件：**
+
+- `simulator/load.py`；
+- `tests/unit/simulator/test_load.py`；
+- `tasks/TASK-067.md`；
+- `architecture/adr/ADR-065-load-simulation-model-contract.md`。
+
+**关键设计决策：** 不增加 concrete Load model、forecast、profile、user behavior、Demand Response、
+schedule、Device、Runtime、Command、aggregate State/Scenario/Step Result、Optimization、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

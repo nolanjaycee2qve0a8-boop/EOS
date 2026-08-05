@@ -260,6 +260,18 @@ SimulationStepIdentity + available_power_kw
 该 boundary 不包含 concrete physics、MPPT、inverter、device parameters、Runtime 或 Command。
 Result 保持 exact Input identity，actual generation 仅受非负 finite kW 和显式 availability 上界约束。
 
+TASK-067 新增独立 abstract Load component contract：
+
+```text
+SimulationStepIdentity + demand_power_kw
+        -> LoadSimulationInput
+        -> LoadSimulationModelBoundary
+        -> LoadSimulationResult(actual_power_kw)
+```
+
+Demand 是 caller-supplied exogenous fact。Boundary 不预测负载、不生成 profile、不模拟用户行为，也不
+访问 Runtime、Device、Command 或 telemetry。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -648,6 +660,10 @@ simulator.core -> simulator.validation -> Python standard library
 TASK-066 进一步提供 `PVSimulationInput`、`PVSimulationResult` 与 abstract
 `PVSimulationModelBoundary`。PV package 只依赖 simulation core/local validation，不访问 Runtime、
 Device、Command、weather、MPPT 或 inverter，也不提供 concrete model。
+
+TASK-067 提供 `LoadSimulationInput`、`LoadSimulationResult` 与 abstract
+`LoadSimulationModelBoundary`。Load package 同样只依赖 core/local validation，不包含 forecast、user
+behavior、Demand Response、Runtime、Device 或 concrete model。
 
 ### 5.7 `kernel/runtime`
 
