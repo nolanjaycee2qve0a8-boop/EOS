@@ -2376,6 +2376,49 @@ alias、conversion 或 migration。
 Optimization 不等于 Decision；`DecisionIntent` 不等于 Command。TASK-061 不生成实际决策、不访问
 设备状态，也不连接 Runtime、Device、PCS 或 BMS。
 
+## TASK-062 Decision Formation Boundary
+
+**目标：** 建立 Phase 4 evidence 与 Phase 5 semantic Intent 之间的 immutable、abstract formation
+seam，不实现具体 EMS 规则。
+
+**实现内容：**
+
+- 新增 frozen/slotted `DecisionFormationInput`；
+- 保存 exact `source_context`、`composition` 与 active `capability`；
+- 使用 `is` 拒绝 inactive、absent 和 equal-but-reconstructed descriptor；
+- 新增 frozen/slotted `DecisionIntentCandidate`；
+- 保存 exact formation input 与 exact Phase 5 Intent；
+- 新增 abstract、stateless、empty-slotted `DecisionFormationBoundary`；
+- 定义 `form(formation_input) -> DecisionIntentCandidate`；
+- 不新增 concrete production implementation。
+
+**架构意义：** Objective、active Capability evidence、Context 与 semantic Intent 首次获得明确、
+可验证的 provenance artifact，同时 Formation 不承担 selection、Resolution、Constraint 或
+Execution。
+
+**核心 identity：**
+
+```text
+formation_input.source_context is original_context
+formation_input.composition is original_composition
+formation_input.capability is original_active_capability
+candidate.formation_input is original_formation_input
+candidate.intent is original_intent
+```
+
+**新增文件：**
+
+- `decision_formation/input.py`；
+- `decision_formation/candidate.py`；
+- `decision_formation/boundary.py`；
+- `tests/unit/decision_formation/test_formation.py`；
+- `tasks/TASK-062.md`；
+- `architecture/adr/ADR-060-decision-formation-boundary.md`。
+
+**关键设计决策：** CapabilityDescriptor 只作为 exact provenance，不是 implementation、factory 或
+registry key。TASK-062 不实现 charge/discharge rule、Capability selection、Optimization、
+Constraint、Command、Runtime 或 Device，并保持 Phase 3 numeric Intent 与 legacy path 不变。
+
 ## 2. 后续追加模板
 
 ```markdown
