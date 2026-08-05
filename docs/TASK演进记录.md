@@ -2376,6 +2376,58 @@ alias、conversion 或 migration。
 Optimization 不等于 Decision；`DecisionIntent` 不等于 Command。TASK-061 不生成实际决策、不访问
 设备状态，也不连接 Runtime、Device、PCS 或 BMS。
 
+## TASK-062 Decision Formation Boundary
+
+**背景：** Phase 5 已有 semantic Intent artifact，但仍缺少把 Context、Objective/Capability
+composition 与一个候选 Intent 关联起来的 provenance seam。
+
+**设计目的：** 定义 immutable `DecisionFormationInput`、immutable `DecisionIntentCandidate` 与
+abstract/stateless `DecisionFormationBoundary`。
+
+**核心契约：** Input 保存 exact `source_context`、exact composition 和 composition active tuple 中的
+exact `CapabilityDescriptor`。Candidate 保存 exact Formation Input 与 exact Intent。值相等但重建的
+descriptor 不能替代 source identity。
+
+**架构收益：** Candidate 不再是脱离证据的 action；Formation 仍不选择 Capability，也不实现
+charge/discharge 规则。
+
+**状态说明：** 合同设计与独立实现审查已经完成；是否进入 `main` 以 TASK-062 PR 的合并状态为准，
+本 documentation PR 不包含其生产代码。
+
+## TASK-063 Intent Resolution Boundary Design
+
+**背景：** 多个 Formation candidates 需要进入一个 source Intent 生命周期阶段，但通用边界不能隐藏
+选择算法。
+
+**设计目的：** 定义 immutable Resolution Input、immutable Resolution Result 与 abstract/stateless
+Resolution Boundary。
+
+**核心契约：** Input 保存 caller candidate tuple 与每个 exact candidate。Result 保存 exact input、
+exact `source_candidate` 与满足 `source_intent is source_candidate.intent` 的 exact source intent。
+
+**架构收益：** Resolution provenance 可审查，同时 priority、ranking、scoring、weighting 和具体
+selection rule 留给未来独立实现 TASK。
+
+**状态说明：** 已完成架构草案和正式设计审查；未在本 PR 中实现 production resolver。
+
+## TASK-064 Constraint Evaluation Boundary Design
+
+**背景：** Resolution 输出的 source intent 与经过可行性检查的 feasible intent 必须成为两个明确的
+生命周期角色。
+
+**设计目的：** 定义 immutable Constraint Evaluation Input、immutable Result 和 abstract/stateless
+Evaluation Boundary。
+
+**核心契约：** Input 保持 exact Resolution Result 与 exact source intent。Result 保持 exact input、
+source intent 和 feasible intent。未调整时 feasible identity 与 source 相同；约束触发时允许产生新的
+immutable `idle` intent。`feasible_intent=None` 非法。
+
+**架构收益：** Constraint 只能保持 action 或将不可行动作收敛为 idle，不能反转 charge/discharge、
+从 idle 生成动作或承担 Decision Formation 策略。
+
+**状态说明：** 已完成架构草案和正式设计审查；未在本 PR 中实现 SOC、电池、PCS、设备或其他具体
+约束算法。
+
 ## 2. 后续追加模板
 
 ```markdown

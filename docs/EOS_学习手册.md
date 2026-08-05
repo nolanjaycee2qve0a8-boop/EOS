@@ -1827,9 +1827,9 @@ Phase 5: decision_formation.DecisionIntent(action)
 两者没有 inheritance、adapter、alias 或自动转换。TASK-061 只建立 artifact，不生成实际决策，
 也不访问 Objective、Capability implementation、Constraint、Optimization、Runtime 或 Device。
 
-### 6.4 后续边界
+### 6.4 TASK-061～064 设计基线
 
-Phase 5 计划按独立 TASK 继续审查：
+Phase 5 按四个独立 TASK 冻结决策形成语言：
 
 ```text
 TASK-061 Intent Contract
@@ -1844,7 +1844,62 @@ TASK-063 Resolution
 TASK-064 Constraint Evaluation
 ```
 
-当前只有 TASK-061 artifact 已进入实现阶段，后续能力不能从文档描述推断为已经存在。
+截至 Architecture Summary v1.0：
+
+- TASK-061 的 semantic Intent contract 已实现并合并；
+- TASK-062 的 Formation contracts 已完成设计与独立实现审查，但其合并状态仍由对应 PR 决定；
+- TASK-063 与 TASK-064 已完成架构草案和正式设计审查，尚未声明为生产实现。
+
+文档中的完整链路是 Phase 5 的批准设计基线，不代表所有节点已经成为当前 `main` 的运行能力。
+
+### 6.5 Formation：候选意图从哪里来
+
+TASK-062 使用 `DecisionFormationInput` 保存 exact `DecisionContext`、exact Objective/Active-Capability
+composition 和其中一个 exact active `CapabilityDescriptor`。Formation 输出
+`DecisionIntentCandidate`，把 semantic Intent 与形成它的输入证据关联起来。
+
+Descriptor 只表示 provenance，不是 Capability implementation。Formation 不选择 Capability，也不
+规定什么时候 charge、discharge 或 idle。
+
+### 6.6 Resolution：哪个候选成为 source intent
+
+TASK-063 设计将 caller 提供的 candidate tuple 封装为 immutable Resolution Input，并由 abstract
+Resolution Boundary 返回一个带有 exact `source_candidate` 和 exact `source_intent` 的 Result。
+
+Resolution contract 不包含 priority、ranking、score、weight 或默认“取第一个”规则。未来具体
+resolver 必须在独立 TASK 中公开其规则，不能把选择策略隐藏在通用边界里。
+
+### 6.7 Constraint Evaluation：source 与 feasible 的区别
+
+`source_intent` 表示 Resolution 选出的业务意图；`feasible_intent` 表示约束评估后允许继续传递的
+语义意图。二者是不同生命周期角色：
+
+```text
+未调整：feasible_intent is source_intent
+被限制：feasible_intent is not source_intent
+```
+
+Phase 5 Intent 只有 action，没有功率大小。因此 TASK-064 的设计只允许约束保持原 action，或将
+不可行的 `charge` / `discharge` 收敛为新的 immutable `idle`。Constraint 不能把 charge 反转为
+discharge，也不能从 idle 产生业务动作，否则它就会偷偷成为 Decision Formation。
+
+`feasible_intent` 必须始终是 `DecisionIntent`，不能用 `None` 表示不可行。
+
+### 6.8 Identity 与 provenance 为什么贯穿 Phase 5
+
+Phase 5 的每个 boundary 只保证其直接输入与输出之间的 identity：
+
+```text
+Formation Input -> Candidate
+Candidate tuple -> Resolution Result
+Resolution Result -> Constraint Evaluation Input
+Constraint Evaluation Input -> Feasible Result
+```
+
+这些关系使用 `is`，而不是仅依赖值相等。这样可以回答“该 Intent 来自哪个 Context、Composition、
+Capability descriptor 和 Candidate”，同时避免通过 copy、serialization 或 reconstruction 伪造来源。
+
+完整设计见 `docs/phase-summary/EOS_Phase5_Decision_Formation_Architecture_v1.0.md`。
 
 ## 7. 学习建议
 

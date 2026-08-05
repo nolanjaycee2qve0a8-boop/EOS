@@ -195,20 +195,36 @@ Phase 4 不包含：
 Future Decision Layer 只是后续演进位置，不属于 Phase 4 已实现能力。任何连接都必须通过新的
 独立 TASK 和架构审查，不能修改已冻结的 Objective/Capability contracts。
 
-### 2.3 Phase 5 Decision Formation（TASK-061 started）
+### 2.3 Phase 5 Decision Formation（TASK-061～064 design baseline）
 
 TASK-061 建立独立的 `decision_formation.DecisionIntent` immutable artifact，使用显式
 `charge`、`discharge`、`idle` action 表达决策语义。该 action 不定义设备功率正负方向、功率
 大小、物理可行性、优化结果或执行状态。
 
 ```text
-Future Decision Formation
+DecisionContext + ObjectiveCapabilityActivationComposition
+        + exact active CapabilityDescriptor
         |
         v
-decision_formation.DecisionIntent(action)
+DecisionFormationInput
         |
         v
-Future Formation / Resolution / Constraint Boundaries
+DecisionFormationBoundary
+        |
+        v
+DecisionIntentCandidate tuple
+        |
+        v
+DecisionIntentResolutionBoundary
+        |
+        v
+Source DecisionIntent
+        |
+        v
+DecisionConstraintEvaluationBoundary
+        |
+        v
+Feasible Decision Artifact
 ```
 
 `DecisionIntent` 不等于 `Command`。TASK-061 不形成实际决策、不生成命令、不调用 Capability
@@ -216,9 +232,23 @@ implementation，也不依赖 Objective、Constraint、Optimization、Runtime、
 PCS 或 BMS。
 
 现有 `kernel.decision.DecisionIntent(battery_power_intent_kw)` 保持不变。新旧合同位于显式不同
-package，没有 inheritance、adapter、alias、automatic conversion 或 migration。Phase 5 后续顺序
-规划为 TASK-062 Formation Boundary、TASK-063 Resolution 和 TASK-064 Constraint Evaluation；
-这些后续边界尚未实现。
+package，没有 inheritance、adapter、alias、automatic conversion 或 migration。
+
+TASK-061 已实现并合并。TASK-062 已完成 contract 设计与独立实现审查；TASK-063 Resolution 与
+TASK-064 Constraint Evaluation 已完成架构设计审查，但本 Summary 不将其声明为已存在的生产代码。
+Phase 5 也没有连接 Runtime、Command 或 Device。
+
+Phase 5 的职责分解如下：
+
+| Boundary | 输入 | 输出 | 非职责 |
+| --- | --- | --- | --- |
+| Intent Contract | explicit action | immutable `DecisionIntent` | 功率、协议、执行 |
+| Formation | Context、Composition、exact active descriptor | Candidate | Capability 选择、业务规则 |
+| Resolution | Candidate tuple | source candidate/source intent evidence | priority、ranking、scoring、算法 |
+| Constraint Evaluation | Resolution evidence/source intent | feasible artifact | 业务策略、具体物理算法、Command |
+
+`source_intent` 与 `feasible_intent` 是不同生命周期角色。未调整时可以保持同一对象；约束触发时
+可以产生新的 immutable feasible intent，但 Constraint 只能限制业务动作，不能反转或创造策略。
 
 ## 3. 核心架构原则
 
@@ -577,14 +607,28 @@ Constraint、Evaluation、Runtime 或 Device。
 
 ### 5.5 `decision_formation`
 
-Phase 5 决策形成语义合同包。TASK-061 当前只包含：
+Phase 5 决策形成语义合同包。当前 `main` 已包含 TASK-061：
 
 - frozen/slotted `DecisionIntent`；
 - exact `charge`、`discharge`、`idle` action validation；
 - 与 Command、设备方向和既有 numeric Intent 的显式分离。
 
-该 package 只依赖 Python standard library，不依赖 Kernel、Objective、Capability、Constraint、
-Optimization、Runtime、Execution 或 Device。
+TASK-062～064 的批准设计进一步定义 Formation、Resolution 与 Constraint Evaluation contracts。
+这些设计只依赖稳定数据合同，并保持以下方向：
+
+```text
+decision_formation.formation
+    -> DecisionContext / Objective composition / CapabilityDescriptor
+
+decision_formation.resolution
+    -> formation candidate / semantic intent
+
+decision_formation.constraint_evaluation
+    -> resolution result / semantic intent
+```
+
+Kernel、Objective 与 Capability 不反向依赖 Decision Formation。该 package 不依赖具体 Capability
+implementation、Optimization、Runtime、Execution、Command、Dispatcher 或 Device。
 
 ### 5.6 `kernel/runtime`
 
