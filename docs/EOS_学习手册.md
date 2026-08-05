@@ -1844,7 +1844,39 @@ TASK-063 Resolution
 TASK-064 Constraint Evaluation
 ```
 
-当前只有 TASK-061 artifact 已进入实现阶段，后续能力不能从文档描述推断为已经存在。
+TASK-061 artifact 与 TASK-062 Formation Boundary 已进入实现阶段；TASK-063 与 TASK-064 仍不能
+从文档描述推断为已经存在。
+
+### 6.5 TASK-062 Decision Formation Boundary
+
+TASK-062 不实现“什么时候充电或放电”，而是建立未来形成规则必须遵守的输入、输出和 provenance
+合同：
+
+```text
+DecisionContext
+        +
+ObjectiveCapabilityActivationComposition
+        +
+exact active CapabilityDescriptor
+        |
+        v
+DecisionFormationInput
+        |
+        v
+DecisionFormationBoundary
+        |
+        v
+DecisionIntentCandidate
+```
+
+`DecisionFormationInput` 保存 exact context、composition 和 active descriptor。Descriptor 必须以
+对象 identity 存在于 composition 的 active tuple；值相等但重建的 descriptor、inactive descriptor
+或无关 descriptor 都不能进入合法 input。
+
+`DecisionIntentCandidate` 保存 exact formation input 与 exact Phase 5 Intent。它不是 resolved
+Intent，也不是 feasible Intent 或 Command。Boundary 本身 abstract、stateless、empty-slotted，
+没有具体 charge/discharge 规则，不选择 Capability，也不执行 Optimization、Constraint、Runtime
+或 Device。
 
 ## 7. 学习建议
 
