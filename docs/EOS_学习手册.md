@@ -1846,7 +1846,44 @@ TASK-064 Constraint Evaluation
 
 当前只有 TASK-061 artifact 已进入实现阶段，后续能力不能从文档描述推断为已经存在。
 
-## 7. 学习建议
+## 7. Phase 6：Simulation Core
+
+Phase 6 位于未来 Phase 5 feasible decision artifact 之后，但 Simulation 不等于 Runtime，也不等于
+Device Execution。Simulation 只接收显式输入并计算模拟响应；它不拥有 loop、scheduler、真实设备、
+Command 或通信协议。
+
+### 7.1 TASK-065 SimulationStepIdentity
+
+TASK-065 只建立最小 identity/time artifact：
+
+```text
+SimulationStepIdentity
+├── sequence: non-negative, zero-based integer
+├── duration_seconds: positive finite raw seconds
+└── timestamp: timezone-aware datetime | explicit None
+```
+
+三个事实全部由 caller 显式提供。构造过程不会读取“现在”、生成 UUID、推进下一 step 或调用任何
+component model。
+
+当 timestamp 存在时，EOS 保留 exact reference：
+
+```text
+step.timestamp is original_timestamp
+```
+
+这意味着 validation 可以确认 timezone，但不能复制 datetime、转换 timezone 或替换调用方证据。
+
+### 7.2 为什么先定义时间合同
+
+PV、Load、Tariff、Battery 和 Grid 模型都需要共享明确的 step duration 或绝对时间语义。如果各模型
+自行读取 clock，就无法保证相同输入得到可重复观察。TASK-065 因此先冻结共同语言，但不提前创建
+任何 component、aggregate State、Scenario、Step Input 或 Step Result。
+
+后续顺序保持：component contracts 在 TASK-066～071 定义，aggregate contracts 只在 TASK-072
+建立。
+
+## 8. 学习建议
 
 建议按以下顺序理解 EOS：
 
@@ -1864,7 +1901,7 @@ TASK-064 Constraint Evaluation
 - 哪些安全约束不属于策略？
 - 谁最终负责设备执行和失败处理？
 
-## 8. 文档维护规则
+## 9. 文档维护规则
 
 以后每完成一个 TASK：
 

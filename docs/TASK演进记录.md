@@ -2376,6 +2376,46 @@ alias、conversion 或 migration。
 Optimization 不等于 Decision；`DecisionIntent` 不等于 Command。TASK-061 不生成实际决策、不访问
 设备状态，也不连接 Runtime、Device、PCS 或 BMS。
 
+## TASK-065 Simulation Core Identity and Time Contracts
+
+**背景：** Phase 6 component models 需要共享确定性的 step identity 与时间语义，但 aggregate contracts
+不能早于尚未定义的 PV、Load、Tariff、Battery 和 Grid contracts。
+
+**目标：** 只建立 immutable simulation core identity/time artifact，不提前引入 component、aggregate
+state、Runtime 或 Device execution。
+
+**实现内容：**
+
+- 新增 frozen/slotted `SimulationStepIdentity`；
+- 定义 non-negative zero-based `sequence`；
+- 定义 positive finite raw `duration_seconds`；
+- 要求 timestamp 为 timezone-aware datetime 或 explicit `None`；
+- 保留 exact caller timestamp identity；
+- 新增 focused validation、public API 和 unit tests。
+
+**架构意义：** Simulator 获得不依赖 wall clock、UUID 或 Runtime 的确定性 step language。后续
+component contracts 可以共享单位和时间语义，而无需修改 TASK-065。
+
+**Identity：**
+
+```text
+step.timestamp is original_timestamp
+```
+
+Validation 不复制 datetime、不转换 timezone，也不生成 timestamp。
+
+**新增文件：**
+
+- `simulator/core.py`；
+- `simulator/validation.py`；
+- `tests/unit/simulator/`；
+- `tasks/TASK-065.md`；
+- `architecture/adr/ADR-063-simulation-core-identity-time-contracts.md`。
+
+**关键设计决策：** TASK-065 不创建 PV、Load、Tariff、Battery、Grid、Simulation State、Scenario、
+Step Input/Result、Runtime、Scheduler、Device、Command、Optimization、cache 或 history。Component
+contracts 保留给 TASK-066～071，aggregate contracts 保留给 TASK-072。
+
 ## 2. 后续追加模板
 
 ```markdown
