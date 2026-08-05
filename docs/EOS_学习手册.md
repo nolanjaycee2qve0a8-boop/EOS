@@ -1939,6 +1939,31 @@ result.simulation_input is original_input
 因此未来预测、profile generation 或行为模型若需要加入，必须作为独立实现或输入来源，不得改变
 基础 Load boundary。
 
+### 7.5 TASK-068 Tariff Model Contract
+
+Tariff boundary 把“当前模拟 step 的价格事实”与“TOU 策略应该做什么”分开。Input 必须引用带有
+timezone-aware timestamp 的 exact step，并显式携带 import/export prices。
+
+```text
+TariffSimulationInput(step, import_price, export_price)
+        |
+        v
+abstract TariffSimulationModelBoundary
+        |
+        v
+TariffSimulationResult(import_price, export_price)
+```
+
+价格单位固定为 signed finite raw CNY/kWh。允许负电价，不进行 currency conversion、hidden scaling、
+TOU window selection 或 forecasting。
+
+```text
+input.step_identity is original_step
+result.simulation_input is original_input
+```
+
+Tariff Model 只产生模拟价格 observation，不能根据高低电价生成 charge/discharge Intent。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

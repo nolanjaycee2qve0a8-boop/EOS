@@ -272,6 +272,18 @@ SimulationStepIdentity + demand_power_kw
 Demand 是 caller-supplied exogenous fact。Boundary 不预测负载、不生成 profile、不模拟用户行为，也不
 访问 Runtime、Device、Command 或 telemetry。
 
+TASK-068 新增 abstract Tariff component contract：
+
+```text
+aware SimulationStepIdentity + explicit import/export CNY/kWh
+        -> TariffSimulationInput
+        -> TariffSimulationModelBoundary
+        -> TariffSimulationResult
+```
+
+价格是 signed finite raw facts，允许负值。Boundary 不读取 clock、不选择 TOU window、不预测价格、
+不调用 API，也不产生 DecisionIntent。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -664,6 +676,10 @@ Device、Command、weather、MPPT 或 inverter，也不提供 concrete model。
 TASK-067 提供 `LoadSimulationInput`、`LoadSimulationResult` 与 abstract
 `LoadSimulationModelBoundary`。Load package 同样只依赖 core/local validation，不包含 forecast、user
 behavior、Demand Response、Runtime、Device 或 concrete model。
+
+TASK-068 提供 `TariffSimulationInput`、`TariffSimulationResult` 与 abstract
+`TariffSimulationModelBoundary`。Tariff package 只依赖 core/local validation，不依赖 Capability、
+Policy、Runtime、Device、external API、forecast 或 concrete model。
 
 ### 5.7 `kernel/runtime`
 
