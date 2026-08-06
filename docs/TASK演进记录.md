@@ -2646,6 +2646,46 @@ component observations，而无需让 Grid contract 反向依赖 PV、Load 或 B
 fault、voltage/frequency/reactive-power physics、Constraint、Optimization、Runtime、Device、Command、Dispatch、
 aggregate contracts、cache 或 history。
 
+## TASK-072 Aggregate Simulation Contract
+
+**背景：** TASK-065～071 已完成独立 step/PV/Load/Tariff/Battery/Grid contracts。Phase 6 需要在不执行
+模型的前提下，表达同一 step 的跨组件输入、结果、状态和 scenario provenance。
+
+**目标：** 建立 immutable aggregate state/scenario/step contracts，不引入 Simulation Runtime。
+
+**实现内容：**
+
+- 新增 frozen/slotted `SimulationStepInput`，保存 exact step 与五类 component inputs；
+- 新增 frozen/slotted `SimulationState`，保存 exact step 与五类 component results；
+- 新增 frozen/slotted `SimulationStepResult`，验证 exact aggregate input/state 与每个 result/input lineage；
+- 新增 frozen/slotted `SimulationScenario`，保存 caller-ordered tuple-only step inputs；
+- 拒绝 value-equal 但 identity 不同的 step/input reconstruction；
+- 新增 focused identity、immutability、ordering、dependency 和 public API tests。
+
+**Identity：**
+
+```text
+component_input.step_identity is aggregate_input.step_identity
+component_result.simulation_input is corresponding aggregate component input
+step_result.simulation_input is original aggregate input
+step_result.state is original aggregate state
+scenario.steps is original caller tuple
+```
+
+**架构意义：** Phase 6 component contracts 首次形成完整 one-step evidence，并保持可验证 provenance。
+Scenario 仍是 immutable description，而不是执行器或 Runtime state。
+
+**新增文件：**
+
+- `simulator/aggregate.py`；
+- `tests/unit/simulator/test_aggregate.py`；
+- `tasks/TASK-072.md`；
+- `architecture/adr/ADR-070-aggregate-simulation-contract.md`。
+
+**关键设计决策：** 不执行 component model，不排序或去重 scenario，不计算 power balance/energy、不推进
+step，不增加 loop、scheduler、Runtime、Device、Command、Dispatch、Optimization、forecast、persistence、
+telemetry、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

@@ -2056,6 +2056,35 @@ Input 保存 exact step，Result 保存 exact Input。
 Grid model 不读取 PV、Load 或 Battery output 来自动计算 Grid power。多个 component 如何形成系统功率
 平衡属于后续 aggregate contract，而不是单一 Grid component 的职责。
 
+### 7.9 TASK-072 Aggregate Simulation Contract
+
+TASK-072 把已经独立 review 的 component artifacts 组合成一致证据，但不执行任何 model：
+
+```text
+exact component inputs -> SimulationStepInput
+exact component results -> SimulationState
+input + state          -> SimulationStepResult
+ordered step inputs    -> SimulationScenario
+```
+
+`SimulationStepInput` 要求 PV、Load、Tariff、Battery、Grid inputs 都引用同一个 exact
+`SimulationStepIdentity`。`SimulationState` 保存同一步的 exact component results。
+`SimulationStepResult` 进一步验证每个 result 的 `simulation_input` 就是 aggregate input 中对应的 exact
+对象，而不是 value 相等的重建版本。
+
+```text
+state.battery_result.simulation_input is step_input.battery_input
+```
+
+这种 identity 验证让 provenance 可以追溯到 Battery actuation，再追溯到 exact feasible decision。
+
+`SimulationScenario.steps` 只能是 tuple，并保留 caller 顺序与 tuple identity。Scenario 不排序、不去重、
+不生成时间、不执行 steps，也不拥有 Runtime history。它描述“准备模拟哪些输入”，不是“负责跑模拟”。
+
+为什么 State 仍不是 Runtime state：这里的 `SimulationState` 是一个完成 step 的 immutable aggregate
+observation。它没有 update/advance 方法、cache、current pointer 或 loop；下一步输入必须由未来明确边界
+提供，不能在 artifact 内偷偷推进。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

@@ -18,7 +18,11 @@ from simulator import (
     PVSimulationInput,
     PVSimulationModelBoundary,
     PVSimulationResult,
+    SimulationScenario,
+    SimulationState,
     SimulationStepIdentity,
+    SimulationStepInput,
+    SimulationStepResult,
     TariffSimulationInput,
     TariffSimulationModelBoundary,
     TariffSimulationResult,
@@ -45,7 +49,11 @@ def test_simulation_step_identity_public_import() -> None:
         "PVSimulationInput",
         "PVSimulationModelBoundary",
         "PVSimulationResult",
+        "SimulationScenario",
+        "SimulationState",
         "SimulationStepIdentity",
+        "SimulationStepInput",
+        "SimulationStepResult",
         "TariffSimulationInput",
         "TariffSimulationModelBoundary",
         "TariffSimulationResult",
@@ -84,6 +92,13 @@ def test_grid_contract_public_imports() -> None:
 
     assert result.simulation_input is simulation_input
     assert GridSimulationModelBoundary.__name__ == "GridSimulationModelBoundary"
+
+
+def test_aggregate_contract_public_imports() -> None:
+    assert SimulationStepInput.__name__ == "SimulationStepInput"
+    assert SimulationState.__name__ == "SimulationState"
+    assert SimulationStepResult.__name__ == "SimulationStepResult"
+    assert SimulationScenario.__name__ == "SimulationScenario"
 
 
 def test_pv_contract_public_imports() -> None:
