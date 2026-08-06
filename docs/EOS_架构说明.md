@@ -972,3 +972,27 @@ Runtime、Scheduler、Device、Command、Dispatcher 或 Optimization。
 
 冻结原则：Binding expresses ownership/reference relationship only. It does not execute, select, create or manage
 models.
+
+## 13. Single-Step Simulation Execution（TASK-076）
+
+TASK-076 在 binding 之上建立唯一一层单步协调：
+
+```text
+SimulationStepInput + SimulationModelBindingCollection
+        |
+        v
+SingleStepSimulationExecutor
+        |
+        v
+SimulationState -> SimulationStepResult
+```
+
+执行前完整验证五个 exact component boundary 各有一个 binding；missing 或 duplicate 在任何 model call 前失败。
+验证完成后严格遍历 caller tuple，不排序、不重新绑定，每个 model 接收对应 exact component input 并执行一次。
+
+异常语义为 stop-first + exact propagation；没有 retry、fallback 或 partial-result artifact。成功结果复用既有
+`SimulationState` 和 `SimulationStepResult`，不创建平行 evidence 模型。
+
+依赖方向：`simulator.executor -> binding + aggregate + component contracts`。Binding、aggregate 与 component
+contracts 不反向依赖 executor。该边界没有 scenario、progression、Runtime、Scheduler、Device、Command、
+Dispatch、Optimization、cache 或 history。
