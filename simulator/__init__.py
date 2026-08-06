@@ -1,5 +1,11 @@
 """Public contracts for deterministic EOS simulation."""
 
+from simulator.aggregate import (
+    SimulationScenario,
+    SimulationState,
+    SimulationStepInput,
+    SimulationStepResult,
+)
 from simulator.battery import (
     BatterySimulationActuation,
     BatterySimulationInput,
@@ -44,7 +50,11 @@ __all__ = [
     "PVSimulationInput",
     "PVSimulationModelBoundary",
     "PVSimulationResult",
+    "SimulationScenario",
+    "SimulationState",
     "SimulationStepIdentity",
+    "SimulationStepInput",
+    "SimulationStepResult",
     "TariffSimulationInput",
     "TariffSimulationModelBoundary",
     "TariffSimulationResult",

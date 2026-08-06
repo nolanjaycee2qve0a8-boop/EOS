@@ -321,6 +321,18 @@ step + explicit requested Grid exchange
 Requested 与 actual 都使用 signed finite raw kW：正值 import、负值 export、零值 balanced。Grid boundary
 不读取其他 component、不计算系统 balance、不执行 Grid Constraint、Zero Export、Runtime 或 Device。
 
+TASK-072 建立 aggregate simulation contracts：
+
+```text
+exact component inputs -> SimulationStepInput
+exact component results -> SimulationState
+input + state          -> SimulationStepResult
+tuple[step inputs, ...] -> SimulationScenario
+```
+
+Aggregate 只验证同一 exact step 和 result-to-input identity lineage，不调用 component models、不计算 power
+balance、不推进 step。Scenario 保留 caller tuple 与顺序，不排序、不去重、不持有 mutable Runtime state。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -731,6 +743,11 @@ Runtime、Device、Command、Constraint、cache 或 history。
 TASK-071 提供 `GridSimulationInput`、`GridSimulationResult` 与 abstract
 `GridSimulationModelBoundary`。Grid package 只依赖 simulation core/local validation，不依赖其他 component、
 Constraint、Runtime、Device 或 Command。系统 power balance 与 aggregate composition 保留给 TASK-072。
+
+TASK-072 提供 `SimulationStepInput`、`SimulationState`、`SimulationStepResult` 与
+`SimulationScenario`。这些 frozen/slotted artifacts 只依赖已审核 component contracts，并以 identity
+验证跨组件 step 与 result/input provenance。它们不构成 simulation runner、Runtime、Scheduler 或
+model orchestration。
 
 ### 5.7 `kernel/runtime`
 
