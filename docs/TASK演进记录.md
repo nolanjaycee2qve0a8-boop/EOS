@@ -2686,6 +2686,34 @@ Scenario 仍是 immutable description，而不是执行器或 Runtime state。
 step，不增加 loop、scheduler、Runtime、Device、Command、Dispatch、Optimization、forecast、persistence、
 telemetry、cache 或 history。
 
+## TASK-073 Phase 6 Integration Validation
+
+**背景：** TASK-065～072 已分别冻结 core、五类 component 与 aggregate contracts，需要通过完整测试证明
+它们可以组合并保持 exactly-once execution 与 identity provenance。
+
+**目标：** 仅增加 Phase 6 end-to-end integration validation，不修改 production contracts。
+
+**实现内容：**
+
+- 新增 test-only PV、Load、Tariff、Battery、Grid recording models；
+- 验证每个 model 接收 exact component input 且执行 exactly once；
+- 验证 charge/import 与 discharge/export signed-power observations；
+- 验证 Battery feasible decision → actuation → input → result provenance；
+- 验证 exact component results → SimulationState → SimulationStepResult lineage；
+- 验证 `SimulationScenario` 保持 exact caller tuple 与 caller order；
+- 验证 aggregate construction 不重新执行 component models。
+
+**架构意义：** Phase 6 从独立 unit contracts 进入完整 integration evidence。测试证明 aggregation 是纯
+observation，不是隐藏的 runner 或 Runtime。
+
+**新增文件：**
+
+- `tests/integration/test_phase6_simulation_flow.py`；
+- `tasks/TASK-073.md`。
+
+**关键设计决策：** 不增加 production code、concrete production model、orchestrator、balance/SOC/energy
+计算、step progression、Runtime、Scheduler、Device、Command、Dispatch、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

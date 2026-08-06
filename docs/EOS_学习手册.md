@@ -2085,6 +2085,39 @@ state.battery_result.simulation_input is step_input.battery_input
 observation。它没有 update/advance 方法、cache、current pointer 或 loop；下一步输入必须由未来明确边界
 提供，不能在 artifact 内偷偷推进。
 
+### 7.10 TASK-073 Phase 6 Integration Validation
+
+TASK-073 不增加生产模型，而是用 test-only recording models 把 TASK-065～072 的 contracts 串成完整证据
+链。PV、Load、Tariff、Battery、Grid models 各接收对应 exact input，并且各执行一次；随后已有 aggregate
+artifacts 只保存这些结果，不重复执行。
+
+```text
+exact step
+  -> exact component inputs
+  -> test-only model calls (once each)
+  -> exact component results
+  -> SimulationState
+  -> SimulationStepResult
+```
+
+测试同时追踪 Battery provenance：
+
+```text
+feasible decision
+  -> BatterySimulationActuation
+  -> BatterySimulationInput
+  -> BatterySimulationResult
+  -> SimulationState
+  -> SimulationStepResult
+```
+
+充电/import 场景验证正功率语义，放电/export 场景验证负功率语义；这些测试不计算 power balance，也不
+宣称两组数值之间存在自动关系。Scenario 测试还故意使用非时间顺序的 caller tuple，以证明 contract
+保持输入顺序而不会偷偷排序或执行。
+
+“integration validation”与“production orchestration”不同：前者证明已有合同可以正确组合，后者会拥有
+调用流程和失败边界。TASK-073 只做前者。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
