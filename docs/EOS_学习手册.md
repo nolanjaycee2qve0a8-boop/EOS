@@ -2143,6 +2143,32 @@ Runtime Loop / Device Command / Physical Side Effect
 Phase 6 仍没有 production physics、power balance、SOC transition、scenario runner 或 step progression。
 “合同完整”表示未来实现有稳定插槽与可验证 provenance，不表示这些未来能力已经存在。
 
+## 7.12 TASK-075 Simulation Model Binding Contract
+
+Phase 6 定义了“模型必须遵守什么接口”，但没有回答“本次执行具体使用 caller 提供的哪个模型对象”。TASK-075
+建立这个最小关系：
+
+```text
+component model boundary + exact caller model
+        |
+        v
+SimulationModelBinding
+        |
+        v
+SimulationModelBindingCollection
+```
+
+Binding 只表达 ownership/reference relationship。它不执行、选择、创建或管理模型。
+
+为什么同时保存 contract 和 model：contract 明确模型承担 PV、Load、Tariff、Battery 或 Grid 中哪一种职责；
+model 则是 caller 已经创建并拥有的 exact instance。系统不用字符串名称、registry、factory 或 reflection 猜测关系。
+
+为什么 binding 使用 identity-based equality：如果重新创建一个字段相同的 binding，它只是“描述相同”，不是原始
+caller artifact。因此 collection membership 不能把 reconstructed binding 当成原 binding。
+
+Collection 保存 exact tuple 和 caller order，不排序、不去重、不补全。即使 caller 重复放入同一个 binding，TASK-075
+也只保存这个事实，不推断它应执行几次；execution semantics 属于后续独立边界。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

@@ -13,6 +13,10 @@ from simulator.battery import (
     BatterySimulationResult,
     BatterySimulationState,
 )
+from simulator.binding import (
+    SimulationModelBinding,
+    SimulationModelBindingCollection,
+)
 from simulator.core import SimulationStepIdentity
 from simulator.grid import (
     GridSimulationInput,
@@ -50,6 +54,8 @@ __all__ = [
     "PVSimulationInput",
     "PVSimulationModelBoundary",
     "PVSimulationResult",
+    "SimulationModelBinding",
+    "SimulationModelBindingCollection",
     "SimulationScenario",
     "SimulationState",
     "SimulationStepIdentity",

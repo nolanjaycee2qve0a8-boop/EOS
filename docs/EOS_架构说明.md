@@ -942,3 +942,33 @@ Execution、Dispatch 与 Device 不反向依赖 simulator。Simulation actuation
 Phase 6 当前明确不具备 production physics、power balance、SOC transition、runner、scheduler、automatic
 progression、Device integration 或 persistence。完整冻结报告见
 `docs/phase-summary/EOS_Phase6_Simulation_Architecture_v1.0.md`。
+
+## 12. Phase 7 Simulation Model Binding（TASK-075）
+
+Phase 7 从 caller-supplied model ownership contract 开始，但尚未引入 executor：
+
+```text
+existing component boundary
+        +
+exact caller-supplied model instance
+        |
+        v
+SimulationModelBinding
+        |
+        v
+SimulationModelBindingCollection
+```
+
+`SimulationModelBinding` 保存 exact `component_contract` 与 exact `model`。`component_contract` 必须是既有
+PV、Load、Tariff、Battery 或 Grid abstract model boundary；`model` 必须实现该 exact contract。
+
+`SimulationModelBindingCollection` 保存 exact caller tuple、exact binding elements 与 caller order。两个
+artifacts 均为 frozen/slotted 且使用 identity-based equality，防止 reconstructed equal-field binding 替代
+source identity。
+
+Binding package 依赖既有 component contracts；component contracts 不反向依赖 binding。该层没有 registry、
+factory、string lookup、reflection、sorting、deduplication、normalization、selection、model execution、runner、
+Runtime、Scheduler、Device、Command、Dispatcher 或 Optimization。
+
+冻结原则：Binding expresses ownership/reference relationship only. It does not execute, select, create or manage
+models.
