@@ -2748,6 +2748,47 @@ pre-commit passed。
 Execution、Actuation != Command；不新增 production model、power balance、SOC transition、runner、step
 progression、persistence、cache 或 history。
 
+## TASK-075 Simulation Model Binding Contract
+
+**背景：** Phase 6 已冻结五类 component model boundaries。未来确定性 execution 需要 caller 显式声明使用
+哪些 model instances，但不能让 executor、registry 或 factory 隐式拥有模型。
+
+**目标：** 建立 component contract 与 exact caller model reference 的 immutable binding contract。
+
+**实现内容：**
+
+- 新增 identity-based frozen/slotted `SimulationModelBinding`；
+- 保存 exact component boundary class 与 exact caller model instance；
+- 新增 identity-based frozen/slotted `SimulationModelBindingCollection`；
+- 保存 exact tuple、exact binding elements 与 caller order；
+- 拒绝错误 contract、contract/model mismatch、mutable collection 与错误 element；
+- 使用 `eq=False` 拒绝 reconstructed equal-field binding 的 identity membership；
+- 公开两个 binding contracts 并增加 focused tests。
+
+**Identity：**
+
+```text
+binding.model is original_model
+collection.bindings is original_tuple
+collection.bindings[index] is original_binding
+```
+
+**架构意义：** caller ownership 与未来 execution coordination 被明确分离；后续 executor 可以消费 exact model
+references，而无需引入 registry、factory、string lookup 或 hidden selection。
+
+**新增文件：**
+
+- `simulator/binding.py`；
+- `tests/unit/simulator/test_binding.py`；
+- `tasks/TASK-075.md`；
+- `architecture/adr/ADR-072-simulation-model-binding-contract.md`。
+
+**验证结果：** focused tests 22 passed；pytest 1305 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
+**关键设计决策：** Binding expresses ownership/reference relationship only. It does not execute, select, create
+or manage models. Collection 不排序、不去重、不补全，也不定义 exactly-once execution semantics。
+
 ## 2. 后续追加模板
 
 ```markdown

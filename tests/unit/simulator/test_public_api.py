@@ -18,6 +18,8 @@ from simulator import (
     PVSimulationInput,
     PVSimulationModelBoundary,
     PVSimulationResult,
+    SimulationModelBinding,
+    SimulationModelBindingCollection,
     SimulationScenario,
     SimulationState,
     SimulationStepIdentity,
@@ -49,6 +51,8 @@ def test_simulation_step_identity_public_import() -> None:
         "PVSimulationInput",
         "PVSimulationModelBoundary",
         "PVSimulationResult",
+        "SimulationModelBinding",
+        "SimulationModelBindingCollection",
         "SimulationScenario",
         "SimulationState",
         "SimulationStepIdentity",
@@ -58,6 +62,13 @@ def test_simulation_step_identity_public_import() -> None:
         "TariffSimulationModelBoundary",
         "TariffSimulationResult",
     ]
+
+
+def test_model_binding_contract_public_imports() -> None:
+    assert SimulationModelBinding.__name__ == "SimulationModelBinding"
+    assert (
+        SimulationModelBindingCollection.__name__ == "SimulationModelBindingCollection"
+    )
 
 
 def test_battery_actuation_public_import() -> None:
