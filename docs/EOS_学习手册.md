@@ -2029,6 +2029,33 @@ Result 的 `actual_power_kw` 延续正值充电、负值放电、零值空闲的
 - model：如何计算模拟响应；
 - immutable next state：本 step 完成后的观察。
 
+### 7.8 TASK-071 Grid Simulation Model Contract
+
+Grid component contract 只描述一个 step 的 requested exchange 与 actual exchange：
+
+```text
+step + requested_grid_power_kw
+        |
+        v
+GridSimulationInput
+        |
+        v
+abstract GridSimulationModelBoundary
+        |
+        v
+GridSimulationResult(actual_grid_power_kw)
+```
+
+两种功率都使用 signed finite raw kW：正值表示从 Grid import，负值表示向 Grid export，零表示平衡。
+Input 保存 exact step，Result 保存 exact Input。
+
+为什么 requested 与 actual 分开：requested 是 caller 明确提供给模拟模型的事实；actual 是模型输出的
+观察。Contract 不要求二者相等，也不负责解释差值。这样未来具体模型可以独立演进，但 artifact 本身
+不会偷偷加入 Grid limit、Zero Export 或 power-balance 算法。
+
+Grid model 不读取 PV、Load 或 Battery output 来自动计算 Grid power。多个 component 如何形成系统功率
+平衡属于后续 aggregate contract，而不是单一 Grid component 的职责。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

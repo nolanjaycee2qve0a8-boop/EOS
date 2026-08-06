@@ -9,6 +9,9 @@ from simulator import (
     BatterySimulationModelBoundary,
     BatterySimulationResult,
     BatterySimulationState,
+    GridSimulationInput,
+    GridSimulationModelBoundary,
+    GridSimulationResult,
     LoadSimulationInput,
     LoadSimulationModelBoundary,
     LoadSimulationResult,
@@ -33,6 +36,9 @@ def test_simulation_step_identity_public_import() -> None:
         "BatterySimulationModelBoundary",
         "BatterySimulationResult",
         "BatterySimulationState",
+        "GridSimulationInput",
+        "GridSimulationModelBoundary",
+        "GridSimulationResult",
         "LoadSimulationInput",
         "LoadSimulationModelBoundary",
         "LoadSimulationResult",
@@ -67,6 +73,17 @@ def test_battery_model_contract_public_imports() -> None:
     assert result.simulation_input is simulation_input
     assert result.next_state is state
     assert BatterySimulationModelBoundary.__name__ == ("BatterySimulationModelBoundary")
+
+
+def test_grid_contract_public_imports() -> None:
+    simulation_input = GridSimulationInput(
+        SimulationStepIdentity(0, 1.0, None),
+        2.0,
+    )
+    result = GridSimulationResult(simulation_input, 1.5)
+
+    assert result.simulation_input is simulation_input
+    assert GridSimulationModelBoundary.__name__ == "GridSimulationModelBoundary"
 
 
 def test_pv_contract_public_imports() -> None:

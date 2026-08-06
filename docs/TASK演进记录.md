@@ -2608,6 +2608,44 @@ result.next_state is caller_supplied_next_state
 voltage、current、temperature、electrochemistry、Constraint、Optimization、Runtime、Device、Command、
 Dispatch、aggregate contracts、cache 或 history。
 
+## TASK-071 Grid Simulation Model Contract
+
+**背景：** TASK-066～070 已建立独立 PV、Load、Tariff 与 Battery contracts。Aggregate simulation 前还需
+冻结独立 Grid exchange seam，避免单一 component 提前承担系统 balance 或 Grid Constraint。
+
+**目标：** 定义 immutable Grid input/result 与 abstract model boundary，不实现具体 Grid 行为。
+
+**实现内容：**
+
+- 新增 frozen/slotted `GridSimulationInput`；
+- 新增 frozen/slotted `GridSimulationResult`；
+- 新增 abstract/stateless/empty-slotted `GridSimulationModelBoundary`；
+- requested/actual power 使用 signed finite raw kW；
+- 冻结正值 import、负值 export、零值 balanced 的符号约定；
+- 保存 exact step/input identities；
+- 新增 focused validation、public API、dependency 和 regression tests。
+
+**Identity：**
+
+```text
+input.step_identity is original_step
+result.simulation_input is original_input
+```
+
+**架构意义：** Grid requested/actual exchange 成为独立 immutable facts。未来 aggregate layer 可以组合
+component observations，而无需让 Grid contract 反向依赖 PV、Load 或 Battery。
+
+**新增文件：**
+
+- `simulator/grid.py`；
+- `tests/unit/simulator/test_grid.py`；
+- `tasks/TASK-071.md`；
+- `architecture/adr/ADR-069-grid-simulation-model-contract.md`。
+
+**关键设计决策：** 不增加 balance calculation、import/export limit、Zero Export、outage、islanding、
+fault、voltage/frequency/reactive-power physics、Constraint、Optimization、Runtime、Device、Command、Dispatch、
+aggregate contracts、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
