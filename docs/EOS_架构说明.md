@@ -333,6 +333,11 @@ tuple[step inputs, ...] -> SimulationScenario
 Aggregate 只验证同一 exact step 和 result-to-input identity lineage，不调用 component models、不计算 power
 balance、不推进 step。Scenario 保留 caller tuple 与顺序，不排序、不去重、不持有 mutable Runtime state。
 
+TASK-073 通过 integration tests 验证完整 Phase 6 evidence flow。Test-only recording models 各执行一次，
+aggregate artifacts 保留 exact component results、Battery feasible-decision provenance 与 caller scenario
+order，并且不会触发第二次执行。TASK-073 不修改 production contracts，也不新增 runner、Runtime、
+Scheduler、Device、Command 或 power-balance calculation。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -748,6 +753,9 @@ TASK-072 提供 `SimulationStepInput`、`SimulationState`、`SimulationStepResul
 `SimulationScenario`。这些 frozen/slotted artifacts 只依赖已审核 component contracts，并以 identity
 验证跨组件 step 与 result/input provenance。它们不构成 simulation runner、Runtime、Scheduler 或
 model orchestration。
+
+TASK-073 仅增加 integration validation。所有 concrete recording models 都位于 tests，生产
+`simulator` package 与公开 API 保持不变。
 
 ### 5.7 `kernel/runtime`
 
