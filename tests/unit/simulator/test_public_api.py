@@ -5,6 +5,10 @@ from datetime import UTC, datetime
 from kernel.decision import DecisionIntent, FeasibleDecisionIntent
 from simulator import (
     BatterySimulationActuation,
+    BatterySimulationInput,
+    BatterySimulationModelBoundary,
+    BatterySimulationResult,
+    BatterySimulationState,
     LoadSimulationInput,
     LoadSimulationModelBoundary,
     LoadSimulationResult,
@@ -25,6 +29,10 @@ def test_simulation_step_identity_public_import() -> None:
     assert step.sequence == 0
     assert public_names == [
         "BatterySimulationActuation",
+        "BatterySimulationInput",
+        "BatterySimulationModelBoundary",
+        "BatterySimulationResult",
+        "BatterySimulationState",
         "LoadSimulationInput",
         "LoadSimulationModelBoundary",
         "LoadSimulationResult",
@@ -44,6 +52,21 @@ def test_battery_actuation_public_import() -> None:
     actuation = BatterySimulationActuation(feasible_decision, 1.0)
 
     assert actuation.source_feasible_decision is feasible_decision
+
+
+def test_battery_model_contract_public_imports() -> None:
+    step = SimulationStepIdentity(0, 1.0, None)
+    state = BatterySimulationState(0.5)
+    actuation = BatterySimulationActuation(
+        FeasibleDecisionIntent(DecisionIntent(1.0)),
+        1.0,
+    )
+    simulation_input = BatterySimulationInput(step, state, actuation)
+    result = BatterySimulationResult(simulation_input, state, 0.0)
+
+    assert result.simulation_input is simulation_input
+    assert result.next_state is state
+    assert BatterySimulationModelBoundary.__name__ == ("BatterySimulationModelBoundary")
 
 
 def test_pv_contract_public_imports() -> None:

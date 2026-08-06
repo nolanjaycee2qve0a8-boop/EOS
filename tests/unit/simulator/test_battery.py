@@ -119,8 +119,10 @@ def test_battery_module_has_only_contract_dependencies() -> None:
     }
 
     assert imported_modules == {
+        "abc",
         "dataclasses",
         "kernel.decision.constraint",
+        "simulator.core",
         "simulator.validation",
     }
 
