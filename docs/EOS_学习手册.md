@@ -1964,6 +1964,39 @@ result.simulation_input is original_input
 
 Tariff Model 只产生模拟价格 observation，不能根据高低电价生成 charge/discharge Intent。
 
+### 7.6 TASK-069 Battery Simulation Actuation Contract
+
+Battery actuation 是“已经允许的决策”与“未来 Battery 模型接收的功率请求”之间的证据边界：
+
+```text
+FeasibleDecisionIntent
+        |
+        v
+BatterySimulationActuation
+        |
+        v
+Future Battery Simulation Model
+```
+
+它保存 exact `source_feasible_decision`，因此可以验证：
+
+```text
+actuation.source_feasible_decision is original_feasible_decision
+```
+
+`battery_power_kw` 使用 signed finite raw kW：正值表示充电，负值表示放电，零表示空闲。这个符号约定
+属于 Simulation actuation contract，不是设备协议，也不代表已经生成 Command。
+
+Actuation 不根据 source decision 计算功率，不裁剪功率，不执行 SOC/SOH、效率、退化或温度模型，也不
+推进 Battery state。caller 必须显式提供功率；后续 TASK-070 才定义 Battery model contract。
+
+为什么不把 actuation 合并进 Decision 或 Command：
+
+- Decision 表达经过约束后的允许结果；
+- Simulation Actuation 表达模型将要观察的显式物理输入及其 provenance；
+- Command 属于真实设备执行语义；
+- 合并会让模拟、决策与设备执行失去独立替换和回放能力。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

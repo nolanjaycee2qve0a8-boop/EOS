@@ -2530,6 +2530,42 @@ Runtime 分离。负电价场景无需修改合同即可表达。
 **关键设计决策：** 不增加 concrete Tariff model、TOU、schedule、forecast、API、currency conversion、
 Runtime、Device、Command、aggregate State/Scenario/Step Result、Optimization、cache 或 history。
 
+## TASK-069 Battery Simulation Actuation Contract
+
+**背景：** Phase 6 在定义 Battery model 前，需要先分离 feasible decision、simulation actuation 与
+真实 Device Command，并补全 actuation 对 exact feasible decision 的 provenance。
+
+**目标：** 定义最小 immutable Battery actuation artifact，不实现 Battery physics 或状态推进。
+
+**实现内容：**
+
+- 新增 frozen/slotted `BatterySimulationActuation`；
+- 保存 exact `source_feasible_decision: FeasibleDecisionIntent`；
+- 使用 signed finite raw `battery_power_kw`；
+- 冻结正值充电、负值放电、零值空闲的 Simulation 符号约定；
+- 拒绝 bool、非 numeric 与非 finite power；
+- 新增 focused identity、immutability、dependency 和 public API tests。
+
+**Identity：**
+
+```text
+actuation.source_feasible_decision is original_feasible_decision
+```
+
+**架构意义：** Simulation 可以证明 Battery 功率输入来自哪个 exact feasible decision，同时保持
+Decision、Actuation 与 Command 三种语义分离。Kernel Decision 不依赖 Simulator。
+
+**新增文件：**
+
+- `simulator/battery.py`；
+- `tests/unit/simulator/test_battery.py`；
+- `tasks/TASK-069.md`；
+- `architecture/adr/ADR-067-battery-simulation-actuation-contract.md`。
+
+**关键设计决策：** Actuation 不计算或裁剪 power，不包含 step/state/model，不执行 SOC/SOH、效率、
+退化、温度、Constraint、Optimization、Runtime、Device、Command、Dispatch、PCS/BMS、协议、cache 或
+history。Battery model 保留给 TASK-070，aggregate contracts 保留给 TASK-072。
+
 ## 2. 后续追加模板
 
 ```markdown

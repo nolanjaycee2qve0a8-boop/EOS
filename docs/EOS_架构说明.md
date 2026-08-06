@@ -284,6 +284,18 @@ aware SimulationStepIdentity + explicit import/export CNY/kWh
 价格是 signed finite raw facts，允许负值。Boundary 不读取 clock、不选择 TOU window、不预测价格、
 不调用 API，也不产生 DecisionIntent。
 
+TASK-069 新增 Battery Simulation Actuation contract：
+
+```text
+FeasibleDecisionIntent
+        -> BatterySimulationActuation(source_feasible_decision, battery_power_kw)
+        -> Future Battery Simulation Model
+```
+
+Actuation 保留 exact feasible-decision identity。Battery power 使用 signed finite raw kW：正值充电、
+负值放电、零值空闲。它不生成 Command、不执行 Constraint、不推进 Battery state，也不拥有 Runtime、
+Device、clock、cache 或 history。Battery model contract 仍保留给 TASK-070。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -680,6 +692,11 @@ behavior、Demand Response、Runtime、Device 或 concrete model。
 TASK-068 提供 `TariffSimulationInput`、`TariffSimulationResult` 与 abstract
 `TariffSimulationModelBoundary`。Tariff package 只依赖 core/local validation，不依赖 Capability、
 Policy、Runtime、Device、external API、forecast 或 concrete model。
+
+TASK-069 提供 frozen/slotted `BatterySimulationActuation`。它依赖现有 immutable
+`FeasibleDecisionIntent` contract，保存 exact source identity，并公开 signed finite raw kW 的
+充电（正）、放电（负）、空闲（零）语义。它不包含 Battery physics、state transition、Runtime、
+Device、Command 或 concrete model。
 
 ### 5.7 `kernel/runtime`
 
