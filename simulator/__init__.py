@@ -1,5 +1,6 @@
 """Public contracts for deterministic EOS simulation."""
 
+from simulator.battery import BatterySimulationActuation
 from simulator.core import SimulationStepIdentity
 from simulator.load import (
     LoadSimulationInput,
@@ -18,6 +19,7 @@ from simulator.tariff import (
 )
 
 __all__ = [
+    "BatterySimulationActuation",
     "LoadSimulationInput",
     "LoadSimulationModelBoundary",
     "LoadSimulationResult",
