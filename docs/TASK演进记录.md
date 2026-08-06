@@ -2833,6 +2833,47 @@ pre-commit passed。
 stop-first 并原样传播；不增加 scenario loop、step progression、retry、Runtime、Device、Command 或
 Optimization。
 
+## TASK-077 Simulation Execution Trace / Evidence Contract
+
+**背景：** TASK-076 能完成一个确定性 step，但完成后的 input、bindings、state 与 result 还缺少统一的 immutable
+observation artifact。证据创建必须避免重新执行 model。
+
+**目标：** 建立一个只保存 structurally completed single-step artifacts 的 execution trace/evidence contract。
+
+**实现内容：**
+
+- 新增 frozen/slotted `SimulationExecutionTrace`；
+- 保存 exact simulation input、binding collection、state 与 step result；
+- 验证 result → input 和 result → state 的 identity relationships；
+- `create(bindings, step_result)` 只读取现有 references；
+- 拒绝 mismatched identity 与 invalid types；
+- 新增 observation-only、immutability、identity、dependency 和 public API tests。
+
+**Identity：**
+
+```text
+trace.bindings is original_bindings
+trace.step_result is original_step_result
+trace.simulation_input is original_step_result.simulation_input
+trace.state is original_step_result.state
+```
+
+**架构意义：** EOS 可以通过单一 immutable artifact 观察完成的单步结构关系，同时不会把 Trace creation 变成
+execution，也不会夸大当前 contracts 对 model invocation 的证明能力。
+
+**新增文件：**
+
+- `simulator/trace.py`；
+- `tests/unit/simulator/test_trace.py`；
+- `tasks/TASK-077.md`；
+- `architecture/adr/ADR-074-simulation-execution-trace-evidence-contract.md`。
+
+**关键设计决策：** Trace 是 structurally completed evidence；不调用 executor/model，不 copy/reconstruct；
+不新增 replay、progression、Runtime、Device、Command、persistence、timestamp、UUID、cache 或 history。
+
+**验证结果：** focused tests 24 passed；pytest 1334 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
 ## 2. 后续追加模板
 
 ```markdown

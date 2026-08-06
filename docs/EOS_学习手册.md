@@ -2195,6 +2195,31 @@ PV、Load、Tariff、Battery、Grid 各一个 model。如果边执行边发现�
 Executor 仍不是 Runtime：它只处理一个显式 step，没有 loop、clock、current pointer、retry、history 或下一 step 生成。
 它也不是 Device Execution：这里调用的是 simulation model boundary，不是 PCS/BMS 或 Command adapter。
 
+### 7.14 TASK-077 Simulation Execution Trace / Evidence Contract
+
+执行完成后，系统需要保存“哪些现有对象共同构成这次结果”，但保存证据不能再次执行。TASK-077 引入：
+
+```text
+bindings + completed step result
+        |
+        v
+SimulationExecutionTrace
+        |- exact input
+        |- exact state
+        |- exact result
+        |- exact binding collection
+```
+
+`create()` 只读取 `step_result.simulation_input` 和 `step_result.state` 的现有引用。它不调用 executor，不调用
+model，也不重新创建 component results。
+
+为什么称为“structurally completed evidence”：Trace 能证明 result 引用 exact input 和 exact state；既有 aggregate
+contracts 又能证明 state 中每个 component result 引用 exact component input。但当前 component result 不保存
+model identity，所以 Trace 不能独立证明某个 model 一定执行过。它只保留 caller 关联的 exact binding collection，
+不把关联夸大为不可伪造的执行证明。
+
+这体现 EOS 的证据原则：只陈述对象结构能够证明的事实，不通过命名暗示更强保证。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

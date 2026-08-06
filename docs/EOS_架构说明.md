@@ -996,3 +996,29 @@ SimulationState -> SimulationStepResult
 依赖方向：`simulator.executor -> binding + aggregate + component contracts`。Binding、aggregate 与 component
 contracts 不反向依赖 executor。该边界没有 scenario、progression、Runtime、Scheduler、Device、Command、
 Dispatch、Optimization、cache 或 history。
+
+## 14. Simulation Execution Trace / Evidence（TASK-077）
+
+TASK-077 在单步 executor 之上增加纯观察边界：
+
+```text
+completed SimulationStepResult + exact bindings
+        |
+        v
+SimulationExecutionTrace
+```
+
+Trace 保存 exact `SimulationStepInput`、`SimulationModelBindingCollection`、`SimulationState` 与
+`SimulationStepResult`，并验证：
+
+```text
+trace.step_result.simulation_input is trace.simulation_input
+trace.step_result.state is trace.state
+```
+
+`create()` 不依赖或调用 `SingleStepSimulationExecutor`，也不调用任何 component model。依赖方向保持
+`simulator.trace -> aggregate + binding`，executor/aggregate/binding/component contracts 均不反向依赖 trace。
+
+Evidence 语义被限定为 structurally completed：当前 component results 不保存 model identity，因此 trace 只保存
+caller 关联的 exact bindings，不宣称能够独立证明 model invocation。该边界没有 replay、progression、Runtime、
+Device、Command、persistence、timestamp、UUID、cache 或 history。

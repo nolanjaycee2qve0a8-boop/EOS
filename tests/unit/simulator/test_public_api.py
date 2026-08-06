@@ -18,6 +18,7 @@ from simulator import (
     PVSimulationInput,
     PVSimulationModelBoundary,
     PVSimulationResult,
+    SimulationExecutionTrace,
     SimulationModelBinding,
     SimulationModelBindingCollection,
     SimulationScenario,
@@ -52,6 +53,7 @@ def test_simulation_step_identity_public_import() -> None:
         "PVSimulationInput",
         "PVSimulationModelBoundary",
         "PVSimulationResult",
+        "SimulationExecutionTrace",
         "SimulationModelBinding",
         "SimulationModelBindingCollection",
         "SimulationScenario",
@@ -75,6 +77,10 @@ def test_model_binding_contract_public_imports() -> None:
 
 def test_single_step_executor_public_import() -> None:
     assert SingleStepSimulationExecutor.__name__ == "SingleStepSimulationExecutor"
+
+
+def test_simulation_execution_trace_public_import() -> None:
+    assert SimulationExecutionTrace.__name__ == "SimulationExecutionTrace"
 
 
 def test_battery_actuation_public_import() -> None:
