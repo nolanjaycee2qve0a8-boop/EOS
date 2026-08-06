@@ -39,6 +39,7 @@ from simulator.tariff import (
     TariffSimulationModelBoundary,
     TariffSimulationResult,
 )
+from simulator.trace import SimulationExecutionTrace
 
 __all__ = [
     "BatterySimulationActuation",
@@ -55,6 +56,7 @@ __all__ = [
     "PVSimulationInput",
     "PVSimulationModelBoundary",
     "PVSimulationResult",
+    "SimulationExecutionTrace",
     "SimulationModelBinding",
     "SimulationModelBindingCollection",
     "SimulationScenario",
