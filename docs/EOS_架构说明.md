@@ -309,6 +309,18 @@ SOC 是 `[0, 1]` raw fraction；actual power 延续正值充电、负值放电�
 Boundary 不实现 SOC transition、efficiency、degradation、constraint 或 concrete physics。Result 保存 exact
 Input 与 next-state references，source state 永不原地修改。
 
+TASK-071 建立 abstract Grid model contract：
+
+```text
+step + explicit requested Grid exchange
+        -> GridSimulationInput
+        -> GridSimulationModelBoundary
+        -> GridSimulationResult(actual Grid exchange)
+```
+
+Requested 与 actual 都使用 signed finite raw kW：正值 import、负值 export、零值 balanced。Grid boundary
+不读取其他 component、不计算系统 balance、不执行 Grid Constraint、Zero Export、Runtime 或 Device。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -715,6 +727,10 @@ TASK-070 进一步提供 `BatterySimulationState`、`BatterySimulationInput`、
 `BatterySimulationResult` 与 abstract `BatterySimulationModelBoundary`。Battery state/Input/Result 均为
 frozen/slotted artifacts；Boundary 只定义 replaceable transition seam，不包含 concrete Battery physics、
 Runtime、Device、Command、Constraint、cache 或 history。
+
+TASK-071 提供 `GridSimulationInput`、`GridSimulationResult` 与 abstract
+`GridSimulationModelBoundary`。Grid package 只依赖 simulation core/local validation，不依赖其他 component、
+Constraint、Runtime、Device 或 Command。系统 power balance 与 aggregate composition 保留给 TASK-072。
 
 ### 5.7 `kernel/runtime`
 

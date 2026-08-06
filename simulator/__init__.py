@@ -8,6 +8,11 @@ from simulator.battery import (
     BatterySimulationState,
 )
 from simulator.core import SimulationStepIdentity
+from simulator.grid import (
+    GridSimulationInput,
+    GridSimulationModelBoundary,
+    GridSimulationResult,
+)
 from simulator.load import (
     LoadSimulationInput,
     LoadSimulationModelBoundary,
@@ -30,6 +35,9 @@ __all__ = [
     "BatterySimulationModelBoundary",
     "BatterySimulationResult",
     "BatterySimulationState",
+    "GridSimulationInput",
+    "GridSimulationModelBoundary",
+    "GridSimulationResult",
     "LoadSimulationInput",
     "LoadSimulationModelBoundary",
     "LoadSimulationResult",
