@@ -911,3 +911,34 @@ constraint / evaluation cycle
 
 文档变更应与代码事实一致。未来设计可以记录为“规划”或“非目标”，不能写成已经具备
 的能力。
+
+## 11. Phase 6 Architecture Freeze（TASK-074）
+
+TASK-074 正式冻结 TASK-065～073 的 Simulation contracts。当前稳定依赖方向为：
+
+```text
+completed feasible decision evidence
+        |
+        v
+immutable simulator component contracts
+        |
+        v
+immutable aggregate simulation evidence
+```
+
+冻结规则：
+
+- component input 保存 exact step identity；
+- component result 保存 exact component input；
+- aggregate state/result 保存 exact inputs/results；
+- Battery actuation 保存 exact feasible decision；
+- scenario 保存 caller tuple identity、element identity 与顺序；
+- abstract model boundaries 无实例状态，production simulator 不提供 concrete model；
+- aggregate artifacts 不执行 model，不推进 step，不拥有 Runtime state。
+
+Phase 6 package 允许依赖既有 feasible-decision contract 作为 Battery provenance；Kernel、Runtime、
+Execution、Dispatch 与 Device 不反向依赖 simulator。Simulation actuation 不得被解释为 Device Command。
+
+Phase 6 当前明确不具备 production physics、power balance、SOC transition、runner、scheduler、automatic
+progression、Device integration 或 persistence。完整冻结报告见
+`docs/phase-summary/EOS_Phase6_Simulation_Architecture_v1.0.md`。

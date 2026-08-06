@@ -2714,6 +2714,40 @@ observation，不是隐藏的 runner 或 Runtime。
 **关键设计决策：** 不增加 production code、concrete production model、orchestrator、balance/SOC/energy
 计算、step progression、Runtime、Scheduler、Device、Command、Dispatch、persistence、cache 或 history。
 
+## TASK-074 Phase 6 Simulation Architecture Completion Review
+
+**背景：** TASK-065～073 已完成 core identity/time、五类 component、aggregate contracts 与 integration
+validation，需要在引入任何未来模型或 runner 前冻结 Phase 6 的真实能力与非目标。
+
+**目标：** 对 Phase 6 执行 completion review，确认 immutable、identity provenance、exactly-once evidence、
+dependency direction 以及 Simulation/Runtime/Device separation。
+
+**实现内容：**
+
+- 审查 `SimulationStepIdentity` 的显式 sequence/duration/timestamp contract；
+- 审查 PV、Load、Tariff、Battery、Grid input/result 与 abstract model boundaries；
+- 审查 feasible decision → Battery actuation → Battery input/result provenance；
+- 审查 aggregate input/state/result/scenario 的 exact identity contracts；
+- 审查 TASK-073 exactly-once integration evidence；
+- 冻结 Phase 6 contracts，并新增 Phase 6 v1.0 summary；
+- 不修改 production code、tests 或 public API。
+
+**架构意义：** EOS 获得稳定的 simulation contract platform，但不把合同完整性误写成 production simulator、
+Runtime 或 Device capability。未来 physics、runner 与 progression 必须通过独立 TASK 引入。
+
+**新增文件：**
+
+- `tasks/TASK-074.md`；
+- `architecture/adr/ADR-071-phase6-simulation-completion-review.md`；
+- `docs/phase-summary/EOS_Phase6_Simulation_Architecture_v1.0.md`。
+
+**验证结果：** Phase 6 architecture review PASS；pytest 1291 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
+**关键设计决策：** 冻结 direct identity contracts；保持 Simulation != Runtime、Simulation != Device
+Execution、Actuation != Command；不新增 production model、power balance、SOC transition、runner、step
+progression、persistence、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown
