@@ -47,6 +47,14 @@ def require_number(value: object, field_name: str) -> float:
     return normalized
 
 
+def require_fraction(value: object, field_name: str) -> float:
+    """Require a finite, non-boolean raw fraction in the closed range [0, 1]."""
+    normalized = require_number(value, field_name)
+    if not 0 <= normalized <= 1:
+        raise ValueError(f"{field_name} must be between 0 and 1 inclusive")
+    return normalized
+
+
 def require_optional_timezone_aware_datetime(
     value: object,
     field_name: str,

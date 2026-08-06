@@ -1997,6 +1997,38 @@ Actuation 不根据 source decision 计算功率，不裁剪功率，不执行 S
 - Command 属于真实设备执行语义；
 - 合并会让模拟、决策与设备执行失去独立替换和回放能力。
 
+### 7.7 TASK-070 Battery Simulation Model Contract
+
+TASK-070 在 actuation 之后加入最小 Battery state-transition seam：
+
+```text
+step + source state + actuation
+        |
+        v
+BatterySimulationInput
+        |
+        v
+abstract BatterySimulationModelBoundary
+        |
+        v
+BatterySimulationResult(next state, actual power)
+```
+
+`BatterySimulationState.soc` 是 `[0, 1]` 的 raw unitless fraction。Input 保存 exact step、source state 与
+actuation；Result 保存 exact Input 和 caller/model 提供的 immutable next state。没有变化时 next state
+可以与 source state 是同一对象，发生变化时则可以是新的 immutable state。
+
+Result 的 `actual_power_kw` 延续正值充电、负值放电、零值空闲的 signed raw kW 约定，但 contract 不
+计算 SOC、不计算效率，也不要求 actual power 必须等于 actuation power。后者属于未来 concrete model，
+不能隐藏在 artifact validation 中。
+
+这个设计把四件事分开：
+
+- feasible decision：允许做什么；
+- actuation：模型收到什么显式功率请求；
+- model：如何计算模拟响应；
+- immutable next state：本 step 完成后的观察。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

@@ -2566,6 +2566,48 @@ Decision、Actuation 与 Command 三种语义分离。Kernel Decision 不依赖 
 退化、温度、Constraint、Optimization、Runtime、Device、Command、Dispatch、PCS/BMS、协议、cache 或
 history。Battery model 保留给 TASK-070，aggregate contracts 保留给 TASK-072。
 
+## TASK-070 Battery Simulation Model Contract
+
+**背景：** TASK-069 已冻结 feasible decision 到 Battery actuation 的 provenance。Phase 6 还需要独立
+的 Battery source-state/next-state 生命周期与 replaceable model seam。
+
+**目标：** 定义 immutable Battery state、input、result 与 abstract model boundary，不实现 physics。
+
+**实现内容：**
+
+- 新增 frozen/slotted `BatterySimulationState(soc)`；
+- SOC 使用 `[0, 1]` finite raw unitless fraction；
+- 新增保存 exact step/source-state/actuation 的 `BatterySimulationInput`；
+- 新增保存 exact input/next-state 与 signed actual power 的 `BatterySimulationResult`；
+- 新增 abstract/stateless/empty-slotted `BatterySimulationModelBoundary`；
+- 保持正值充电、负值放电、零值空闲的 raw kW 符号；
+- 新增 focused validation、identity、public API 和 dependency tests。
+
+**Identity：**
+
+```text
+input.step_identity is original_step
+input.source_state is original_source_state
+input.actuation is original_actuation
+result.simulation_input is original_input
+result.next_state is caller_supplied_next_state
+```
+
+**架构意义：** Battery 模拟获得明确的 immutable state transition seam。无变化可以保留 state identity，
+变化则由未来 concrete model 提供新 state；artifact 自身不计算或修改状态。
+
+**新增文件：**
+
+- 扩展 `simulator/battery.py`；
+- 扩展 `simulator/validation.py`；
+- `tests/unit/simulator/test_battery_model.py`；
+- `tasks/TASK-070.md`；
+- `architecture/adr/ADR-068-battery-simulation-model-contract.md`。
+
+**关键设计决策：** 不实现 SOC transition、capacity integration、efficiency、loss、degradation、SOH、
+voltage、current、temperature、electrochemistry、Constraint、Optimization、Runtime、Device、Command、
+Dispatch、aggregate contracts、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

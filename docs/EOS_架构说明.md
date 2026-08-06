@@ -296,6 +296,19 @@ Actuation 保留 exact feasible-decision identity。Battery power 使用 signed 
 负值放电、零值空闲。它不生成 Command、不执行 Constraint、不推进 Battery state，也不拥有 Runtime、
 Device、clock、cache 或 history。Battery model contract 仍保留给 TASK-070。
 
+TASK-070 建立 abstract Battery model contract：
+
+```text
+step + immutable source state + exact actuation
+        -> BatterySimulationInput
+        -> BatterySimulationModelBoundary
+        -> BatterySimulationResult(immutable next state, actual power)
+```
+
+SOC 是 `[0, 1]` raw fraction；actual power 延续正值充电、负值放电、零值空闲的 signed finite raw kW。
+Boundary 不实现 SOC transition、efficiency、degradation、constraint 或 concrete physics。Result 保存 exact
+Input 与 next-state references，source state 永不原地修改。
+
 ## 3. 核心架构原则
 
 ### 3.1 Boundary First Design
@@ -697,6 +710,11 @@ TASK-069 提供 frozen/slotted `BatterySimulationActuation`。它依赖现有 im
 `FeasibleDecisionIntent` contract，保存 exact source identity，并公开 signed finite raw kW 的
 充电（正）、放电（负）、空闲（零）语义。它不包含 Battery physics、state transition、Runtime、
 Device、Command 或 concrete model。
+
+TASK-070 进一步提供 `BatterySimulationState`、`BatterySimulationInput`、
+`BatterySimulationResult` 与 abstract `BatterySimulationModelBoundary`。Battery state/Input/Result 均为
+frozen/slotted artifacts；Boundary 只定义 replaceable transition seam，不包含 concrete Battery physics、
+Runtime、Device、Command、Constraint、cache 或 history。
 
 ### 5.7 `kernel/runtime`
 
