@@ -2169,6 +2169,32 @@ caller artifact。因此 collection membership 不能把 reconstructed binding �
 Collection 保存 exact tuple 和 caller order，不排序、不去重、不补全。即使 caller 重复放入同一个 binding，TASK-075
 也只保存这个事实，不推断它应执行几次；execution semantics 属于后续独立边界。
 
+### 7.13 TASK-076 Single-Step Simulation Executor Boundary
+
+TASK-076 首次让 Phase 6 contracts 发生一次真实但严格受限的 model invocation：
+
+```text
+one exact SimulationStepInput
+        +
+caller-owned bindings
+        |
+        v
+SingleStepSimulationExecutor
+        |
+        v
+SimulationState -> SimulationStepResult
+```
+
+为什么先检查 completeness 再调用：TASK-075 collection 可以表达 partial 或 duplicate facts，但一次完整 step 必须拥有
+PV、Load、Tariff、Battery、Grid 各一个 model。如果边执行边发现缺失，前面的 model 已经被调用，就会产生半完成执行。
+因此 TASK-076 在任何调用之前验证“五类各且仅一个”。
+
+为什么按 caller order：BindingCollection 已保存显式顺序。Executor 尊重这个输入，不排序、不推断依赖、不隐藏优先级。
+成功时每个 model 恰好执行一次；失败时立即停止，并把同一个异常交还 caller。
+
+Executor 仍不是 Runtime：它只处理一个显式 step，没有 loop、clock、current pointer、retry、history 或下一 step 生成。
+它也不是 Device Execution：这里调用的是 simulation model boundary，不是 PCS/BMS 或 Command adapter。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

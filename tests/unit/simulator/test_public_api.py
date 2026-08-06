@@ -25,6 +25,7 @@ from simulator import (
     SimulationStepIdentity,
     SimulationStepInput,
     SimulationStepResult,
+    SingleStepSimulationExecutor,
     TariffSimulationInput,
     TariffSimulationModelBoundary,
     TariffSimulationResult,
@@ -58,6 +59,7 @@ def test_simulation_step_identity_public_import() -> None:
         "SimulationStepIdentity",
         "SimulationStepInput",
         "SimulationStepResult",
+        "SingleStepSimulationExecutor",
         "TariffSimulationInput",
         "TariffSimulationModelBoundary",
         "TariffSimulationResult",
@@ -69,6 +71,10 @@ def test_model_binding_contract_public_imports() -> None:
     assert (
         SimulationModelBindingCollection.__name__ == "SimulationModelBindingCollection"
     )
+
+
+def test_single_step_executor_public_import() -> None:
+    assert SingleStepSimulationExecutor.__name__ == "SingleStepSimulationExecutor"
 
 
 def test_battery_actuation_public_import() -> None:

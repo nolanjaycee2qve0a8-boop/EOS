@@ -18,6 +18,7 @@ from simulator.binding import (
     SimulationModelBindingCollection,
 )
 from simulator.core import SimulationStepIdentity
+from simulator.executor import SingleStepSimulationExecutor
 from simulator.grid import (
     GridSimulationInput,
     GridSimulationModelBoundary,
@@ -61,6 +62,7 @@ __all__ = [
     "SimulationStepIdentity",
     "SimulationStepInput",
     "SimulationStepResult",
+    "SingleStepSimulationExecutor",
     "TariffSimulationInput",
     "TariffSimulationModelBoundary",
     "TariffSimulationResult",

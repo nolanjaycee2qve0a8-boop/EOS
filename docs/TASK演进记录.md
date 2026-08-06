@@ -2789,6 +2789,50 @@ pre-commit passed。
 **关键设计决策：** Binding expresses ownership/reference relationship only. It does not execute, select, create
 or manage models. Collection 不排序、不去重、不补全，也不定义 exactly-once execution semantics。
 
+## TASK-076 Single-Step Simulation Executor Boundary
+
+**背景：** TASK-075 已表达 caller-supplied model ownership，但没有执行语义。Phase 7 需要最小单步协调器，
+同时避免提前引入 scenario runner 或 Runtime。
+
+**目标：** 使用 exact `SimulationStepInput` 与 caller bindings 执行一个确定性 simulation step，并返回既有
+`SimulationStepResult`。
+
+**实现内容：**
+
+- 新增 stateless/empty-slotted `SingleStepSimulationExecutor`；
+- 执行前验证 PV、Load、Tariff、Battery、Grid bindings 各且仅一个；
+- 严格按 caller binding tuple 顺序调用；
+- 每个 component model 在成功路径 exactly once；
+- 每个 model 接收对应 exact component input；
+- 验证 model result type，并复用 `SimulationState`/`SimulationStepResult`；
+- 异常立即停止并保持 exact exception identity；
+- 新增 focused execution、ordering、identity、failure 和 dependency tests。
+
+**Identity：**
+
+```text
+step_result.simulation_input is original_step_input
+state.<component>_result.simulation_input is original_component_input
+bound model receives original_component_input
+```
+
+**架构意义：** EOS 首次具备单个 simulation step 的确定性 coordination，同时 executor 不拥有 model、scenario、
+clock、Runtime state 或 Device execution。
+
+**新增文件：**
+
+- `simulator/executor.py`；
+- `tests/unit/simulator/test_executor.py`；
+- `tasks/TASK-076.md`；
+- `architecture/adr/ADR-073-single-step-simulation-executor-boundary.md`。
+
+**验证结果：** focused tests 24 passed；pytest 1320 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
+**关键设计决策：** completeness validation 先于任何 model call；caller order 即 execution order；failure
+stop-first 并原样传播；不增加 scenario loop、step progression、retry、Runtime、Device、Command 或
+Optimization。
+
 ## 2. 后续追加模板
 
 ```markdown
