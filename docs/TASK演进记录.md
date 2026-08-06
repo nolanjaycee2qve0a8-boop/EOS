@@ -2492,6 +2492,44 @@ result.simulation_input is original_simulation_input
 **关键设计决策：** 不增加 concrete Load model、forecast、profile、user behavior、Demand Response、
 schedule、Device、Runtime、Command、aggregate State/Scenario/Step Result、Optimization、cache 或 history。
 
+## TASK-068 Tariff Simulation Model Contract
+
+**背景：** Aggregate Simulation contracts 之前需要独立冻结 Tariff component 的显式时间、价格单位、
+输入、输出和 extension seam。
+
+**目标：** 只定义 tariff simulation contract，不实现 TOU、schedule selection、price forecast、API 或
+套利策略。
+
+**实现内容：**
+
+- 新增 frozen/slotted `TariffSimulationInput`；
+- 新增 frozen/slotted `TariffSimulationResult`；
+- 新增 abstract/stateless/empty-slotted `TariffSimulationModelBoundary`；
+- 要求 exact step 具有 timezone-aware timestamp；
+- import/export prices 使用 signed finite raw CNY/kWh；
+- 保存 exact step/input identities；
+- 新增 focused validation、public API 和 unit tests。
+
+**Identity：**
+
+```text
+simulation_input.step_identity is original_step_identity
+result.simulation_input is original_simulation_input
+```
+
+**架构意义：** Tariff observation 与 TOU Capability、pricing strategy、clock、external service 和
+Runtime 分离。负电价场景无需修改合同即可表达。
+
+**新增文件：**
+
+- `simulator/tariff.py`；
+- `tests/unit/simulator/test_tariff.py`；
+- `tasks/TASK-068.md`；
+- `architecture/adr/ADR-066-tariff-simulation-model-contract.md`。
+
+**关键设计决策：** 不增加 concrete Tariff model、TOU、schedule、forecast、API、currency conversion、
+Runtime、Device、Command、aggregate State/Scenario/Step Result、Optimization、cache 或 history。
+
 ## 2. 后续追加模板
 
 ```markdown

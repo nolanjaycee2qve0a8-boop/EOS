@@ -11,6 +11,11 @@ from simulator.pv import (
     PVSimulationModelBoundary,
     PVSimulationResult,
 )
+from simulator.tariff import (
+    TariffSimulationInput,
+    TariffSimulationModelBoundary,
+    TariffSimulationResult,
+)
 
 __all__ = [
     "LoadSimulationInput",
@@ -20,4 +25,7 @@ __all__ = [
     "PVSimulationModelBoundary",
     "PVSimulationResult",
     "SimulationStepIdentity",
+    "TariffSimulationInput",
+    "TariffSimulationModelBoundary",
+    "TariffSimulationResult",
 ]
