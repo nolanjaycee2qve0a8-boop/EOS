@@ -2874,6 +2874,52 @@ execution，也不会夸大当前 contracts 对 model invocation 的证明能力
 **验证结果：** focused tests 24 passed；pytest 1334 passed；Ruff lint/format passed；mypy passed；
 pre-commit passed。
 
+## TASK-078 Scenario Execution Boundary
+
+**背景：** TASK-076 已提供 deterministic single-step execution，TASK-077 已提供 observation-only single-step
+evidence，但 `SimulationScenario` 仍没有一个复用两者的明确执行入口。
+
+**目标：** 按 caller 提供的 scenario step 顺序执行所有明确输入，并返回完整 immutable scenario evidence；不生成或
+推进 step。
+
+**实现内容：**
+
+- 新增 stateless/empty-slotted `ScenarioExecutionBoundary`；
+- 按 exact `scenario.steps` caller order 调用现有 single-step executor；
+- 每个成功 step 恰好执行一次，每个完成 step 恰好创建一个 trace；
+- 新增 frozen/slotted、tuple-only `ScenarioExecutionResult`；
+- 验证 trace 数量完整且每个 trace 在相同 index 引用 exact scenario step；
+- caller 重复同一个 step reference 时仍逐 occurrence 执行，并产生不同 trace identity；
+- 验证每个 trace 引用 exact caller binding collection；
+- 空 scenario 不调用 model；异常 stop-first 并保持 exact identity；
+- 新增 ordering、exactly-once、provenance、failure、immutability、dependency 与 public API tests。
+
+**Identity：**
+
+```text
+result.scenario is original_scenario
+result.bindings is original_bindings
+result.traces[index].simulation_input is original_scenario.steps[index]
+result.traces[index].bindings is original_bindings
+```
+
+**架构意义：** EOS 可以执行 caller 已经完整描述的确定性 scenario，同时保持 one-step execution 与 evidence 的唯一
+职责来源。Scenario execution 没有被扩展为 progression、Runtime 或 Scheduler。
+
+**新增文件：**
+
+- `simulator/scenario_execution.py`；
+- `tests/unit/simulator/test_scenario_execution.py`；
+- `tasks/TASK-078.md`；
+- `architecture/adr/ADR-075-scenario-execution-boundary.md`。
+
+**关键设计决策：** 复用 `SingleStepSimulationExecutor` 与 `SimulationExecutionTrace`，不复制其逻辑；不排序、不去重、
+不生成 next step、不自动传播 state；不增加 Runtime、Scheduler、Device、Command、Dispatch、replay、persistence、
+retry、cache、history、physics、Optimization 或 EMS strategy。
+
+**验证结果：** focused tests 26 passed；pytest 1349 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
 ## 2. 后续追加模板
 
 ```markdown

@@ -34,6 +34,10 @@ from simulator.pv import (
     PVSimulationModelBoundary,
     PVSimulationResult,
 )
+from simulator.scenario_execution import (
+    ScenarioExecutionBoundary,
+    ScenarioExecutionResult,
+)
 from simulator.tariff import (
     TariffSimulationInput,
     TariffSimulationModelBoundary,
@@ -56,6 +60,8 @@ __all__ = [
     "PVSimulationInput",
     "PVSimulationModelBoundary",
     "PVSimulationResult",
+    "ScenarioExecutionBoundary",
+    "ScenarioExecutionResult",
     "SimulationExecutionTrace",
     "SimulationModelBinding",
     "SimulationModelBindingCollection",

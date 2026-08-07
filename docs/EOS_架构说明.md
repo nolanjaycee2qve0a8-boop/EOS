@@ -1022,3 +1022,42 @@ trace.step_result.state is trace.state
 Evidence 语义被限定为 structurally completed：当前 component results 不保存 model identity，因此 trace 只保存
 caller 关联的 exact bindings，不宣称能够独立证明 model invocation。该边界没有 replay、progression、Runtime、
 Device、Command、persistence、timestamp、UUID、cache 或 history。
+
+## 15. Scenario Execution Boundary（TASK-078）
+
+TASK-078 只组合既有 scenario、single-step executor 与 trace contracts：
+
+```text
+SimulationScenario + SimulationModelBindingCollection
+        |
+        v
+ScenarioExecutionBoundary
+        |
+        +-- SingleStepSimulationExecutor.execute(step, bindings)
+        |       exactly once per successful explicit step
+        |
+        +-- SimulationExecutionTrace.create(bindings, step_result)
+        |       exactly once per completed step
+        v
+ScenarioExecutionResult
+```
+
+`ScenarioExecutionBoundary` 无实例状态并使用空 slots。它严格按 `scenario.steps` 的 caller order 执行，不按 sequence
+或 timestamp 排序，不去重，也不生成 step。异常立即停止并原样传播，不返回 partial result。
+
+`ScenarioExecutionResult` 是 frozen/slotted、tuple-only artifact，字段为 exact `scenario`、exact `bindings` 和新组装的
+trace tuple。它验证：
+
+```text
+len(traces) == len(scenario.steps)
+traces[index].simulation_input is scenario.steps[index]
+traces[index].bindings is bindings
+each scenario tuple occurrence has a distinct trace identity
+```
+
+因此 result 表达完整、顺序一致的 direct provenance，但不增加 model execution 的证明强度；单步 evidence 语义仍以
+TASK-077 为准。
+
+依赖方向保持：`scenario_execution -> executor + trace + aggregate + binding`。既有 component、aggregate、binding、
+executor 和 trace contracts 不反向依赖 scenario execution。该边界没有 progression、Runtime、Scheduler、Device、
+Command、Dispatch、replay、persistence、retry、cache、history、physics、Optimization 或 EMS strategy。

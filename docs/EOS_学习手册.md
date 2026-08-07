@@ -2220,6 +2220,41 @@ model identity，所以 Trace 不能独立证明某个 model 一定执行过。�
 
 这体现 EOS 的证据原则：只陈述对象结构能够证明的事实，不通过命名暗示更强保证。
 
+### 7.15 TASK-078 Scenario Execution Boundary
+
+TASK-076 只能执行一个明确 step，TASK-077 只能观察一个已完成 step。TASK-078 把两者组合到 caller 已经完整提供的
+`SimulationScenario` 上：
+
+```text
+explicit caller-ordered scenario steps
+        +
+exact caller-owned bindings
+        |
+        v
+ScenarioExecutionBoundary
+        |
+        v
+one exact SimulationExecutionTrace per completed step
+        |
+        v
+ScenarioExecutionResult
+```
+
+“Scenario execution”不等于“Scenario progression”。Boundary 只遍历现有 `scenario.steps`，不根据前一步结果生成
+下一步，也不把 Battery next state 自动写入下一项输入。每个 step 的 source state、actuation 和 component inputs
+仍由 caller 明确给出。
+
+为什么必须复用 single-step executor：PV、Load、Tariff、Battery、Grid binding completeness、caller binding order、
+result type 和 failure semantics 已由 TASK-076 定义。如果 scenario 层重新实现，会形成两套可能分歧的执行规则。
+
+为什么结果保存 trace 而不是只保存数值：每个 trace 继续保留 exact step input、state、step result 和 bindings。
+`ScenarioExecutionResult` 又验证 trace 与 `scenario.steps` 在同一 index 上使用 exact identity，因此 missing、extra、
+reordered 或 differently-bound evidence 都不能冒充完整场景结果。
+
+失败采用 stop-first：同一个异常原样传播，不返回半完成 result。此前已经被调用的 caller-owned test/model object
+可能已经观察到调用；本边界不提供 rollback、retry 或 checkpoint。空 scenario 则直接产生空 trace tuple，且不调用
+任何 model。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
