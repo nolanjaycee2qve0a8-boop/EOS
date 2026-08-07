@@ -1096,3 +1096,24 @@ next_input.battery_input.source_state
 依赖方向为 `simulator.progression -> trace + aggregate`。Trace、aggregate、executor、scenario execution、Runtime、
 Device、Kernel 和策略层不反向依赖 progression。该合同没有 loop、Scheduler、history、persistence、replay、forecast、
 Optimization、Constraint evaluation、Command 或 Device integration。
+
+## 17. Phase 7 Integration Validation（TASK-080）
+
+TASK-080 不新增 production boundary，只通过 test-only component models 验证 Phase 7 组合：
+
+```text
+Binding -> Scenario Execution -> Single-Step Execution -> Trace -> Progression
+```
+
+冻结结果：
+
+- scenario 与 binding order 完全由 caller 控制；
+- 每个 component 在每个成功 explicit step 中 exactly once；
+- scenario、bindings、steps、traces、step results 与 progression 保持 direct identity；
+- 相同 explicit facts 与等价 deterministic models 产生相同 observation values；
+- failure stop-first，exact exception propagation，无 retry、skip 或 implicit continuation；
+- progression 只验证 caller next input，不生成 step 或推进时间；
+- 没有 Runtime、Scheduler、Clock、Thread、Queue、Device、Command、Optimization 或 persistence/history。
+
+TASK-080 仅新增 integration tests 和 Markdown。`simulator/` production code、public API 与既有 tests 均未修改。
+完整 Phase 7 报告见 `docs/phase-summary/EOS_Phase7_Deterministic_Simulation_Execution_v1.0.md`。
