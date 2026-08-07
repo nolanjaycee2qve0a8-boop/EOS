@@ -1061,3 +1061,38 @@ TASK-077 为准。
 依赖方向保持：`scenario_execution -> executor + trace + aggregate + binding`。既有 component、aggregate、binding、
 executor 和 trace contracts 不反向依赖 scenario execution。该边界没有 progression、Runtime、Scheduler、Device、
 Command、Dispatch、replay、persistence、retry、cache、history、physics、Optimization 或 EMS strategy。
+
+## 16. Explicit Step Progression Contract（TASK-079）
+
+TASK-079 不实现 progression engine，只定义 caller-owned next-step relationship：
+
+```text
+SimulationExecutionTrace + exact previous result
+        +
+caller-supplied next SimulationStepInput
+        |
+        v
+SimulationStepProgression
+```
+
+`SimulationStepProgression` 是 `frozen=True, slots=True, eq=False` 的 identity artifact，保存 exact
+`previous_trace`、exact `previous_result` 和 exact `next_input`。核心验证为：
+
+```text
+previous_result is previous_trace.step_result
+next_input.battery_input.source_state
+    is previous_result.state.battery_result.next_state
+```
+
+前者防止 reconstructed result 破坏 evidence lineage；后者显式连接 Battery model 已产生的 next state 与 caller 下一
+输入的 source state。合同不计算 SOC、不复制或修改 state，也不把其他 component facts 推导为下一步输入。
+
+`SimulationStepProgressionBoundary` 是 abstract、stateless、empty-slotted contract，仅定义
+`relate(previous_trace, next_input) -> SimulationStepProgression`，TASK-079 不提供 concrete implementation。
+
+时间完全由 `next_input.step_identity` 的 caller-supplied timestamp/duration 表达。该 package 不导入 datetime/time，
+不读取 clock，不增加 sequence/timestamp，不比较 chronology，也不调度或执行下一步。
+
+依赖方向为 `simulator.progression -> trace + aggregate`。Trace、aggregate、executor、scenario execution、Runtime、
+Device、Kernel 和策略层不反向依赖 progression。该合同没有 loop、Scheduler、history、persistence、replay、forecast、
+Optimization、Constraint evaluation、Command 或 Device integration。
