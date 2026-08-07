@@ -3002,6 +3002,38 @@ Optimization、persistence、history、retry 或 replay。
 **验证结果：** focused integration tests 3 passed；pytest 1363 passed；Ruff lint/format passed；mypy passed；
 pre-commit passed。
 
+## TASK-081 Phase 7 Deterministic Simulation Execution Completion Review
+
+**背景：** TASK-075～080 已完成 model binding、single-step execution、trace evidence、scenario execution、explicit
+progression 与 end-to-end validation，需要在进入后续阶段前冻结 Phase 7 的保证和 non-goals。
+
+**目标：** 以 documentation-only completion review 确认 Phase 7 架构完整性，不修改 production code、tests 或 API。
+
+**审查结论：**
+
+- execution 输入、model binding、step order、binding order 与 next step 均由 caller 显式提供；
+- 每个 component 在每个成功 explicit step 中 exactly once；
+- scenario result、trace 与 progression 保持各自直接字段的 exact identity；
+- reconstructed equal-field artifact 不能替代 provenance object；
+- failure stop-first，exact exception propagation，无 retry、skip、implicit continuation 或伪造成功结果；
+- Simulation 不拥有 Runtime、Clock、Scheduler、Thread、Queue、loop、history 或 lifecycle；
+- Phase 7 不包含 Device/Command/Dispatcher/PCS/BMS/协议，也不包含 EMS strategy、Optimization、Forecast 或决策。
+
+**架构意义：** Phase 7 从“实现并验证”进入“完成并冻结”。后续能力必须通过新边界扩展，不能把 scenario execution 解释
+成 Runtime，不能把 progression 解释成 step generation/time scheduling，也不能把 structural trace 过度描述为独立执行证明。
+
+**新增文件：**
+
+- `tasks/TASK-081.md`；
+- `architecture/adr/ADR-078-phase7-simulation-execution-completion-review.md`。
+
+**更新文件：** Phase 7 summary、EOS 学习手册、EOS 架构说明、TASK 演进记录。
+
+**关键设计决策：** 只修改 Markdown；不修改 Phase 5/6 contracts、`simulator/`、public API、tests、Runtime、Device 或
+execution semantics。Identity guarantee 仅覆盖每个 contract 明确验证的 direct references。
+
+**验证结果：** `pytest`、Ruff lint/format、`mypy` 与 `pre-commit` 全部通过。
+
 ## 2. 后续追加模板
 
 ```markdown

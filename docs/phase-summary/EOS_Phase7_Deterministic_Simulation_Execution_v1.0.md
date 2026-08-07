@@ -51,6 +51,12 @@ Uses test-only models to validate the complete success, deterministic
 observation, identity, progression, and failure chains. No production contract
 is added or modified.
 
+### TASK-081 — Phase 7 Completion Review
+
+Freezes the reviewed Phase 7 guarantees and exclusions. This completion task
+changes documentation only; Phase 5 contracts, Phase 6 contracts, simulator
+production code, public APIs, and tests remain unchanged.
+
 ## 3. Frozen architecture
 
 ```text
@@ -154,10 +160,16 @@ loop, Device adapter, command dispatch, or lifecycle history.
 
 ## 10. Completion status
 
-Phase 7 deterministic simulation execution architecture is integration-tested
-and ready for architecture review. Future work must preserve these contracts
-and introduce any Runtime, scheduling, persistence, or Device concerns through
-separate explicit boundaries.
+Phase 7 deterministic simulation execution architecture is integration-tested,
+completion-reviewed, and frozen at TASK-081. Future work must preserve these
+contracts and introduce any Runtime, scheduling, persistence, or Device
+concerns through separate explicit boundaries.
+
+The freeze is deliberately narrow: every artifact preserves the exact direct
+references required by its own contract. Phase 7 does not assert an automatic
+cross-boundary lineage beyond those validated relationships, and execution
+traces remain structural evidence rather than independent proof of model
+invocation.
 
 ## 11. Validation
 
