@@ -2255,6 +2255,50 @@ reordered 或 differently-bound evidence 都不能冒充完整场景结果。
 可能已经观察到调用；本边界不提供 rollback、retry 或 checkpoint。空 scenario 则直接产生空 trace tuple，且不调用
 任何 model。
 
+### 7.16 TASK-079 Explicit Step Progression Contract
+
+Scenario order 只回答“以什么顺序执行 caller 已经给出的 steps”，并不回答“下一步输入从哪里来”。TASK-079 把后者
+建模为一个显式 provenance relation：
+
+```text
+completed previous trace/result
+        +
+caller-created next input
+        |
+        v
+SimulationStepProgression
+```
+
+为什么不能让 Simulation 自动生成下一步：一旦 simulation 根据当前结果创建 timestamp、sequence、load、PV、tariff
+或 actuation，它就开始拥有未来事实、时间推进和生命周期，实际上变成了 Runtime。TASK-079 因此只验证 caller
+已经提供的对象关系。
+
+Battery 是当前 component contracts 中唯一显式暴露 source state 与 next state 的模型。其 lineage 为：
+
+```text
+previous battery source_state
+        |
+        v
+previous BatterySimulationResult.next_state
+        |
+        | exact identity
+        v
+next BatterySimulationInput.source_state
+```
+
+这里没有 SOC 计算或状态复制。若 caller 新建一个数值相同的 `BatterySimulationState`，identity 已经不同，不能冒充
+model 实际产生的 next state。同理，progression 保存的 previous result 必须就是 previous trace 中的 exact result，
+value-equal reconstruction 会被拒绝。
+
+下一步的 timestamp 和 duration 已经包含在 caller-supplied `SimulationStepIdentity` 中。Progression 不读取 clock、
+不增加时间、不验证时间先后，也不执行下一步。因此必须持续区分：
+
+```text
+Scenario ordering != Step generation
+Step progression != Time scheduling
+Simulation != Runtime
+```
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

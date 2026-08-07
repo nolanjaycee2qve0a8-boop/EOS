@@ -2920,6 +2920,52 @@ retry、cache、history、physics、Optimization 或 EMS strategy。
 **验证结果：** focused tests 26 passed；pytest 1349 passed；Ruff lint/format passed；mypy passed；
 pre-commit passed。
 
+## TASK-079 Explicit Step Progression Contract
+
+**背景：** TASK-078 可以按 caller order 执行已存在的 scenario steps，但 scenario ordering 不表达下一步输入如何与前一
+步完成证据及 state transition 建立 provenance。
+
+**目标：** 定义 previous completed evidence 与 caller-supplied next input 的 immutable、identity-based 关系，同时
+保持 Simulation 不拥有 progression、time 或 lifecycle。
+
+**实现内容：**
+
+- 新增 `frozen=True, slots=True, eq=False` 的 `SimulationStepProgression`；
+- 保存 exact previous trace、exact previous result 与 exact caller next input；
+- 验证 previous result 就是 trace 中的 exact step result；
+- 验证 next Battery input 的 source state 就是 previous Battery result 产生的 exact next state；
+- 拒绝 value-equal reconstructed previous result 和 Battery state；
+- 新增 abstract/stateless/empty-slotted `SimulationStepProgressionBoundary`；
+- 不提供 concrete progression implementation；
+- 新增 identity、reconstruction rejection、immutability、boundary、dependency 与 public API tests。
+
+**Identity：**
+
+```text
+progression.previous_trace is original_trace
+progression.previous_result is original_trace.step_result
+progression.next_input is caller_supplied_next_input
+progression.next_input.battery_input.source_state
+    is progression.previous_result.state.battery_result.next_state
+```
+
+**架构意义：** Step progression 被限定为 caller-owned provenance，而不是 time scheduling、future input generation 或
+Runtime lifecycle。Scenario ordering 与 step generation 继续分离。
+
+**新增文件：**
+
+- `simulator/progression.py`；
+- `tests/unit/simulator/test_progression.py`；
+- `tasks/TASK-079.md`；
+- `architecture/adr/ADR-076-explicit-step-progression-contract.md`。
+
+**关键设计决策：** 不修改 `SimulationStepInput`；不读取 clock、不推进 timestamp/sequence、不执行下一步、不保存
+current step/history/runtime state；不增加 Runtime、Scheduler、Scenario runner、Replay、Persistence、Forecast、
+Optimization、EMS strategy、Constraint、Command、Device 或协议。
+
+**验证结果：** focused tests 23 passed；pytest 1360 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
 ## 2. 后续追加模板
 
 ```markdown

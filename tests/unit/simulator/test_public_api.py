@@ -27,6 +27,8 @@ from simulator import (
     SimulationState,
     SimulationStepIdentity,
     SimulationStepInput,
+    SimulationStepProgression,
+    SimulationStepProgressionBoundary,
     SimulationStepResult,
     SingleStepSimulationExecutor,
     TariffSimulationInput,
@@ -64,6 +66,8 @@ def test_simulation_step_identity_public_import() -> None:
         "SimulationState",
         "SimulationStepIdentity",
         "SimulationStepInput",
+        "SimulationStepProgression",
+        "SimulationStepProgressionBoundary",
         "SimulationStepResult",
         "SingleStepSimulationExecutor",
         "TariffSimulationInput",
@@ -90,6 +94,14 @@ def test_simulation_execution_trace_public_import() -> None:
 def test_scenario_execution_public_imports() -> None:
     assert ScenarioExecutionBoundary.__name__ == "ScenarioExecutionBoundary"
     assert ScenarioExecutionResult.__name__ == "ScenarioExecutionResult"
+
+
+def test_step_progression_public_imports() -> None:
+    assert SimulationStepProgression.__name__ == "SimulationStepProgression"
+    assert (
+        SimulationStepProgressionBoundary.__name__
+        == "SimulationStepProgressionBoundary"
+    )
 
 
 def test_battery_actuation_public_import() -> None:

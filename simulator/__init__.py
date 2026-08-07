@@ -29,6 +29,10 @@ from simulator.load import (
     LoadSimulationModelBoundary,
     LoadSimulationResult,
 )
+from simulator.progression import (
+    SimulationStepProgression,
+    SimulationStepProgressionBoundary,
+)
 from simulator.pv import (
     PVSimulationInput,
     PVSimulationModelBoundary,
@@ -69,6 +73,8 @@ __all__ = [
     "SimulationState",
     "SimulationStepIdentity",
     "SimulationStepInput",
+    "SimulationStepProgression",
+    "SimulationStepProgressionBoundary",
     "SimulationStepResult",
     "SingleStepSimulationExecutor",
     "TariffSimulationInput",
