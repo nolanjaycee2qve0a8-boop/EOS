@@ -2966,6 +2966,42 @@ Optimization、EMS strategy、Constraint、Command、Device 或协议。
 **验证结果：** focused tests 23 passed；pytest 1360 passed；Ruff lint/format passed；mypy passed；
 pre-commit passed。
 
+## TASK-080 Phase 7 Integration Validation
+
+**背景：** TASK-075～079 分别建立 binding、single-step execution、trace、scenario execution 与 explicit progression
+contracts，需要验证组合后仍保持 deterministic execution、identity lineage、failure semantics 与隔离边界。
+
+**目标：** 只使用 test-only models 完成 Phase 7 end-to-end validation，不新增或修改 production contract。
+
+**验证内容：**
+
+- `SimulationScenario -> ScenarioExecutionBoundary -> SingleStepSimulationExecutor -> SimulationExecutionTrace`；
+- caller-defined step order 与 binding order；
+- 每个 successful explicit step 的每个 component exactly once；
+- exact scenario、bindings、steps、generated traces、states、results 与 component input/result lineage；
+- exact previous trace/result、caller next input 与 Battery next-state/source-state progression lineage；
+- equivalent deterministic executions 产生相同 observation values，但 evidence objects 独立；
+- component failure stop-first、exact exception propagation、无 retry、无 skip、无 implicit continuation；
+- failure 不返回伪造或 partial successful `ScenarioExecutionResult`；
+- 无 Runtime、Scheduler、Clock、Thread、Queue、Device、Command、Optimization、Forecast 或 persistence/history。
+
+**架构意义：** Phase 7 contracts 在不增加 production orchestration 的前提下获得完整组合证据。Simulation、Runtime、
+Device Execution、step generation 与 time scheduling 的边界继续分离。
+
+**新增文件：**
+
+- `tests/integration/test_phase7_simulation_execution.py`；
+- `tasks/TASK-080.md`；
+- `architecture/adr/ADR-077-phase7-integration-validation.md`；
+- `docs/phase-summary/EOS_Phase7_Deterministic_Simulation_Execution_v1.0.md`。
+
+**关键设计决策：** test-only models 不成为 production physics；TASK-080 不修改 `simulator/`、public API 或既有 tests；
+不增加 Runtime、real-time execution、scenario scheduling、automatic progression、Device control、EMS algorithm、
+Optimization、persistence、history、retry 或 replay。
+
+**验证结果：** focused integration tests 3 passed；pytest 1363 passed；Ruff lint/format passed；mypy passed；
+pre-commit passed。
+
 ## 2. 后续追加模板
 
 ```markdown

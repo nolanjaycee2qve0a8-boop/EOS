@@ -2299,6 +2299,39 @@ Step progression != Time scheduling
 Simulation != Runtime
 ```
 
+### 7.17 TASK-080 Phase 7 Integration Validation
+
+单元测试证明每个 contract 自身成立，integration validation 则回答“这些 contract 组合后是否仍保持原来的边界”。
+TASK-080 使用 test-only component models 验证完整链路：
+
+```text
+Bindings + Scenario
+        |
+        v
+Scenario Execution
+        |
+        v
+Single-Step Execution
+        |
+        v
+Trace Evidence
+        |
+        v
+Explicit Progression Relation
+```
+
+成功路径证明 caller step order 与 binding order 没有被改写，每个成功 step 的每个 model 恰好调用一次，并且 scenario、
+bindings、steps、traces、results 和 progression 全部保持 direct identity。两组独立但等价的 test models 对同一组明确
+输入产生相同观察值，同时各自 evidence 仍是独立对象。
+
+失败路径故意让第二个 step 的 component 抛出一个预先创建的异常对象。验证结果是：同一个异常原样传播；当前 step
+后续 bindings 和未来 steps 不执行；失败 component 不 retry；调用方收不到伪造的成功 `ScenarioExecutionResult`。
+
+为什么 TASK-080 不新增 production integration service：TASK-078 已经是 production composition boundary。为了测试再
+增加一层只会复制职责。测试使用的 recording models 只存在于 tests，不是 EOS 提供的 production physics。
+
+完整冻结报告见 `docs/phase-summary/EOS_Phase7_Deterministic_Simulation_Execution_v1.0.md`。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
