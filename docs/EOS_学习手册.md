@@ -2356,6 +2356,35 @@ Progression 尤其不能被理解成“模拟器算出下一步”。下一步�
 TASK-081 也确认 Phase 7 没有 Command、Dispatcher、PCS/BMS、CAN/Modbus/MQTT、EMS strategy、Optimization、Forecast、
 persistence 或 history ownership。未来若引入这些能力，必须建立新的显式边界，不能修改 Phase 7 的含义。
 
+### 7.19 TASK-082：从冻结架构走向 24 小时 Demo 输入
+
+TASK-082 是应用层开发的第一步。它不再增加通用抽象边界，而是回答一个具体问题：运行 24 小时储能仿真前，调用方必须明确
+提供哪些事实？答案是 24 个小时的 PV、Load、Tariff 曲线，电池参数、初始 SOC，以及每小时明确的 step identity。
+
+```text
+24-hour caller facts
+        |
+        v
+DailySimulationScenarioInput
+        |
+        v
+future demo runner
+        |
+        v
+frozen Phase 6/7 simulation contracts
+```
+
+这里最重要的区别是 `DailySimulationScenarioInput != SimulationScenario`。前者是用户可准备的数据集；后者是 Phase 6 中已经
+拥有完整 component inputs 的可执行场景。Battery actuation、下一 SOC 和 Grid power 不能在读入曲线时提前猜测，否则输入层
+就会偷偷承担策略和物理计算。
+
+所有曲线都使用长度为 24 的 tuple。PV/Load 单位是 kW，Tariff 单位是 CNY/kWh；SOC 和效率使用未缩放的 `[0, 1]`
+fraction。时间由调用方通过 24 个连续、timezone-aware、每步 3600 秒的 `SimulationStepIdentity` 提供。合同只验证这些事实，
+不排序、不补值、不读取 clock，也不构造未来执行步骤。
+
+`BatteryParameters` 同样只描述事实：容量、充放电功率限制、效率和 reserve SOC。TASK-082 不执行限制、不更新 SOC，也不
+生成 Battery power。这样后续 concrete model 和 runner 可以复用这些事实，同时 Phase 5～7 contract 保持冻结。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
