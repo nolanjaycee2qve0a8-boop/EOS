@@ -3034,6 +3034,36 @@ execution semantics。Identity guarantee 仅覆盖每个 contract 明确验证�
 
 **验证结果：** `pytest`、Ruff lint/format、`mypy` 与 `pre-commit` 全部通过。
 
+## TASK-082 24-Hour Simulation Scenario and Data Input
+
+**背景：** Phase 7 已冻结 deterministic execution，但 EOS 仍缺少第一个 24 小时储能 Demo 可直接接收的 PV、Load、Tariff、
+Battery 与初始 SOC 输入合同。
+
+**目标：** 建立独立应用层的 immutable 24-hour data input，不提前实现 strategy、physics、runner、CSV 或 plotting。
+
+**实现内容：**
+
+- 新增 `BatteryParameters`，明确 capacity、charge/discharge limits、efficiency 与 reserve SOC 的单位和范围；
+- 新增 `DailySimulationScenarioInput`，保存 exact 24-hour step/PV/Load/Tariff tuples、exact battery parameters 与 initial SOC；
+- 验证 24 个 sequence `0..23`、3600-second duration、显式 timezone-aware consecutive timestamps；
+- 拒绝 mutable list、非有限值、错误范围和非 24-hour 输入；保持 caller order，不复制、排序或补全数据。
+
+**架构意义：** 输入数据与 executable Phase 6 `SimulationScenario` 分离。TASK-082 不伪造 Battery actuation、SOC progression 或
+Grid request；未来 application runner 在事实齐备后显式装配 Phase 6 inputs，并复用 Phase 7 execution/trace。
+
+**新增文件：**
+
+- `ems_simulator/__init__.py`；
+- `ems_simulator/input.py`；
+- `tests/unit/ems_simulator/`；
+- `tasks/TASK-082.md`；
+- `architecture/adr/ADR-079-24h-simulation-scenario-input.md`。
+
+**关键设计决策：** 只建立 24h scenario/data input；不修改 Phase 5～7 contracts；不增加 model execution、EMS strategy、
+Battery physics、Grid balance、runner、Runtime、Device、Command、Optimization、CSV 或 plotting。
+
+**验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
+
 ## 2. 后续追加模板
 
 ```markdown

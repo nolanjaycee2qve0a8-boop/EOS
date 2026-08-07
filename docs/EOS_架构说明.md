@@ -1148,3 +1148,31 @@ Command、Dispatcher、PCS/BMS 或通信协议，也不拥有 EMS strategy、Opt
 或 recovery。
 
 TASK-081 只更新 Markdown；Phase 5、Phase 6、`simulator/` production code、public API 与 tests 均保持不变。
+
+## 19. EMS Simulator 1.0 Application Input（TASK-082）
+
+TASK-082 在冻结的 Phase 5～7 之上增加独立应用包 `ems_simulator`，不修改 `decision_formation`、`simulator` 或既有执行边界。
+
+```text
+caller-owned 24-hour curves + battery facts + explicit time
+        |
+        v
+ems_simulator.DailySimulationScenarioInput
+        |
+        v
+future application assembly and runner
+        |
+        v
+simulator.SimulationScenario / Phase 7 execution
+```
+
+`BatteryParameters` 和 `DailySimulationScenarioInput` 均为 frozen/slotted、无 mutable container 的数据合同。Daily input 保存
+exact `step_identities`、PV/Load/Tariff tuples 和 exact battery-parameter reference，并保持 caller order。它要求 24 个 sequence
+为 `0..23`、duration 为 3600 秒、timestamp 显式且连续的 hourly facts。
+
+依赖方向为 `ems_simulator -> simulator public contracts`。`simulator` 不依赖应用层。该 input 不依赖 Runtime、Device、Command、
+Dispatcher、Optimization 或 Forecast，也不调用 model、executor 或 scenario boundary。
+
+应用输入与 executable `SimulationScenario` 明确分离。TASK-082 不具备 Battery actuation、SOC progression 和 Grid request，因此
+不会提前构造完整 `SimulationStepInput`。后续 runner 必须通过显式步骤复用 Phase 5 decision、Phase 6 component contracts 和
+Phase 7 executor/trace；不能回写或扩展这些冻结合同。

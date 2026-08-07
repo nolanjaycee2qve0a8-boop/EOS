@@ -33,6 +33,7 @@ packages = [
   "decision_formation",
   "objective",
   "simulator",
+  "ems_simulator",
 ]
 
 [tool.pytest.ini_options]
@@ -41,4 +42,11 @@ testpaths = ["tests"]
 
 [tool.coverage.run]
 branch = true
-source = ["kernel", "capability", "decision_formation", "objective", "simulator"]
+source = [
+  "kernel",
+  "capability",
+  "decision_formation",
+  "objective",
+  "simulator",
+  "ems_simulator",
+]
