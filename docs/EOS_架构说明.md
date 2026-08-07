@@ -1117,3 +1117,34 @@ Binding -> Scenario Execution -> Single-Step Execution -> Trace -> Progression
 
 TASK-080 仅新增 integration tests 和 Markdown。`simulator/` production code、public API 与既有 tests 均未修改。
 完整 Phase 7 报告见 `docs/phase-summary/EOS_Phase7_Deterministic_Simulation_Execution_v1.0.md`。
+
+## 18. Phase 7 Completion Freeze（TASK-081）
+
+TASK-081 将 TASK-075～080 的审查结果冻结为以下架构状态：
+
+```text
+caller facts + caller model bindings
+        |
+        v
+deterministic single-step/scenario execution
+        |
+        v
+immutable structural evidence
+        +
+caller-supplied next step
+        |
+        v
+explicit progression relationship
+```
+
+冻结保证：caller 控制 step 与 binding 顺序；完整 binding 在执行前验证；每个成功 step 的每个 component exactly once；
+异常 stop-first 并保持 exact exception；result、trace 与 progression 只保存各自合同规定的 exact references。
+
+Identity contract 是直接且局部的。它拒绝 value-equal reconstruction，但不把 trace 描述成 model invocation 的独立证明，
+也不宣布未验证的自动跨边界 lineage。
+
+Phase 7 的依赖终点仍是 immutable simulation contracts。它不依赖 Runtime、Scheduler、Clock、Thread、Queue、Device、
+Command、Dispatcher、PCS/BMS 或通信协议，也不拥有 EMS strategy、Optimization、Forecast、persistence、history、retry
+或 recovery。
+
+TASK-081 只更新 Markdown；Phase 5、Phase 6、`simulator/` production code、public API 与 tests 均保持不变。

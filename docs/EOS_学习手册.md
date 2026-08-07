@@ -2332,6 +2332,30 @@ bindings、steps、traces、results 和 progression 全部保持 direct identity
 
 完整冻结报告见 `docs/phase-summary/EOS_Phase7_Deterministic_Simulation_Execution_v1.0.md`。
 
+### 7.18 TASK-081 Phase 7 Completion Review
+
+TASK-081 不增加代码，而是把 Phase 7 已经由实现和测试证明的边界正式冻结下来。完成性审查回答的不是“还能增加什么”，
+而是“当前系统已经保证什么，以及明确不保证什么”。
+
+冻结后的学习重点是三组区别：
+
+```text
+deterministic execution != Runtime lifecycle
+scenario ordering != future step generation
+structural trace != independent proof of model invocation
+```
+
+确定性来自 caller 提供的 immutable facts、明确顺序和 deterministic models，不来自 global cache 或隐藏状态。每个 contract
+只对自己直接保存的对象承担 identity guarantee：scenario result 保存 exact scenario/bindings，trace 保存 exact
+input/state/result/bindings，progression 保存 exact previous evidence 与 caller next input。不要把这些局部且明确的关系扩张为
+未实现的自动跨层 lineage。
+
+Progression 尤其不能被理解成“模拟器算出下一步”。下一步的 timestamp、duration、component inputs 与 Battery source state
+都由 caller 提供；合同只验证其中明确要求的 provenance。这样 Simulation 始终不会偷偷变成 Scheduler 或 Runtime。
+
+TASK-081 也确认 Phase 7 没有 Command、Dispatcher、PCS/BMS、CAN/Modbus/MQTT、EMS strategy、Optimization、Forecast、
+persistence 或 history ownership。未来若引入这些能力，必须建立新的显式边界，不能修改 Phase 7 的含义。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
