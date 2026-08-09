@@ -2438,6 +2438,37 @@ LoadSimulationResult
 同一输入重复执行时，输出数值相同，但 result artifact 各自独立；每个 result 都保持 exact input 和 exact step identity。
 model 使用 empty slots，不保存 curve、cache 或 history。这样 deterministic execution 来自显式事实，而不是隐藏状态。
 
+### 7.22 TASK-085：Simple Battery Physics Model
+
+PV 和 Load profile model 只回放事实；Battery model 首次引入真正的状态转移。`SimpleBatteryPhysicsModel` 接收 exact source
+state、actuation、step duration 和 immutable `BatteryParameters`，输出 actual power 与 next SOC。
+
+```text
+source SOC + requested Battery power + duration + parameters
+        |
+        v
+SimpleBatteryPhysicsModel
+        |
+        +-- actual Battery power
+        `-- immutable next SOC
+```
+
+Battery power 继续使用统一符号：正值充电、负值放电、零为空闲。充电时，进入系统边界的能量乘以 charge efficiency 后才成为
+stored energy；放电时，为向系统边界提供指定能量，stored energy 的减少量需要除以 discharge efficiency。
+
+```text
+charge:    ΔE_stored = +P * Δt * η_charge
+discharge: ΔE_stored = -|P| * Δt / η_discharge
+SOC_next = SOC_source + ΔE_stored / capacity
+```
+
+actual power 同时受充放电功率上限和 SOC headroom 限制。充电不超过 SOC 1.0，放电不低于 reserve SOC。如果输入状态已经低于
+reserve，model 只阻止继续放电，不会把 SOC 凭空抬高到 reserve。无实际变化时保留 exact source-state identity；有变化时创建
+新的 immutable state。
+
+这不等于把 Constraint 搬进 Battery model。上游 Constraint 判断意图是否可行；simulation physics 负责保证明确 actuation 在
+其物理模型中不会产生非法状态，并报告真正实现的功率。model 不生成 intent，不知道 EMS objective，也不控制真实 BMS/PCS。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
