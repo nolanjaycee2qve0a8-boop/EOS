@@ -2414,6 +2414,30 @@ result 对象。
 当前 `actual_power_kw == available_power_kw` 只是 profile demo 的明确语义，不是天气、辐照度、温度、MPPT、逆变器或预测模型。
 这些能力若未来需要，必须以新的 concrete implementation 引入，不能修改已经冻结的 Phase 6 contract。
 
+### 7.21 TASK-084：Concrete Load Profile Model
+
+`LoadProfileSimulationModel` 延续 PV model 的最小模式：未来 runner 从 TASK-082 的 24h Load curve 取出一个明确值，放入
+`LoadSimulationInput.demand_power_kw`；model 只返回引用 exact input 的 `LoadSimulationResult`。
+
+```text
+24h Load curve 中的一个值
+        |
+        v
+exact LoadSimulationInput
+        |
+        v
+LoadProfileSimulationModel
+        |
+        v
+LoadSimulationResult
+```
+
+这里的 `actual_power_kw == demand_power_kw` 表示 profile replay，不是用户行为仿真。model 不知道家电类型，不生成随机负载，
+不做 forecast 或 AI prediction，也不根据电价改变 demand。它只把 caller fact 转换为 Phase 6 result。
+
+同一输入重复执行时，输出数值相同，但 result artifact 各自独立；每个 result 都保持 exact input 和 exact step identity。
+model 使用 empty slots，不保存 curve、cache 或 history。这样 deterministic execution 来自显式事实，而不是隐藏状态。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：

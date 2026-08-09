@@ -1202,3 +1202,27 @@ profile ownership 仍属于 TASK-082 caller input。未来 application runner �
 依赖方向保持 `ems_simulator.pv -> simulator public PV contracts`。`simulator` 不反向依赖 concrete model。TASK-083 不修改
 Phase 5～7，也不增加 weather/irradiance/temperature、forecast、MPPT、inverter、PCS、Runtime、Device、Command、Strategy
 或 Optimization。
+
+## 21. Concrete Load Profile Model（TASK-084）
+
+TASK-084 在 `ems_simulator` 应用层增加 `LoadProfileSimulationModel`，实现既有
+`LoadSimulationModelBoundary`：
+
+```text
+LoadSimulationInput.demand_power_kw
+        |
+        v
+ems_simulator.LoadProfileSimulationModel
+        |
+        v
+LoadSimulationResult.actual_power_kw
+```
+
+model 是 stateless、empty-slotted concrete component，可作为 exact caller model 进入 Phase 7 binding。每次调用产生新
+immutable result，且 `result.simulation_input is original_input`，因此 step identity 也沿 input 保持 exact provenance。
+
+profile 仍只由 TASK-082 daily input 持有。future runner 负责逐小时构造 `LoadSimulationInput`；model 不保存 curve、不按
+sequence 查找、不复制输入、不读取 clock。
+
+依赖方向为 `ems_simulator.load -> simulator public Load contracts`，无反向依赖。TASK-084 不修改 Phase 5～7，不包含 user
+behavior、appliance、stochastic generation、forecast、AI、Runtime、Device、Command、Strategy 或 Optimization。

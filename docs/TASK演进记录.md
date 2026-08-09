@@ -3094,6 +3094,36 @@ Optimization 或 EMS strategy；不修改 Phase 5～7 contracts。
 
 **验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
 
+## TASK-084 Concrete Load Profile Simulation Model
+
+**背景：** TASK-082 已保存 caller-owned 24h Load curve，TASK-083 已证明 concrete profile model 可以在不修改 Phase 6/7
+的前提下接入 execution binding；Load component 仍缺少对应实现。
+
+**目标：** 把 explicit hourly Load profile fact 确定性转换为 `LoadSimulationResult`。
+
+**实现内容：**
+
+- 新增 empty-slotted `LoadProfileSimulationModel`，继承 `LoadSimulationModelBoundary`；
+- 输入 exact `LoadSimulationInput`，输出保存 exact input 的 immutable `LoadSimulationResult`；
+- `actual_power_kw` 等于 caller-supplied `demand_power_kw`，单位为 finite non-negative raw kW；
+- 支持现有 identity-based `SimulationModelBinding`；
+- 覆盖正常 24h profile、zero Load、非法 power、determinism、identity、statelessness、public API 与 dependency isolation。
+
+**架构意义：** application concrete Load behavior 与 frozen simulator contracts 分离。Profile 保持单一 caller ownership，
+model 不持有第二份 curve，不增加 lookup、cache 或 hidden state。
+
+**新增文件：**
+
+- `ems_simulator/load.py`；
+- `tests/unit/ems_simulator/test_load.py`；
+- `tasks/TASK-084.md`；
+- `architecture/adr/ADR-081-concrete-load-profile-simulation-model.md`。
+
+**关键设计决策：** 不实现 user behavior、appliance、stochastic generation、forecast、AI、Runtime、Device、Command、
+Optimization 或 EMS strategy；不修改 Phase 5～7 contracts。
+
+**验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
+
 ## 2. 后续追加模板
 
 ```markdown
