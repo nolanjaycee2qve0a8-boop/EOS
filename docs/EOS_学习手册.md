@@ -2549,6 +2549,31 @@ Grid 依赖同一步已完成的 PV/Load/Battery results。Runner 不修改 Phas
 不重算、复制或规范化结果。最终 `DailySimulationResult` 保存 exact source、scenario、traces
 和 progressions，但不拥有 Runtime history、Scheduler、Device 或 Command。
 
+### 7.25 TASK-088：Simulation Result Export
+
+仿真完成并不等于工程人员能够方便地使用结果。TASK-088 在 completed
+`DailySimulationResult` 上增加只读 output layer：
+
+```text
+DailySimulationResult
+        |
+        +--> deterministic CSV
+        +--> Power / SOC SVG
+        `--> DailyEnergySummary
+```
+
+CSV 的每一行对应一个 exact trace，固定包含 timestamp、PV、Load、Battery、Grid power
+和 SOC。它不从输入 curve 重新计算结果，而是读取 model 已经实现的 realized values。Power
+图也同时展示这四条曲线，SOC 图展示每一步完成后的 next-state SOC。
+
+功率是瞬时 kW，能量是对显式 step duration 的积分，单位 kWh。Battery throughput 使用
+绝对 Battery power，因此充电和放电都会贡献 throughput；Grid import 只积累正 power，
+Grid export 把负 power 的绝对值作为正的 export energy 报告。
+
+Output artifacts 保存 exact `DailySimulationResult` reference，但绝不修改 result、trace
+或 state。相同 result 生成 byte-identical CSV/SVG。文件写入仅面向 caller 提供的 existing
+directory，不等于数据库 persistence、Runtime history、dashboard 或 real-time monitoring。
+
 ## 9. 文档维护规则
 
 以后每完成一个 TASK：
