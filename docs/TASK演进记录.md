@@ -3269,6 +3269,41 @@ file output、determinism、full pytest、Ruff、mypy 与 pre-commit。
 和 export 分别统计；Battery throughput 使用绝对 realized power；不引入 database、dashboard、
 Web API、cloud、Runtime、real-time monitoring、Device 或 Command；不修改 Phase 5～7。
 
+## TASK-089 EOS EMS Simulator 1.0 Demo
+
+**背景：** TASK-082～088 已分别完成输入、concrete models、24-hour runner 和工程输出，
+但用户仍需要一个无需手动装配各组件的完整示例。
+
+**目标：** 提供固定家庭光储场景与 one-command CLI，一次生成 24-step simulation、CSV、
+Power/SOC curves 和 daily summary。
+
+**实现内容：**
+
+- 固定 24-hour PV、Load、Tariff profiles；
+- 固定 10 kWh Battery parameters、initial SOC 0.50 与 reserve SOC 0.20；
+- 新增 `create_demo_scenario()`、`run_demo()` 与 module CLI；
+- 新增 frozen/slotted `DemoExecutionResult` 维护 exact provenance；
+- 输出 `simulation_result.csv`、`power_curve.svg`、`soc_curve.svg`、
+  `daily_summary.txt`；
+- 增加独立 Demo guide 与 end-to-end integration tests。
+
+**架构意义：** EOS EMS Simulator 1.0 首次成为可直接运行的应用 Demo，同时不把 simulation
+变成 Runtime，不把示例 rule 变成生产 EMS strategy。
+
+**新增文件：**
+
+- `ems_simulator/demo.py`；
+- `tests/integration/test_ems_simulator_demo.py`；
+- `docs/EOS_EMS_Simulator_1.0_Demo.md`；
+- `tasks/TASK-089.md`；
+- `architecture/adr/ADR-086-eos-ems-simulator-1-demo.md`。
+
+**验证结果：** scenario facts、24-step completion、output files、CLI、identity、immutability、
+deterministic content、full pytest、Ruff、mypy 与 pre-commit。
+
+**关键设计决策：** 只组合 TASK-082～088；不修改 Phase 5～8；不引入 MPC、Optimization、
+AI、Forecast、Runtime、Scheduler、Device、Command、Cloud 或 real-time monitoring。
+
 ## 2. 后续追加模板
 
 ```markdown

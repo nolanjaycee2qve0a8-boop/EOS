@@ -1353,3 +1353,29 @@ database、dashboard、Web API、cloud storage、Runtime history 或 monitoring 
 
 依赖方向保持 `ems_simulator.output -> ems_simulator.runner -> simulator contracts`。
 Phase 5～7 不反向依赖 output layer，所有既有 contracts 保持不变。
+
+### TASK-089：Simulator 1.0 Demo Composition
+
+`ems_simulator.demo` 是最外层 application composition，不是新的 domain contract：
+
+```text
+explicit Demo scenario
+        |
+        v
+existing DailySimulationRunner
+        |
+        v
+existing SimulationResultExporter
+        |
+        v
+caller output directory
+```
+
+模块只拥有固定示例 facts 和一次性 orchestration。`DemoExecutionResult` frozen/slotted，并
+验证 `simulation_result.source_input is source_input` 与
+`export.source_result is simulation_result`。它不修改 runner、exporter、Phase 5～8 contracts
+或 simulation evidence。
+
+CLI 可为易用性创建 caller 指定的 output directory，但不保存全局 path、history 或 current
+execution。它没有 Runtime lifecycle、Scheduler、background loop、Device、Command、Cloud、
+MPC、Optimization、AI 或 Forecast 依赖。Demo rule 是验证夹具，不升级为生产策略边界。
