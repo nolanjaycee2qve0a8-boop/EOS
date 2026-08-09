@@ -2574,6 +2574,33 @@ Output artifacts 保存 exact `DailySimulationResult` reference，但绝不修�
 或 state。相同 result 生成 byte-identical CSV/SVG。文件写入仅面向 caller 提供的 existing
 directory，不等于数据库 persistence、Runtime history、dashboard 或 real-time monitoring。
 
+### 7.26 TASK-089：EOS EMS Simulator 1.0 Demo
+
+TASK-089 把 TASK-082～088 组合成一条可直接运行的应用链：
+
+```text
+fixed household facts
+        |
+        v
+DailySimulationRunner (24 steps)
+        |
+        v
+immutable result and traces
+        |
+        v
+CSV + Power/SOC SVG + daily summary
+```
+
+Demo 的 24-hour PV/Load/Tariff profiles、Battery parameters、initial SOC 和 UTC step
+identities 都是显式 caller facts。运行入口不读取 clock、不连接设备，也不产生隐藏 scenario。
+
+`python -m ems_simulator.demo --output-dir simulation_output` 会一次完成仿真和导出。这里的
+simple PV-surplus rule 只用于证明 simulator 能闭环运行；actual Battery power 仍由 physics
+model 决定，Grid 仍使用 realized result。Demo 因此不是 Runtime，也不是生产 EMS controller。
+
+`DemoExecutionResult` 保存 exact source input、simulation result、export artifact 和 paths。
+相同 Demo 运行生成相同文件内容，但每次 execution 都有独立 immutable evidence identity。
+
 ## 9. 文档维护规则
 
 以后每完成一个 TASK：
