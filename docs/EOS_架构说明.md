@@ -1280,3 +1280,45 @@ request，也不使用 Grid input 的 requested value 替代 component evidence�
 依赖方向为 `ems_simulator.grid -> simulator public contracts`。该 concrete model 是 per-step immutable configuration，不拥有
 Runtime state、cache 或 history。Future application runner 负责 component execution ordering；TASK-086 不修改 Phase 5～7、
 executor 或 scenario contracts，不引入 Zero Export、strategy、PCS、Device、Command 或 Optimization。
+
+### TASK-087：24 小时 Simulation Runner
+
+`ems_simulator.DailySimulationRunner` 是 Simulator 1.0 的 application orchestration
+boundary，不是 Runtime：
+
+```text
+DailySimulationScenarioInput
+        |
+        v
+explicit component inputs and simple demo actuation
+        |
+        v
+PV / Load / Battery results
+        |
+        v
+GridEnergyBalanceSimulationModel
+        |
+        v
+SingleStepSimulationExecutor -> SimulationExecutionTrace
+        | x 24
+        v
+DailySimulationResult
+```
+
+Runner 是 empty-slotted、stateless execution entry point。它不保存 current SOC、clock、
+cache 或 history。时间、step identity 与顺序均来自 exact
+`DailySimulationScenarioInput`。`DailySimulationResult` 是 frozen/slotted evidence
+aggregate，保存 exact source input、scenario、24 traces 和 23 progressions。
+
+Battery progression 冻结为 `next_step.battery_input.source_state is
+previous_trace.state.battery_result.next_state`。Grid 使用 realized Battery result，
+继续遵守 `Grid = Load + Battery - PV`。
+
+由于 frozen Phase 7 executor 要求预先提供五个 bindings，而 Grid model 需要同一步已完成
+的 component results，runner 先显式协调 PV、Load、Tariff 与 Battery result，再创建
+frozen exact-result adapters 和 TASK-086 Grid binding。Adapters 只返回 exact result，
+不复制、重建、重算或规范化 evidence。Executor、trace、scenario、progression 以及
+Phase 5～7 public contracts 均未修改。
+
+该 boundary 不拥有 Runtime lifecycle、Scheduler、Clock、Device、Command、MPC、
+Optimization、Forecast 或 AI。Demo rule 只验证 simulator，不能被视为最终 EMS strategy。

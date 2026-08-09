@@ -2514,6 +2514,41 @@ balance；TASK-086 不修改既有 executor 或 scenario contracts。
 - 哪些安全约束不属于策略？
 - 谁最终负责设备执行和失败处理？
 
+### 7.24 TASK-087：24 小时 Simulation Runner
+
+TASK-087 把前四个 concrete simulation models 组合为第一个可运行的 24 小时 Demo：
+
+```text
+DailySimulationScenarioInput
+        |
+        v
+PV / Load facts -> simple Battery request
+        |
+        v
+Battery physics -> realized Battery power and next SOC
+        |
+        v
+Grid balance -> SingleStepSimulationExecutor -> Trace
+        |
+        v
+DailySimulationResult
+```
+
+这里最重要的学习点是“连续执行”不等于引入 Runtime。24 个 step 的 identity、timestamp
+和顺序全部由 caller 提供；runner 不读取 clock，也不生成未来时间。每一步只通过 Phase 7
+executor 一次，完成后把 exact Battery next state 作为下一步 source state。23 个显式
+progression artifacts 记录这个关系，因此 SOC continuity 不是只比较数值，而是可以追踪对象
+provenance。
+
+Demo rule 只用于验证 simulator：PV surplus 请求充电，PV deficit 且 SOC 高于 reserve 时请求
+放电。Battery model 决定实际可实现功率并保护 SOC；Grid model 使用 realized Battery power，按
+`Grid = Load + Battery - PV` 计算 exchange。这保持了 strategy、physics 与 evidence 的职责分离。
+
+Grid 依赖同一步已完成的 PV/Load/Battery results。Runner 不修改 Phase 7 executor，而是先显式
+协调 results，再通过 frozen exact-result adapters 让 executor 聚合 exact evidence。Adapters
+不重算、复制或规范化结果。最终 `DailySimulationResult` 保存 exact source、scenario、traces
+和 progressions，但不拥有 Runtime history、Scheduler、Device 或 Command。
+
 ## 9. 文档维护规则
 
 以后每完成一个 TASK：
