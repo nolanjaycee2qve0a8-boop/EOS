@@ -1322,3 +1322,34 @@ Phase 5～7 public contracts 均未修改。
 
 该 boundary 不拥有 Runtime lifecycle、Scheduler、Clock、Device、Command、MPC、
 Optimization、Forecast 或 AI。Demo rule 只验证 simulator，不能被视为最终 EMS strategy。
+
+### TASK-088：Simulation Result Output Layer
+
+TASK-088 在 `ems_simulator` 应用层增加只读 output boundary：
+
+```text
+exact DailySimulationResult
+        |
+        v
+SimulationResultExporter
+        |
+        +--> DailySimulationExport.csv_content
+        +--> DailyEnergySummary
+        `--> SimulationVisualization(power SVG, SOC SVG)
+```
+
+Exporter 是 empty-slotted、stateless service。`DailySimulationExport`、
+`DailyEnergySummary`、`SimulationVisualization` 和 `SimulationExportPaths` 均为
+frozen/slotted artifacts。Summary 与 visualization 必须保持 exact source-result identity。
+
+CSV 固定使用 caller trace order、ISO 8601 timestamp 与 realized PV/Load/Battery/Grid/SOC
+values。Summary 使用 exact step duration 把 power 积分为 kWh，并把 Grid positive/negative
+分别记录为 import/export positive magnitudes。Visualization 由标准库生成 deterministic
+SVG，不依赖 plotting runtime 或 global style state。
+
+`write_files()` 只把已生成的 immutable content 写入 caller-supplied existing directory，
+固定命名为 `simulation_result.csv`、`power_curve.svg` 和 `soc_curve.svg`。它不创建
+database、dashboard、Web API、cloud storage、Runtime history 或 monitoring path。
+
+依赖方向保持 `ems_simulator.output -> ems_simulator.runner -> simulator contracts`。
+Phase 5～7 不反向依赖 output layer，所有既有 contracts 保持不变。

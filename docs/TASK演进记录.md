@@ -3233,6 +3233,42 @@ Grid models，但尚无完整的连续应用执行入口。
 协调 Grid 的 same-step result dependency；不引入 Runtime、Scheduler、Clock、Device、
 Command、Optimization、Forecast、MPC 或 AI；CSV、plotting 和 daily summary 留给后续任务。
 
+## TASK-088 Simulation Result CSV Export and Visualization
+
+**背景：** TASK-087 已生成完整 24 小时 immutable result 与 trace evidence，但尚缺少工程
+可读的表格、曲线和日能量统计。
+
+**目标：** 只读转换 `DailySimulationResult`，生成 deterministic CSV、Power/SOC SVG
+和 `DailyEnergySummary`。
+
+**实现内容：**
+
+- 新增 stateless `SimulationResultExporter`；
+- CSV 固定输出 timestamp、PV、Load、Battery、Grid power 和 SOC；
+- Power SVG 展示四条 power curves，SOC SVG 展示 next-state SOC；
+- Summary 计算 PV/Load energy、Battery throughput、Grid import/export energy；
+- 所有 energy 由 explicit step duration 积分，单位 raw kWh；
+- output artifacts 保存 exact source result identity；
+- 可向 existing caller directory 写出 `simulation_result.csv`、`power_curve.svg` 和
+  `soc_curve.svg`。
+
+**架构意义：** Simulation evidence 与工程展示正式分离。Export 只观察 completed result，
+不重新执行 model、runner、policy 或 constraint，也不修改 trace/state。
+
+**新增文件：**
+
+- `ems_simulator/output.py`；
+- `tests/unit/ems_simulator/test_output.py`；
+- `tasks/TASK-088.md`；
+- `architecture/adr/ADR-085-simulation-result-export-visualization.md`。
+
+**验证结果：** CSV content/order/values、SVG validity、summary energy、identity、immutability、
+file output、determinism、full pytest、Ruff、mypy 与 pre-commit。
+
+**关键设计决策：** 使用标准库 deterministic SVG，避免引入 plotting state；Grid import
+和 export 分别统计；Battery throughput 使用绝对 realized power；不引入 database、dashboard、
+Web API、cloud、Runtime、real-time monitoring、Device 或 Command；不修改 Phase 5～7。
+
 ## 2. 后续追加模板
 
 ```markdown
