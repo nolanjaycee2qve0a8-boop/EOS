@@ -3124,6 +3124,38 @@ Optimization 或 EMS strategy；不修改 Phase 5～7 contracts。
 
 **验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
 
+## TASK-085 Simple Battery Physics Simulation Model
+
+**背景：** TASK-082 提供 Battery 参数与 initial SOC，TASK-083/084 提供 concrete PV/Load profile models，但 Simulator 尚不能
+根据 explicit Battery actuation 推进 SOC。
+
+**目标：** 实现第一个 deterministic Battery physics model，计算 actual power、charge/discharge energy 和 immutable next SOC。
+
+**实现内容：**
+
+- 新增 frozen/slotted `SimpleBatteryPhysicsModel`，注入 exact immutable `BatteryParameters`；
+- 保持 positive charging、negative discharging、zero idle 的 power contract；
+- charging 使用 `P * hours * charge_efficiency`，discharging 使用 `|P| * hours / discharge_efficiency`；
+- 根据 max charge/discharge power、SOC 1.0 与 reserve SOC 裁剪 actual power；
+- 无状态变化时复用 exact source state，有变化时创建新 immutable state；
+- result 保存 exact Battery input 及其 step/state/actuation/feasible-decision lineage；
+- 覆盖 charge、discharge、idle、efficiency、power limit、SOC boundaries、duration、identity 和 determinism。
+
+**架构意义：** EOS EMS Simulator 获得首个 physical state transition，同时 state progression 继续由 explicit input/result 驱动，
+model 不持有 Runtime state。Simulation physics 保护模拟状态，不生成 EMS strategy 或新的 decision。
+
+**新增文件：**
+
+- `ems_simulator/battery.py`；
+- `tests/unit/ems_simulator/test_battery.py`；
+- `tasks/TASK-085.md`；
+- `architecture/adr/ADR-082-simple-battery-physics-simulation-model.md`。
+
+**关键设计决策：** 不修改 Phase 5～7；不实现 SOH、temperature/cell model、BMS、PCS、CAN、Runtime、Device、Command、
+Optimization 或 EMS strategy。低于 reserve 的 source state 不被无能量依据地向上归一化。
+
+**验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
+
 ## 2. 后续追加模板
 
 ```markdown

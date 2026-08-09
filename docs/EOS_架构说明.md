@@ -1226,3 +1226,30 @@ sequence 查找、不复制输入、不读取 clock。
 
 依赖方向为 `ems_simulator.load -> simulator public Load contracts`，无反向依赖。TASK-084 不修改 Phase 5～7，不包含 user
 behavior、appliance、stochastic generation、forecast、AI、Runtime、Device、Command、Strategy 或 Optimization。
+
+## 22. Simple Battery Physics Model（TASK-085）
+
+TASK-085 在 `ems_simulator` 应用层增加 frozen/slotted `SimpleBatteryPhysicsModel`，实现既有 Phase 6
+`BatterySimulationModelBoundary`：
+
+```text
+BatterySimulationInput + exact BatteryParameters
+        |
+        v
+SimpleBatteryPhysicsModel
+        |
+        v
+BatterySimulationResult(actual power, immutable next state)
+```
+
+model 保存 exact immutable parameters reference，但不保存 current SOC、step、result、cache 或 history。每次调用只读取 exact
+input 中的 source state、actuation 和 duration。Result 保存 exact input，因此 step、state、actuation 与 feasible-decision
+provenance 均保持。
+
+能量合同明确：charging stored energy 为 `P * hours * charge_efficiency`；discharging removed energy 为
+`|P| * hours / discharge_efficiency`。实际功率受 caller 参数中的 charge/discharge limit、SOC 1.0 与 reserve SOC 限制。
+无实际转换时 next state 复用 exact source state；否则创建新 immutable state。
+
+依赖方向为 `ems_simulator.battery -> ems_simulator.input + simulator public contracts`。`simulator` 不依赖 application model。
+TASK-085 不修改 Phase 5～7，不引入 SOH、thermal/cell physics、BMS、PCS、CAN、Runtime、Device、Command、Optimization 或
+EMS strategy。
