@@ -3156,6 +3156,44 @@ Optimization 或 EMS strategy。低于 reserve 的 source state 不被无能量�
 
 **验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
 
+## TASK-086 Grid Energy Balance Simulation Model
+
+**背景：** TASK-083/084/085 已能产生 realized PV、Load 与 Battery results，Simulator 需要由这些同一步事实计算 Grid exchange。
+
+**目标：** 实现 concrete Grid balance，同时保持现有 `GridSimulationModelBoundary` 与 Phase 5～7 contracts 不变。
+
+**公式修正：** 冻结 Battery positive charging / negative discharging 与 Grid positive import / negative export 后，正式公式为：
+
+```text
+grid_power_kw = load_power_kw + battery_power_kw - pv_power_kw
+```
+
+旧草案 `load - battery - pv` 被拒绝，因为会让 charging 减少 import、discharging 增加 import。
+
+**实现内容：**
+
+- 新增 frozen/slotted、per-step `GridEnergyBalanceSimulationModel`；
+- 保存 exact `PVSimulationResult`、`LoadSimulationResult`、`BatterySimulationResult` references；
+- identity-validate 三个 result 与 Grid input 共享 exact step；
+- 使用 realized Battery actual power 计算 finite signed raw-kW Grid exchange；
+- result 保存 exact `GridSimulationInput`；
+- 覆盖 PV surplus、charging、discharging、import/export/zero balance、identity、reconstructed-step rejection 与 determinism。
+
+**架构意义：** Grid exchange 来自完成的 physical observations，而不是 Battery request。应用层获得确定性 balance，同时 frozen
+Grid contract、executor 和 scenario contracts 均保持不变。
+
+**新增文件：**
+
+- `ems_simulator/grid.py`；
+- `tests/unit/ems_simulator/test_grid.py`；
+- `tasks/TASK-086.md`；
+- `architecture/adr/ADR-083-grid-energy-balance-simulation-model.md`。
+
+**关键设计决策：** future runner 显式协调 component results 后再调用 Grid model；不实现 Zero Export、Grid limit、EMS control、
+PCS、inverter、Runtime、Device、Command 或 Optimization；不修改 Phase 5～7。
+
+**验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
+
 ## 2. 后续追加模板
 
 ```markdown

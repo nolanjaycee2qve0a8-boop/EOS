@@ -5,6 +5,7 @@ def test_public_imports() -> None:
     from ems_simulator import (
         BatteryParameters,
         DailySimulationScenarioInput,
+        GridEnergyBalanceSimulationModel,
         LoadProfileSimulationModel,
         PVProfileSimulationModel,
         SimpleBatteryPhysicsModel,
@@ -12,6 +13,9 @@ def test_public_imports() -> None:
 
     assert BatteryParameters.__name__ == "BatteryParameters"
     assert DailySimulationScenarioInput.__name__ == "DailySimulationScenarioInput"
+    assert (
+        GridEnergyBalanceSimulationModel.__name__ == "GridEnergyBalanceSimulationModel"
+    )
     assert LoadProfileSimulationModel.__name__ == "LoadProfileSimulationModel"
     assert PVProfileSimulationModel.__name__ == "PVProfileSimulationModel"
     assert SimpleBatteryPhysicsModel.__name__ == "SimpleBatteryPhysicsModel"

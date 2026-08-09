@@ -2469,6 +2469,33 @@ reserve，model 只阻止继续放电，不会把 SOC 凭空抬高到 reserve。
 这不等于把 Constraint 搬进 Battery model。上游 Constraint 判断意图是否可行；simulation physics 负责保证明确 actuation 在
 其物理模型中不会产生非法状态，并报告真正实现的功率。model 不生成 intent，不知道 EMS objective，也不控制真实 BMS/PCS。
 
+### 7.23 TASK-086：Grid Energy Balance Model
+
+TASK-086 使用 PV、Load 与 Battery 的 actual results 计算同一步 Grid exchange。首先必须把符号放在同一个坐标系中：
+
+```text
+Battery > 0: charging
+Battery < 0: discharging
+Grid > 0: import
+Grid < 0: export
+```
+
+因此正确平衡是：
+
+```text
+Grid = Load + Battery - PV
+```
+
+充电是额外用电，所以增加 Grid import；放电向系统供能，所以减少 Grid import。最初草案中的 `Load - Battery - PV` 与上述
+符号冲突，已在实现前纠正。
+
+`GridEnergyBalanceSimulationModel` 保存同一步 exact PV/Load/Battery result references，并使用 identity 检查它们共享同一个
+step。它使用 Battery `actual_power_kw`，而不是 actuation request，因为 TASK-085 可能因 power/SOC limits 调整实际功率。
+
+Grid result 仍保存 exact `GridSimulationInput`，但 `requested_grid_power_kw` 不是 balance 的事实来源。model 是 per-step immutable
+evaluation configuration，不保存 history 或 current state。未来 runner 负责先取得同一步 component results，再显式调用 Grid
+balance；TASK-086 不修改既有 executor 或 scenario contracts。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
