@@ -3064,6 +3064,36 @@ Battery physics、Grid balance、runner、Runtime、Device、Command、Optimizat
 
 **验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
 
+## TASK-083 Concrete PV Profile Simulation Model
+
+**背景：** TASK-082 已提供 caller-owned 24h PV curve，但应用层尚无可由 Phase 7 executor 绑定和调用的 concrete PV model。
+
+**目标：** 实现第一个 deterministic concrete component，只把 explicit hourly PV profile fact 转换为
+`PVSimulationResult`。
+
+**实现内容：**
+
+- 新增 empty-slotted `PVProfileSimulationModel`，继承 frozen Phase 6 `PVSimulationModelBoundary`；
+- 输入 exact `PVSimulationInput`，输出引用 exact input 的 immutable `PVSimulationResult`；
+- `actual_power_kw` 直接等于 caller-supplied `available_power_kw`，单位为 finite non-negative raw kW；
+- 支持既有 identity-based `SimulationModelBinding`；
+- 覆盖正常 24h profile、zero PV、非法 power、determinism、identity、statelessness、public API 和 dependency isolation。
+
+**架构意义：** concrete demo behavior 位于 `ems_simulator` 应用层，Phase 6/7 contracts 保持冻结。Profile 只由 TASK-082
+caller input 持有，model 不保存第二份 curve，不引入 lookup、cache 或 hidden state。
+
+**新增文件：**
+
+- `ems_simulator/pv.py`；
+- `tests/unit/ems_simulator/test_pv.py`；
+- `tasks/TASK-083.md`；
+- `architecture/adr/ADR-080-concrete-pv-profile-simulation-model.md`。
+
+**关键设计决策：** 不实现 weather、irradiance、temperature、forecast、MPPT、inverter、PCS、Runtime、Device、Command、
+Optimization 或 EMS strategy；不修改 Phase 5～7 contracts。
+
+**验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
+
 ## 2. 后续追加模板
 
 ```markdown

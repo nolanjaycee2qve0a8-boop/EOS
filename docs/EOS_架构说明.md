@@ -1176,3 +1176,29 @@ Dispatcher、Optimization 或 Forecast，也不调用 model、executor 或 scena
 应用输入与 executable `SimulationScenario` 明确分离。TASK-082 不具备 Battery actuation、SOC progression 和 Grid request，因此
 不会提前构造完整 `SimulationStepInput`。后续 runner 必须通过显式步骤复用 Phase 5 decision、Phase 6 component contracts 和
 Phase 7 executor/trace；不能回写或扩展这些冻结合同。
+
+## 20. Concrete PV Profile Model（TASK-083）
+
+TASK-083 在应用包 `ems_simulator` 中增加 `PVProfileSimulationModel`，实现既有
+`simulator.PVSimulationModelBoundary`：
+
+```text
+PVSimulationInput.available_power_kw
+        |
+        v
+ems_simulator.PVProfileSimulationModel
+        |
+        v
+PVSimulationResult.actual_power_kw
+```
+
+实现是 stateless、empty-slotted，并可作为 exact model instance 绑定到 Phase 7 `SimulationModelBinding`。它每次创建新的
+immutable result，但 result 保存 exact input，input 继续保存 exact step identity。相同输入得到相同数值输出，不依赖 cache、
+history、clock 或 global state。
+
+profile ownership 仍属于 TASK-082 caller input。未来 application runner 负责把 `pv_power_curve_kw[index]` 显式放入对应
+`PVSimulationInput`；model 不保存整条曲线、不按 sequence 查找、不复制或重建输入。
+
+依赖方向保持 `ems_simulator.pv -> simulator public PV contracts`。`simulator` 不反向依赖 concrete model。TASK-083 不修改
+Phase 5～7，也不增加 weather/irradiance/temperature、forecast、MPPT、inverter、PCS、Runtime、Device、Command、Strategy
+或 Optimization。

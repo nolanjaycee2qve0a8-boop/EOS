@@ -2385,6 +2385,35 @@ fraction。时间由调用方通过 24 个连续、timezone-aware、每步 3600 
 `BatteryParameters` 同样只描述事实：容量、充放电功率限制、效率和 reserve SOC。TASK-082 不执行限制、不更新 SOC，也不
 生成 Battery power。这样后续 concrete model 和 runner 可以复用这些事实，同时 Phase 5～7 contract 保持冻结。
 
+### 7.20 TASK-083：第一个 Concrete PV Profile Model
+
+TASK-083 开始把输入事实接到可执行 component model，但仍保持非常窄的职责：`PVProfileSimulationModel` 只把一个小时的
+`PVSimulationInput.available_power_kw` 变成同值的 `PVSimulationResult.actual_power_kw`。
+
+```text
+24h PV curve 中的一个值
+        |
+        v
+exact PVSimulationInput
+        |
+        v
+PVProfileSimulationModel
+        |
+        v
+PVSimulationResult
+```
+
+为什么 model 不在构造函数中再保存整条 24h curve？因为 TASK-082 的 daily input 已经是 profile 的 caller-owned source。
+未来 runner 会为每个小时显式构造 `PVSimulationInput`。如果 model 再保存一份 curve，就会出现两个事实来源，还会把 sequence
+lookup 和 scenario-length 假设带进 component model。
+
+这个最小模型也展示了 deterministic 与 object identity 的区别。同一 input 重复执行会得到相同的 power value，但每次产生
+独立 immutable result；每个 result 都通过 `result.simulation_input is original_input` 保存来源。确定性不要求缓存或返回同一个
+result 对象。
+
+当前 `actual_power_kw == available_power_kw` 只是 profile demo 的明确语义，不是天气、辐照度、温度、MPPT、逆变器或预测模型。
+这些能力若未来需要，必须以新的 concrete implementation 引入，不能修改已经冻结的 Phase 6 contract。
+
 ## 8. 学习建议
 
 建议按以下顺序理解 EOS：
