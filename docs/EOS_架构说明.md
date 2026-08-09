@@ -1253,3 +1253,30 @@ provenance 均保持。
 依赖方向为 `ems_simulator.battery -> ems_simulator.input + simulator public contracts`。`simulator` 不依赖 application model。
 TASK-085 不修改 Phase 5～7，不引入 SOH、thermal/cell physics、BMS、PCS、CAN、Runtime、Device、Command、Optimization 或
 EMS strategy。
+
+## 23. Grid Energy Balance Model（TASK-086）
+
+TASK-086 在 `ems_simulator` 增加 frozen/slotted `GridEnergyBalanceSimulationModel`，实现既有
+`GridSimulationModelBoundary`，不修改 Phase 6 Grid input/result：
+
+```text
+exact PV result + exact Load result + exact Battery result
+        |
+        v
+GridEnergyBalanceSimulationModel
+        + exact same-step GridSimulationInput
+        |
+        v
+GridSimulationResult
+```
+
+正式公式为 `grid = load + battery - pv`。Battery positive charging 增加 Grid import；Battery negative discharging 减少
+Grid import。Grid positive 表示 import，negative 表示 export。旧草案中的减 Battery 公式被明确拒绝。
+
+model 的三个 result fields 均保持 exact identity，并要求其 `step_identity` 使用 `is` 相同；Grid input 也必须引用同一个 exact
+step。Result 保存 exact Grid input。Balance 使用 realized Battery result，不使用可能已被 physics clipping 改变的 actuation
+request，也不使用 Grid input 的 requested value 替代 component evidence。
+
+依赖方向为 `ems_simulator.grid -> simulator public contracts`。该 concrete model 是 per-step immutable configuration，不拥有
+Runtime state、cache 或 history。Future application runner 负责 component execution ordering；TASK-086 不修改 Phase 5～7、
+executor 或 scenario contracts，不引入 Zero Export、strategy、PCS、Device、Command 或 Optimization。
