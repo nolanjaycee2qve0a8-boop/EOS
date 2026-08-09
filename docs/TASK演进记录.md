@@ -3194,6 +3194,45 @@ PCS、inverter、Runtime、Device、Command 或 Optimization；不修改 Phase 5
 
 **验证结果：** focused tests、pytest、Ruff lint/format、mypy 与 pre-commit。
 
+## TASK-087 24h Simulation Runner
+
+**背景：** TASK-082～086 已提供 24 小时 caller input 与 concrete PV、Load、Battery、
+Grid models，但尚无完整的连续应用执行入口。
+
+**目标：** 使用现有 Phase 7 single-step executor 按 caller order 执行 24 个显式 step，
+输出 immutable `DailySimulationResult`。
+
+**实现内容：**
+
+- 新增 empty-slotted `DailySimulationRunner` 与 frozen/slotted
+  `DailySimulationResult`。
+- 每个 step 生成 exact component inputs，并通过
+  `SingleStepSimulationExecutor.execute()` exactly once。
+- 使用简单 PV/Load imbalance rule 产生 Battery request；Battery physics 负责 realized
+  power、efficiency、power limits 与 SOC boundaries。
+- Grid 使用同一步 exact PV/Load/Battery results，按
+  `Grid = Load + Battery - PV` 计算。
+- 24 traces 保存 exact step evidence；23 progressions 保存 exact previous trace/result
+  与 next input。
+- Battery next state 作为下一 step exact source state。
+
+**架构意义：** EOS EMS Simulator 1.0 首次具备完整 24 小时 deterministic demo flow，
+同时继续保持 Simulation ≠ Runtime。连续 step 来自 caller input 和 explicit progression，
+不是 clock、scheduler 或自动 lifecycle。
+
+**新增文件：**
+
+- `ems_simulator/runner.py`；
+- `tests/unit/ems_simulator/test_runner.py`；
+- `tasks/TASK-087.md`；
+- `architecture/adr/ADR-084-24h-simulation-runner.md`。
+
+**验证结果：** focused tests、full pytest、Ruff lint/format、mypy 与 pre-commit。
+
+**关键设计决策：** 不修改 Phase 5～7 contracts；使用 frozen exact-result adapters
+协调 Grid 的 same-step result dependency；不引入 Runtime、Scheduler、Clock、Device、
+Command、Optimization、Forecast、MPC 或 AI；CSV、plotting 和 daily summary 留给后续任务。
+
 ## 2. 后续追加模板
 
 ```markdown
