@@ -3384,6 +3384,37 @@ dependency、focused/full pytest、Ruff、mypy 与 pre-commit。
 **关键设计决策：** 不新增 `EMSStrategyBoundary`，不修改 Phase 5～8，不调用 Simulator，
 不执行 Constraint/Feasibility，不生成 Actuation、Command 或任何具体 EMS algorithm。
 
+## TASK-091 EMS Strategy Boundary
+
+**背景：** TASK-090 已提供 immutable Context、Strategy descriptor 和 Decision artifacts，
+但尚未定义所有具体 EMS strategies 必须遵守的统一调用入口。
+
+**目标：** 新增 abstract、empty-slotted `EMSStrategyBoundary`，冻结
+`evaluate(context: EMSContext) -> EMSDecision` contract。
+
+**实现内容：**
+
+- 新增独立 `ems_strategy/boundary.py`；
+- 从 `ems_strategy` public API 导出 boundary；
+- 文档化 exact `decision.source_context is context` postcondition；
+- 使用 test-only `MinimalStrategy` 验证 subclass、返回类型和 identity；
+- 验证 boundary 与 test implementation 均无 instance state。
+
+**架构意义：** 未来 Self Consumption、Zero Export、TOU 和 MPC implementation 可以使用
+同一调用契约，而 Simulator、Constraint、Runtime 和 Device 继续保持隔离。
+
+**新增文件：**
+
+- `ems_strategy/boundary.py`；
+- `tests/unit/ems_strategy/test_strategy_boundary.py`；
+- `tasks/TASK-091.md`。
+
+**验证结果：** abstract/signature、statelessness、exact context provenance、public API、
+dependency isolation、full pytest、Ruff format/check 与 mypy。
+
+**关键设计决策：** boundary 本身不执行 input normalization、copy、Constraint、Simulator 或
+Command；conforming implementation 必须返回引用 exact input context 的 `EMSDecision`。
+
 ## 2. 后续追加模板
 
 ```markdown
