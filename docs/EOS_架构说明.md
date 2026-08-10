@@ -1379,3 +1379,83 @@ caller output directory
 CLI 可为易用性创建 caller 指定的 output directory，但不保存全局 path、history 或 current
 execution。它没有 Runtime lifecycle、Scheduler、background loop、Device、Command、Cloud、
 MPC、Optimization、AI 或 Forecast 依赖。Demo rule 是验证夹具，不升级为生产策略边界。
+
+## 24. Phase 9 EMS Strategy Layer Architecture Freeze
+
+Phase 9 在 Simulator 1.0 之外建立正式 EMS Strategy Layer。Simulator 继续负责执行显式
+actuation、计算物理状态和记录 evidence；Strategy 只根据事实产生决策请求：
+
+```text
+Facts
+  |
+  v
+EMSContext
+  |
+  v
+EMSStrategyBoundary
+  |
+  v
+EMSDecision
+  |
+  v
+Constraint / Feasibility
+  |
+  v
+BatterySimulationActuation
+  |
+  v
+Existing Simulator
+```
+
+`EMSContext` 是 frozen/slotted immutable fact snapshot，保存 exact source context、objective
+evidence 和 active capability information。它没有 cache、history、Runtime state、clock 或
+Device access。Objective 描述业务目标，Capability 描述系统能力，Strategy 根据事实产生请求；
+Objective 不直接生成 Intent，Capability descriptor 也不实例化或调用 Strategy。
+
+`EMSStrategyBoundary.evaluate(context) -> EMSDecision` 是 abstract、empty-slotted、stateless
+边界。每次 evaluation 只接收一个 Context 并返回一个 Decision，不执行 Constraint、不调用
+Simulator、不修改 Context，也不保存历史。
+
+`EMSDecision` 保存 exact `source_context`、exact immutable `source_strategy` descriptor、exact
+semantic `intent` 和 requested power。Phase 5 `DecisionIntent` 仍只表达 charge/discharge/idle；
+requested power 是非负 raw kW magnitude，方向由 action 表达。显式 post-feasibility handoff
+才把它映射为 Simulator signed Battery power。
+
+以下区分被冻结：
+
+```text
+EMSDecision != Command
+EMSDecision != Feasible Decision
+EMSDecision != BatterySimulationActuation
+```
+
+Strategy 负责业务目标和决策逻辑；Constraint/Feasibility 负责 SOC、功率、系统能力和物理可行性。
+Simulator physics 是最终物理验证，但不替代独立 feasibility boundary。完整 evidence chain 为：
+
+```text
+DecisionContext -> EMSContext -> Strategy -> EMSDecision
+    -> Feasible Decision -> BatterySimulationActuation -> Simulation Trace
+```
+
+每个 boundary 只保证其直接输入与输出之间声明的 identity provenance。禁止 copy、deepcopy、
+serialization reconstruction 和 value-only lineage；跨层关系必须由 application composition
+显式建立。
+
+Self Consumption、Zero Export 和 TOU 将作为未来 Strategy implementations。MPC 也只能作为
+Strategy implementation；其预测和规划数据必须通过独立 caller-supplied immutable horizon
+artifact 提供，不得把 solver state、forecast 或 Optimization ownership 塞入基础 `EMSContext`。
+
+Phase 9 不修改 Phase 5～8 contracts，不把 EMS 写入 Simulator，也不引入 Runtime、Scheduler、
+Device、Command、Dispatcher 或通信协议。正式决策如何经过 feasibility 并映射为现有
+`BatterySimulationActuation`，必须由后续独立 integration boundary 显式定义。
+
+### TASK-090：EMS Core Contracts
+
+TASK-090 首次实现 Phase 9 的三个 immutable artifacts：`EMSStrategyDescriptor`、`EMSContext`
+和 `EMSDecision`。它们位于独立 `ems_strategy` package，不属于 `simulator`、`ems_simulator`
+或 legacy `kernel/runtime`。
+
+`EMSContext` 保存 exact `DecisionContext`、exact objective/capability composition 和其中一个
+exact active `CapabilityDescriptor`。`EMSDecision` 保存 exact context、strategy descriptor 和
+Phase 5 semantic `DecisionIntent`，并保存非负 raw kW requested magnitude。TASK-090 不实现
+`EMSStrategyBoundary`、Constraint、Actuation handoff 或任何 EMS algorithm。
