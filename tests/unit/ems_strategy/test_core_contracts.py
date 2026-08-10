@@ -252,6 +252,7 @@ def test_public_api_exports_strategy_contracts() -> None:
         "EMSStrategyDescriptor",
         "FeasibilityBoundary",
         "FeasibleDecision",
+        "SelfConsumptionStrategy",
     ]
     assert ems_strategy.EMSContext is EMSContext
     assert ems_strategy.EMSDecision is EMSDecision
@@ -292,5 +293,9 @@ def test_package_has_no_simulator_runtime_device_or_command_dependency() -> None
             "Simulator",
         ):
             assert forbidden_name not in source
-        if module_path.name not in {"boundary.py", "feasibility.py"}:
+        if module_path.name not in {
+            "boundary.py",
+            "feasibility.py",
+            "self_consumption.py",
+        }:
             assert "evaluate(" not in source
