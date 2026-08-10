@@ -243,6 +243,7 @@ def test_core_contracts_reject_invalid_reference_types() -> None:
 
 def test_public_api_exports_strategy_contracts() -> None:
     assert ems_strategy.__all__ == [
+        "DecisionProvenance",
         "EMSContext",
         "EMSDecision",
         "EMSStrategyBoundary",

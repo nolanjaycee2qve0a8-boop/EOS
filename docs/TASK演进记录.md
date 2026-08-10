@@ -3415,6 +3415,36 @@ dependency isolation、full pytest、Ruff format/check 与 mypy。
 **关键设计决策：** boundary 本身不执行 input normalization、copy、Constraint、Simulator 或
 Command；conforming implementation 必须返回引用 exact input context 的 `EMSDecision`。
 
+## TASK-092 EMS Decision Provenance Contract
+
+**背景：** TASK-090 定义 Context、Strategy descriptor 和 Decision，TASK-091 定义统一调用
+边界；完成后的 Decision 仍需要一个独立、不可变、只读的 lineage observation artifact。
+
+**目标：** 新增 `DecisionProvenance`，保存 exact Context、Strategy descriptor 和 Decision。
+
+**实现内容：**
+
+- 新增 frozen/slotted `DecisionProvenance`；
+- 使用 `is` 验证 Decision 内 source Context 和 source Strategy descriptor；
+- 拒绝 value-equal reconstructed source artifacts；
+- 从 `ems_strategy` public API 导出 provenance contract；
+- 增加 focused identity、immutability、invalid type 和 dependency tests。
+
+**架构意义：** Phase 9 首次能把一次 Strategy Decision 的直接来源作为 immutable evidence
+观察，同时不重新执行 Strategy、不重建 Decision，也不把 provenance 变成 history storage。
+
+**新增文件：**
+
+- `ems_strategy/provenance.py`；
+- `tests/unit/ems_strategy/test_decision_provenance.py`；
+- `tasks/TASK-092.md`。
+
+**验证结果：** exact identity、reconstruction rejection、frozen/slotted、observation-only
+dependencies、full pytest、Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不修改 TASK-090/091 contracts，不保存 Strategy implementation，不调用
+Simulator、Constraint、Runtime、Device 或 Command，不引入 serialization 或 mutable state。
+
 ## 2. 后续追加模板
 
 ```markdown
