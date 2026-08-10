@@ -3545,6 +3545,39 @@ statelessness、dependency isolation、full pytest、Ruff、mypy 与 `git diff -
 Simulator、Runtime、Device、PCS、Command、TOU、MPC、Optimization 或 Forecasting；不修改
 TASK-090–094 和 Phase 5–8 contracts。
 
+## TASK-096 Zero Export Feasibility Boundary
+
+**背景：** Self Consumption Strategy 已能产生请求，但 Zero Export 属于 feasibility
+constraint，不能被塞入 Strategy 或直接变成物理控制。
+
+**目标：** 新增 immutable feasibility evidence 与 abstract/stateless boundary，只表达一个
+exact `EMSDecision` 是否满足 Zero Export 可行性。
+
+**实现内容：**
+
+- `ZeroExportFeasibility` 保存 exact Decision、exact DecisionProvenance 与 Boolean status；
+- `ZeroExportBoundary` 使用 empty slots，不保存 cache/history/runtime state；
+- public evaluation seam 使用 `is` 强制 direct input/output lineage；
+- PV-surplus charge request 可保持为 feasible；
+- future export risk 只表达为 infeasible，不生成 correction。
+
+**架构意义：** 明确 Zero Export 是 Constraint，不是 Strategy，并保持
+Strategy request、feasibility evidence、actuation 与 Command 分离。
+
+**新增文件：**
+
+- `ems_strategy/zero_export.py`；
+- `tests/unit/ems_strategy/test_zero_export_feasibility.py`；
+- `tasks/TASK-096.md`。
+
+**验证结果：** frozen/slotted、abstract/stateless、Decision/Provenance identities、
+reconstruction rejection、feasible/infeasible representation、dependency isolation、full pytest、
+Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不修改 SelfConsumptionStrategy，不执行 clipping、SOC、Grid control、
+Simulator、Runtime、Device、Command、TOU、MPC、Optimization 或 Forecasting；不修改既有
+contracts。
+
 ```markdown
 ## TASK-XXX
 
