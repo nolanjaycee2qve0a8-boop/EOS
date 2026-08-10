@@ -8,6 +8,7 @@ from ems_strategy.feasibility import FeasibilityBoundary, FeasibleDecision
 from ems_strategy.handoff import ActuationHandoffBoundary, ActuationHandoffResult
 from ems_strategy.provenance import DecisionProvenance
 from ems_strategy.self_consumption import SelfConsumptionStrategy
+from ems_strategy.zero_export import ZeroExportBoundary, ZeroExportFeasibility
 
 __all__ = [
     "ActuationHandoffBoundary",
@@ -20,4 +21,6 @@ __all__ = [
     "FeasibilityBoundary",
     "FeasibleDecision",
     "SelfConsumptionStrategy",
+    "ZeroExportBoundary",
+    "ZeroExportFeasibility",
 ]

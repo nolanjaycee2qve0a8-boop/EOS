@@ -253,6 +253,8 @@ def test_public_api_exports_strategy_contracts() -> None:
         "FeasibilityBoundary",
         "FeasibleDecision",
         "SelfConsumptionStrategy",
+        "ZeroExportBoundary",
+        "ZeroExportFeasibility",
     ]
     assert ems_strategy.EMSContext is EMSContext
     assert ems_strategy.EMSDecision is EMSDecision
@@ -297,5 +299,6 @@ def test_package_has_no_simulator_runtime_device_or_command_dependency() -> None
             "boundary.py",
             "feasibility.py",
             "self_consumption.py",
+            "zero_export.py",
         }:
             assert "evaluate(" not in source
