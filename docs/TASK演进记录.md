@@ -3445,6 +3445,38 @@ dependencies、full pytest、Ruff、mypy 与 `git diff --check`。
 **关键设计决策：** 不修改 TASK-090/091 contracts，不保存 Strategy implementation，不调用
 Simulator、Constraint、Runtime、Device 或 Command，不引入 serialization 或 mutable state。
 
+## TASK-093 EMS Decision Feasibility Boundary Contract
+
+**背景：** Strategy request 不能直接等同于物理可行结果或 Simulator actuation。TASK-092 已
+提供 exact Decision provenance，因此 feasibility 必须显式保留该 evidence，而不是重建。
+
+**目标：** 新增 immutable `FeasibleDecision` 与 abstract `FeasibilityBoundary`，建立请求到可行
+结果的架构 seam，不实现约束算法。
+
+**实现内容：**
+
+- FeasibleDecision 保存 exact source Decision 和 exact DecisionProvenance；
+- provenance 必须使用 `is` 引用 exact source Decision；
+- approved action 独立表达，可保持 source action 或降为 idle，不允许反向生成业务策略；
+- approved power 使用 finite non-negative raw kW magnitude；
+- boundary 使用 empty slots，无 cache、history 或 instance state；
+- provenance 作为显式 keyword-only input，避免 boundary 内部重建 evidence。
+
+**架构意义：** Phase 9 首次明确区分 Strategy request 与 approved feasible result，同时继续保持
+`FeasibleDecision != BatterySimulationActuation != Command`。
+
+**新增文件：**
+
+- `ems_strategy/feasibility.py`；
+- `tests/unit/ems_strategy/test_feasibility_boundary.py`；
+- `tasks/TASK-093.md`。
+
+**验证结果：** abstract/signature、identity/reconstruction、immutability、statelessness、action
+contract、dependency isolation、full pytest、Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不实现 SOC、Battery/Grid constraint、power clipping、Zero Export、TOU、
+MPC、Simulator call、Actuation handoff、Runtime、Device 或 Command；不修改既有 contracts。
+
 ## 2. 后续追加模板
 
 ```markdown
