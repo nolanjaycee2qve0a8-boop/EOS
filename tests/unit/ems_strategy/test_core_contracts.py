@@ -245,6 +245,9 @@ def test_public_api_exports_strategy_contracts() -> None:
     assert ems_strategy.__all__ == [
         "ActuationHandoffBoundary",
         "ActuationHandoffResult",
+        "BatteryOperatingEnvelope",
+        "BatteryOperatingEnvelopeBoundary",
+        "BatteryOperatingEnvelopeFeasibility",
         "DecisionProvenance",
         "EMSContext",
         "EMSDecision",
@@ -297,6 +300,7 @@ def test_package_has_no_simulator_runtime_device_or_command_dependency() -> None
             assert forbidden_name not in source
         if module_path.name not in {
             "boundary.py",
+            "battery_operating_envelope.py",
             "feasibility.py",
             "self_consumption.py",
             "zero_export.py",
