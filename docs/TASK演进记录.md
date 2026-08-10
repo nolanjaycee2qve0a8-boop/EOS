@@ -3512,6 +3512,39 @@ reconstruction rejection、signed-power mapping、dependency isolation、full py
 **关键设计决策：** 不修改 Phase 5–8 contracts，不执行 Battery physics、SOC transition、
 Constraint、Simulator、Runtime、Device、PCS 或 Command。
 
+## TASK-095 Self Consumption EMS Strategy
+
+**背景：** TASK-090–094 已建立 Strategy request、provenance、feasibility 与 Simulator
+handoff contracts，但 Phase 9 尚无具体 Strategy implementation。
+
+**目标：** 实现第一个 concrete `EMSStrategyBoundary`，根据 PV、Load、SOC 与 reserve SOC
+facts 产生 self-consumption `EMSDecision` request。
+
+**实现内容：**
+
+- PV surplus 产生 charge request；
+- Load deficit 且 SOC 高于 reserve 时产生 discharge request；
+- balanced 或不可请求放电时产生 idle request；
+- requested power 是未裁剪的 non-negative raw kW magnitude；
+- exact `EMSContext` 与 immutable Strategy descriptor identity 得到保留；
+- Strategy empty-slotted，不保存 cache、history 或 runtime state。
+
+**架构意义：** Phase 9 首次加入真实业务决策逻辑，同时保持 Strategy 只表达请求，
+Feasibility 负责物理可行性，handoff 负责 Simulator sign mapping。
+
+**新增文件：**
+
+- `ems_strategy/self_consumption.py`；
+- `tests/unit/ems_strategy/test_ems_self_consumption_strategy.py`；
+- `tasks/TASK-095.md`。
+
+**验证结果：** charge/discharge/idle、reserve SOC gate、unclipped request、identity、
+statelessness、dependency isolation、full pytest、Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不执行 SOC limiting、power clipping、Grid/Zero Export constraint、
+Simulator、Runtime、Device、PCS、Command、TOU、MPC、Optimization 或 Forecasting；不修改
+TASK-090–094 和 Phase 5–8 contracts。
+
 ```markdown
 ## TASK-XXX
 
