@@ -241,10 +241,11 @@ def test_core_contracts_reject_invalid_reference_types() -> None:
         EMSDecision(context, strategy, cast(Any, None), 0.0)
 
 
-def test_public_api_exports_only_core_contracts() -> None:
+def test_public_api_exports_strategy_contracts() -> None:
     assert ems_strategy.__all__ == [
         "EMSContext",
         "EMSDecision",
+        "EMSStrategyBoundary",
         "EMSStrategyDescriptor",
     ]
     assert ems_strategy.EMSContext is EMSContext
@@ -282,6 +283,7 @@ def test_package_has_no_simulator_runtime_device_or_command_dependency() -> None
             "BatterySimulationActuation",
             "Command",
             "Simulator",
-            "evaluate(",
         ):
             assert forbidden_name not in source
+        if module_path.name != "boundary.py":
+            assert "evaluate(" not in source
