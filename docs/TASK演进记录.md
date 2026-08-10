@@ -3578,6 +3578,38 @@ Ruff、mypy 与 `git diff --check`。
 Simulator、Runtime、Device、Command、TOU、MPC、Optimization 或 Forecasting；不修改既有
 contracts。
 
+## TASK-097 Battery Operating Envelope Feasibility Boundary
+
+**背景：** Zero Export feasibility 已建立独立 constraint evidence；Battery 自身的 SOC 与功率
+operating envelope 也需要独立表达，不能进入 Strategy 或 Simulator physics。
+
+**目标：** 新增 caller-supplied immutable Battery limits、abstract/stateless evaluation seam 与
+identity-preserving feasibility result。
+
+**实现内容：**
+
+- `BatteryOperatingEnvelope` 明确 SOC fraction 与 charge/discharge raw kW limits；
+- `BatteryOperatingEnvelopeFeasibility` 保存 exact Decision、Provenance、Envelope 与 Boolean；
+- boundary 使用 `is` 强制 direct lineage 并拒绝 reconstructed artifacts；
+- tests 演示 charge/discharge、SOC boundary 与 power limit semantics；
+- production contract 不包含 clipping 或 correction algorithm。
+
+**架构意义：** Battery physical feasibility 与 Strategy request、Zero Export constraint、
+actuation handoff 和 physical execution 保持分离。
+
+**新增文件：**
+
+- `ems_strategy/battery_operating_envelope.py`；
+- `tests/unit/ems_strategy/test_battery_operating_envelope.py`；
+- `tasks/TASK-097.md`。
+
+**验证结果：** immutable/slotted、exact identity、reconstruction rejection、charge/discharge、
+SOC/power boundary、statelessness、dependency isolation、full pytest、Ruff、mypy 与
+`git diff --check`。
+
+**关键设计决策：** 不执行 clipping、SOC calculation、Strategy generation、Grid control、
+Simulator、Runtime、Device、PCS、Command 或 Optimization；不修改既有 contracts。
+
 ```markdown
 ## TASK-XXX
 
