@@ -3479,6 +3479,39 @@ MPC、Simulator call、Actuation handoff、Runtime、Device 或 Command；不修
 
 ## 2. 后续追加模板
 
+## TASK-094 EMS Feasible Decision to Simulator Actuation Handoff Contract
+
+**背景：** Phase 9 `FeasibleDecision` 与冻结的 Phase 6
+`BatterySimulationActuation` 是独立类型，不能通过修改旧 contract 或伪造类型直接连接。
+
+**目标：** 新增 explicit EMS-to-Simulator adapter boundary，在保持两侧 contract 不变的同时，
+建立可审计的 direct identity lineage。
+
+**实现内容：**
+
+- 新增 frozen/slotted `ActuationHandoffResult`；
+- 保存 exact Phase 9 `FeasibleDecision` 与 exact existing
+  `BatterySimulationActuation`；
+- 新增 abstract/stateless `ActuationHandoffBoundary`；
+- 使用 identity 验证拒绝 value-equal reconstructed source；
+- 冻结 charge 为正、discharge 为负、idle 为零的 Simulator raw kW 映射契约。
+
+**架构意义：** 明确 EMS Layer 到 Simulator Layer 的 adapter seam，同时保持
+`FeasibleDecision != BatterySimulationActuation != Command`。
+
+**新增文件：**
+
+- `ems_strategy/handoff.py`；
+- `tests/unit/ems_strategy/test_actuation_handoff.py`；
+- `tasks/TASK-094.md`。
+
+**验证结果：** abstract/stateless、frozen/slotted、exact source/actuation identities、
+reconstruction rejection、signed-power mapping、dependency isolation、full pytest、Ruff、mypy
+与 `git diff --check`。
+
+**关键设计决策：** 不修改 Phase 5–8 contracts，不执行 Battery physics、SOC transition、
+Constraint、Simulator、Runtime、Device、PCS 或 Command。
+
 ```markdown
 ## TASK-XXX
 
