@@ -3304,6 +3304,86 @@ deterministic content、full pytest、Ruff、mypy 与 pre-commit。
 **关键设计决策：** 只组合 TASK-082～088；不修改 Phase 5～8；不引入 MPC、Optimization、
 AI、Forecast、Runtime、Scheduler、Device、Command、Cloud 或 real-time monitoring。
 
+## Phase 9 EMS Strategy Architecture Freeze（TASK-090 前）
+
+**背景：** TASK-089 已证明 EOS EMS Simulator 1.0 可以完整运行并导出工程结果，但 Demo rule
+只是 simulator validation fixture，不是正式 EMS Strategy。进入实现前需要先冻结 Strategy、
+Decision、Constraint 和 Simulation 的职责与 provenance。
+
+**目标：** 通过 ADR-087 冻结独立 EMS Strategy Layer：
+
+```text
+Facts -> EMSContext -> EMSStrategyBoundary -> EMSDecision
+      -> Constraint / Feasibility -> BatterySimulationActuation -> Existing Simulator
+```
+
+**文档内容：**
+
+- `EMSContext` 是 immutable fact snapshot，保存 exact source context、objective evidence 和
+  active capability information；
+- `EMSStrategyBoundary.evaluate(context) -> EMSDecision` 是 abstract、stateless、exactly-one
+  evaluation contract；
+- `EMSDecision` 保存 exact context、strategy descriptor、semantic intent 和 requested power；
+- Strategy 负责业务请求，Constraint 负责 SOC、功率、系统能力与物理可行性；
+- Decision、Feasible Decision、BatterySimulationActuation 和 Command 保持独立；
+- provenance 使用 direct object identity，禁止 copy、serialization reconstruction 和
+  value-only lineage；
+- Self Consumption、Zero Export、TOU 与 MPC 仅作为未来 Strategy implementations；
+- MPC horizon 必须使用独立 caller-supplied immutable artifact，不污染基础 `EMSContext`。
+
+**架构意义：** 正式 EMS 算法可以在不修改 Simulator physics、Phase 7 executor 或 Phase 8
+Demo contracts 的前提下演进。Simulator 继续执行和验证，Strategy 只产生请求，application
+composition 显式协调 feasibility 与 simulation handoff。
+
+**修改文件：**
+
+- `architecture/adr/ADR-087-phase9-ems-strategy-architecture.md`；
+- `docs/EOS_架构说明.md`；
+- `docs/EOS_学习手册.md`；
+- `docs/TASK演进记录.md`。
+
+**验证结果：** documentation-only diff review；无 production code、tests、public API 或
+Phase 5～8 contract 变化。
+
+**关键设计决策：** 本节不是 TASK-090，也不实现 Strategy。Simulator 不调用 Strategy；
+Strategy 不推进 simulation step、不控制 Device、不生成 Command；未来 explicit handoff 必须
+保持 direct identity provenance。
+
+## TASK-090 EMS Core Contracts
+
+**背景：** ADR-087 已冻结 Phase 9 EMS Strategy Layer，但正式 Strategy 需要先有稳定、不可变、
+可追踪的输入和输出 artifacts。
+
+**目标：** 实现 `EMSStrategyDescriptor`、`EMSContext` 和 `EMSDecision` 三个核心 contracts，
+不实现 Strategy boundary 或算法。
+
+**实现内容：**
+
+- 新增独立 `ems_strategy` package 与明确 public API；
+- descriptor 使用 immutable name/version identity；
+- Context 保存 exact source `DecisionContext`、objective composition 和 active capability；
+- capability membership 使用 `is` 验证，拒绝 value-equal reconstructed descriptor；
+- Decision 保存 exact Context、Strategy descriptor 和 Phase 5 semantic Intent；
+- requested power 使用 finite non-negative raw kW magnitude，并验证 action/magnitude 一致性。
+
+**架构意义：** Strategy 输入、策略生产者身份和请求结果首次具备直接 provenance，同时继续
+保持 `EMSDecision != Feasible Decision != BatterySimulationActuation != Command`。
+
+**新增文件：**
+
+- `ems_strategy/__init__.py`；
+- `ems_strategy/descriptor.py`；
+- `ems_strategy/context.py`；
+- `ems_strategy/decision.py`；
+- `tests/unit/ems_strategy/test_core_contracts.py`；
+- `tasks/TASK-090.md`。
+
+**验证结果：** immutable/slotted、identity、invalid mutation/type/value、public API、forbidden
+dependency、focused/full pytest、Ruff、mypy 与 pre-commit。
+
+**关键设计决策：** 不新增 `EMSStrategyBoundary`，不修改 Phase 5～8，不调用 Simulator，
+不执行 Constraint/Feasibility，不生成 Actuation、Command 或任何具体 EMS algorithm。
+
 ## 2. 后续追加模板
 
 ```markdown

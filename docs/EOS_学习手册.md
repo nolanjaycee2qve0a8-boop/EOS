@@ -2601,6 +2601,101 @@ model 决定，Grid 仍使用 realized result。Demo 因此不是 Runtime，也�
 `DemoExecutionResult` 保存 exact source input、simulation result、export artifact 和 paths。
 相同 Demo 运行生成相同文件内容，但每次 execution 都有独立 immutable evidence identity。
 
+## 8. Phase 9：为什么 EMS Strategy 必须独立于 Simulator
+
+Simulator 1.0 已经能执行 24 小时场景，但 Demo 中的简单 PV-surplus rule 只是验证夹具。工程上，
+“决定电池希望做什么”和“验证电池实际能做什么”必须分开：
+
+```text
+EMS Strategy                     Simulator
+-------------                    ---------
+读取决策事实                     接收显式 actuation
+产生业务决策请求                 执行 Battery physics
+说明 charge/discharge/idle       计算 actual power 和 next SOC
+                                 记录 trace 并导出结果
+```
+
+如果把正式 EMS 写进 Simulator，策略变更会污染物理模型，仿真也无法独立验证不同策略。因此
+Phase 9 冻结以下链路：
+
+```text
+Facts -> EMSContext -> EMSStrategyBoundary -> EMSDecision
+      -> Constraint / Feasibility -> BatterySimulationActuation -> Simulator
+```
+
+### 8.1 EMSContext：策略看到的事实
+
+`EMSContext` 是一次 evaluation 的 immutable fact snapshot。它保存 exact source context、
+objective evidence 和 active capability information，但不保存 cache、history、Runtime state，
+也不读取 clock 或 Device。
+
+Objective 回答“业务为什么要做”，Capability 回答“系统具备什么能力”，Strategy 才回答“根据
+当前事实请求做什么”。Objective 不直接生成 Intent，Capability descriptor 也不是会运行的
+Strategy implementation。
+
+### 8.2 EMSDecision：请求，不是执行
+
+`EMSDecision` 保存 source context、source strategy、semantic intent 和 requested power。
+Phase 5 `DecisionIntent` 继续只用 charge/discharge/idle 表达语义。requested power 使用非负
+kW magnitude，方向由 action 表达；它不把功率符号重新塞进 semantic Intent。
+
+必须记住三条不等式：
+
+```text
+EMSDecision != Feasible Decision
+EMSDecision != BatterySimulationActuation
+EMSDecision != Command
+```
+
+Strategy 的请求可能超过 SOC 或功率能力，所以先由 Constraint/Feasibility 处理。只有显式
+handoff 才把 feasible action 映射成 Simulator 的 Battery power：charge 为正、discharge 为负、
+idle 为零。真实 Device Command 是更远的执行边界，本阶段不涉及。
+
+### 8.3 为什么 Strategy 不能替代 Constraint
+
+Self Consumption、Zero Export、TOU 或 MPC 可以使用 SOC、价格和 Grid facts 形成业务判断，
+但它们不能因此拥有物理安全职责。SOC 上下限、最大充放电功率和系统能力仍属于
+Constraint/Feasibility；Simulator physics 负责验证给定 actuation 的实际状态转移。
+
+这种分工让同一个 Strategy 能在不同 Battery 参数下复用，也让 Constraint 和 physics 可以
+单独测试，而不是把所有规则塞进一个 `decide_and_control()` 方法。
+
+### 8.4 Identity provenance
+
+完整证据链是：
+
+```text
+DecisionContext -> EMSContext -> Strategy -> EMSDecision
+    -> Feasible Decision -> BatterySimulationActuation -> Simulation Trace
+```
+
+每个 boundary 保存其直接 source 的 exact reference。不能用 value equality、copy、deepcopy 或
+serialization reconstruction 冒充 provenance。跨边界关系也不会自动出现，必须由 caller 在
+application composition 中显式建立。
+
+### 8.5 为未来策略保留扩展空间
+
+- Self Consumption：根据 PV/Load 形成自发自用请求；
+- Zero Export：根据并网事实形成降低出口的请求；
+- TOU：根据 caller-supplied tariff facts 形成峰谷请求；
+- MPC：作为未来 Strategy implementation 使用显式 planning horizon。
+
+MPC 的 horizon 必须是独立、caller-supplied、immutable artifact。基础 `EMSContext` 不保存
+forecast algorithm、solver state 或 optimization cache。这样支持 MPC 不会污染普通策略，
+也不会把 Optimization 误认为 Decision。
+
+### 8.6 TASK-090：先建立可以被信任的数据合同
+
+正式 Strategy boundary 还没有出现以前，TASK-090 先实现三个最小 artifacts：
+
+- `EMSStrategyDescriptor`：说明哪一种、哪一版本 Strategy 产生证据，但不是实现实例；
+- `EMSContext`：保存 exact source facts 与 objective/capability provenance；
+- `EMSDecision`：保存 exact Context、Strategy、semantic Intent 与 requested power。
+
+这里最重要的不是算法，而是以后任何算法都必须返回同一种可追踪请求。requested power 是
+非负 kW magnitude，方向继续由 charge/discharge/idle action 表达。这样 semantic Intent 不会
+被设备功率符号污染，Simulator signed actuation 也不会提前进入 Strategy contract。
+
 ## 9. 文档维护规则
 
 以后每完成一个 TASK：
