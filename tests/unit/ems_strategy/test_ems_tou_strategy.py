@@ -23,6 +23,7 @@ from ems_strategy import (
     TOUStrategy,
     TOUStrategyConfiguration,
 )
+from forecast import ForecastHorizon, ForecastPoint
 from kernel.decision import DecisionContext
 from objective import (
     ObjectiveCapabilityActivationComposition,
@@ -70,6 +71,19 @@ def make_configuration() -> TOUStrategyConfiguration:
     )
 
 
+def make_horizon(*prices: float | None) -> ForecastHorizon:
+    points = tuple(
+        ForecastPoint(
+            datetime(2026, 1, 1, index + 1, tzinfo=UTC),
+            pv_power_kw=0.0,
+            load_power_kw=0.0,
+            electricity_price_cny_per_kwh=price,
+        )
+        for index, price in enumerate(prices)
+    )
+    return ForecastHorizon(points)
+
+
 def test_low_price_creates_charge_request() -> None:
     decision = TOUStrategy(make_configuration()).evaluate(make_context(0.3))
 
@@ -87,6 +101,66 @@ def test_high_price_creates_discharge_request() -> None:
 @pytest.mark.parametrize("price", [0.5, 0.7])
 def test_normal_price_period_creates_idle_request(price: float) -> None:
     decision = TOUStrategy(make_configuration()).evaluate(make_context(price))
+
+    assert decision.intent.action == "idle"
+    assert decision.requested_power_kw == 0.0
+
+
+def test_normal_price_with_future_high_tariff_requests_charge() -> None:
+    decision = TOUStrategy(make_configuration()).evaluate(
+        make_context(0.5),
+        forecast_horizon=make_horizon(0.9),
+    )
+
+    assert decision.intent.action == "charge"
+    assert decision.requested_power_kw == 2.0
+
+
+def test_normal_price_with_future_low_tariff_requests_discharge() -> None:
+    decision = TOUStrategy(make_configuration()).evaluate(
+        make_context(0.5),
+        forecast_horizon=make_horizon(0.3),
+    )
+
+    assert decision.intent.action == "discharge"
+    assert decision.requested_power_kw == 3.0
+
+
+@pytest.mark.parametrize(
+    ("current_price", "forecast_price", "action"),
+    [
+        (0.3, 0.9, "charge"),
+        (0.9, 0.3, "discharge"),
+    ],
+)
+def test_current_price_thresholds_take_precedence_over_forecast(
+    current_price: float,
+    forecast_price: float,
+    action: str,
+) -> None:
+    decision = TOUStrategy(make_configuration()).evaluate(
+        make_context(current_price),
+        forecast_horizon=make_horizon(forecast_price),
+    )
+
+    assert decision.intent.action == action
+
+
+@pytest.mark.parametrize(
+    "horizon",
+    [
+        make_horizon(),
+        make_horizon(None),
+        make_horizon(0.3, 0.9),
+    ],
+)
+def test_normal_price_with_ambiguous_or_unavailable_forecast_stays_idle(
+    horizon: ForecastHorizon,
+) -> None:
+    decision = TOUStrategy(make_configuration()).evaluate(
+        make_context(0.5),
+        forecast_horizon=horizon,
+    )
 
     assert decision.intent.action == "idle"
     assert decision.requested_power_kw == 0.0
@@ -113,6 +187,27 @@ def test_decision_preserves_exact_context_and_strategy_descriptor_identity() -> 
     assert decision.source_context is context
     assert decision.source_strategy is strategy.descriptor
     assert strategy.configuration is configuration
+
+
+def test_forecast_input_identity_is_preserved_without_strategy_retention() -> None:
+    context = make_context(0.5)
+    point = ForecastPoint(
+        datetime(2026, 1, 1, 1, tzinfo=UTC),
+        pv_power_kw=0.0,
+        load_power_kw=0.0,
+        electricity_price_cny_per_kwh=0.9,
+    )
+    points = (point,)
+    horizon = ForecastHorizon(points)
+    strategy = TOUStrategy(make_configuration())
+
+    decision = strategy.evaluate(context, forecast_horizon=horizon)
+
+    assert horizon.points is points
+    assert horizon.points[0] is point
+    assert decision.source_context is context
+    assert decision.source_strategy is strategy.descriptor
+    assert not hasattr(strategy, "forecast_horizon")
 
 
 def test_strategy_and_configuration_are_frozen_slotted_without_runtime_state() -> None:
@@ -163,6 +258,11 @@ def test_strategy_rejects_invalid_configuration_and_context_types() -> None:
         TOUStrategy(cast(Any, object()))
     with pytest.raises(TypeError, match="context"):
         TOUStrategy(make_configuration()).evaluate(cast(Any, object()))
+    with pytest.raises(TypeError, match="forecast_horizon"):
+        TOUStrategy(make_configuration()).evaluate(
+            make_context(0.5),
+            forecast_horizon=cast(Any, object()),
+        )
 
 
 def test_strategy_has_no_simulation_or_execution_dependency() -> None:
@@ -180,6 +280,7 @@ def test_strategy_has_no_simulation_or_execution_dependency() -> None:
         "ems_strategy.context",
         "ems_strategy.decision",
         "ems_strategy.descriptor",
+        "forecast",
         "math",
         "typing",
     }

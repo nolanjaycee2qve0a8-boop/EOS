@@ -3683,6 +3683,20 @@ existing contracts。
 
 **验证结果：** 覆盖 immutable/slotted、optional price、invalid values、strict order、empty horizon、exact identity、public import 与 EMSContext isolation。
 
+## TASK-103 Forecast-Aware TOU Strategy
+
+**背景：** TASK-102 已将 future predictions 从 current `EMSContext` 分离为 caller-owned `ForecastHorizon`。现有 TOU 只读取 current price，无法以最小方式验证 future tariff 输入。
+
+**目标：** 扩展既有 `TOUStrategy.evaluate` 的 optional keyword-only `forecast_horizon` 输入；不改变 `EMSStrategyBoundary` 或无 forecast 的 TASK-098 行为。
+
+**核心契约：** current low/high threshold 继续优先。仅 current normal price 时，future-only high tariff 请求 charge，future-only low tariff 请求 discharge，mixed/empty/unavailable horizon 请求 idle。Horizon 只在 evaluation 中读取，不被 Strategy 保存、复制或重建。
+
+**架构收益：** `EMSContext` 继续只含 current facts；`EMSDecision` 和 `DecisionProvenance` 保持不变并继续保留 exact Context/descriptor identity。固定 threshold look-ahead 是 concrete Strategy rule，不是 MPC、solver、ranking 或 optimization。
+
+**新增文件：** `tasks/TASK-103.md`；更新 `ems_strategy/tou.py` 与 TOU unit tests。
+
+**验证结果：** 覆盖 legacy no-forecast、future high/low、empty/unavailable/mixed horizon、exact input identity、statelessness 与 dependency isolation。
+
 ```markdown
 ## TASK-XXX
 

@@ -9,6 +9,7 @@ from ems_strategy.boundary import EMSStrategyBoundary
 from ems_strategy.context import EMSContext
 from ems_strategy.decision import EMSDecision
 from ems_strategy.descriptor import EMSStrategyDescriptor
+from forecast import ForecastHorizon
 
 
 def _require_finite_number(value: object, field_name: str) -> float:
@@ -77,10 +78,11 @@ class TOUStrategyConfiguration:
 
 @dataclass(frozen=True, slots=True)
 class TOUStrategy(EMSStrategyBoundary):
-    """Request a semantic Battery action from the current tariff fact only.
+    """Request a semantic Battery action from tariff facts.
 
     Immutable configuration is declarative input, not retained runtime state.
-    Physical feasibility and all execution remain downstream.
+    An optional caller-supplied forecast is evaluated only for a current normal
+    price. Physical feasibility and all execution remain downstream.
     """
 
     configuration: TOUStrategyConfiguration
@@ -94,10 +96,20 @@ class TOUStrategy(EMSStrategyBoundary):
         if not isinstance(self.configuration, TOUStrategyConfiguration):
             raise TypeError("configuration must be a TOUStrategyConfiguration")
 
-    def evaluate(self, context: EMSContext) -> EMSDecision:
-        """Return one request preserving the exact supplied context identity."""
+    def evaluate(
+        self,
+        context: EMSContext,
+        *,
+        forecast_horizon: ForecastHorizon | None = None,
+    ) -> EMSDecision:
+        """Return one request without retaining the optional forecast input."""
         if not isinstance(context, EMSContext):
             raise TypeError("context must be an EMSContext")
+        if forecast_horizon is not None and not isinstance(
+            forecast_horizon,
+            ForecastHorizon,
+        ):
+            raise TypeError("forecast_horizon must be a ForecastHorizon or None")
 
         price = context.source_context.electricity_price_cny_per_kwh
         if price <= self.configuration.low_price_threshold_cny_per_kwh:
@@ -107,8 +119,7 @@ class TOUStrategy(EMSStrategyBoundary):
             intent = DecisionIntent("discharge")
             requested_power_kw = self.configuration.discharge_request_power_kw
         else:
-            intent = DecisionIntent("idle")
-            requested_power_kw = 0.0
+            intent, requested_power_kw = self._normal_price_request(forecast_horizon)
 
         return EMSDecision(
             source_context=context,
@@ -116,3 +127,37 @@ class TOUStrategy(EMSStrategyBoundary):
             intent=intent,
             requested_power_kw=requested_power_kw,
         )
+
+    def _normal_price_request(
+        self,
+        forecast_horizon: ForecastHorizon | None,
+    ) -> tuple[DecisionIntent, float]:
+        """Apply a deterministic look-ahead rule without planning or solving.
+
+        A future-only high tariff requests charge; a future-only low tariff
+        requests discharge. Mixed, absent, or unavailable price predictions
+        are intentionally ambiguous and therefore request idle.
+        """
+        if forecast_horizon is None:
+            return DecisionIntent("idle"), 0.0
+
+        has_future_high_tariff = any(
+            point.electricity_price_cny_per_kwh is not None
+            and point.electricity_price_cny_per_kwh
+            >= self.configuration.high_price_threshold_cny_per_kwh
+            for point in forecast_horizon.points
+        )
+        has_future_low_tariff = any(
+            point.electricity_price_cny_per_kwh is not None
+            and point.electricity_price_cny_per_kwh
+            <= self.configuration.low_price_threshold_cny_per_kwh
+            for point in forecast_horizon.points
+        )
+        if has_future_high_tariff and not has_future_low_tariff:
+            return DecisionIntent("charge"), self.configuration.charge_request_power_kw
+        if has_future_low_tariff and not has_future_high_tariff:
+            return (
+                DecisionIntent("discharge"),
+                self.configuration.discharge_request_power_kw,
+            )
+        return DecisionIntent("idle"), 0.0
