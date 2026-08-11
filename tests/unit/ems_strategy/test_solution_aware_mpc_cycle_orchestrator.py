@@ -136,15 +136,15 @@ class MinimalDecisionTranslator(MPCDecisionTranslationBoundary):
 
 @pytest.fixture(autouse=True)
 def reset_test_dependencies() -> None:
+    CountingSolutionBoundary.calls = 0
+    CountingSolutionBoundary.empty_solution = False
+    CountingSolutionBoundary.failure = None
     for dependency in (
-        CountingSolutionBoundary,
         CountingPlanConstructor,
         CountingExtractor,
         MinimalDecisionTranslator,
     ):
         dependency.calls = 0
-        if dependency is CountingSolutionBoundary:
-            dependency.empty_solution = False
         dependency.failure = None
     CountingSolutionBoundary.foreign_problem = None
 
