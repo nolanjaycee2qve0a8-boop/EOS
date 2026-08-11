@@ -14,7 +14,15 @@ from optimization.model import (
     OptimizationResult,
     OptimizationSense,
 )
+from optimization.price_aware_baseline import (
+    PriceAwareBaselineOptimizationConfiguration,
+    PriceAwareBaselineOptimizer,
+)
 from optimization.solution import OptimizationSolution, OptimizationSolutionStep
+from optimization.solution_boundary import (
+    OptimizationSolutionBoundary,
+    OptimizationSolveOutput,
+)
 from optimization.solution_control_plan import (
     OptimizationSolutionControlPlanBuilder,
     OptimizationSolutionControlPlanConstructionBoundary,
@@ -34,8 +42,12 @@ __all__ = [
     "OptimizationResult",
     "OptimizationSense",
     "OptimizationSolution",
+    "OptimizationSolutionBoundary",
     "OptimizationSolutionControlPlanBuilder",
     "OptimizationSolutionControlPlanConstructionBoundary",
     "OptimizationSolutionControlPlanConstructionInput",
     "OptimizationSolutionStep",
+    "OptimizationSolveOutput",
+    "PriceAwareBaselineOptimizationConfiguration",
+    "PriceAwareBaselineOptimizer",
 ]

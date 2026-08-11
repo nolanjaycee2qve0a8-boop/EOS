@@ -291,8 +291,12 @@ def test_public_api_exports_optimization_contracts() -> None:
         "OptimizationResult",
         "OptimizationSense",
         "OptimizationSolution",
+        "OptimizationSolutionBoundary",
         "OptimizationSolutionControlPlanBuilder",
         "OptimizationSolutionControlPlanConstructionBoundary",
         "OptimizationSolutionControlPlanConstructionInput",
         "OptimizationSolutionStep",
+        "OptimizationSolveOutput",
+        "PriceAwareBaselineOptimizationConfiguration",
+        "PriceAwareBaselineOptimizer",
     ]
