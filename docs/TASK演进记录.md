@@ -3868,6 +3868,40 @@ Simulator, Runtime, Device, or Command work.
 **Changed files:** `ems_strategy/mpc_current_action.py`, package exports,
 focused tests, `tasks/TASK-108.md`, and this record.
 
+## TASK-109 Receding Horizon MPC Cycle Contract
+
+**Background:** TASK-105 through TASK-108 separately establish MPC planning
+facts, solver-independent optimization provenance, proposed future plans, and
+explicit selection of one current plan step.
+
+**Objective:** Add immutable `MPCCycleInput`, `MPCCycleResult`, and the
+abstract empty-slotted `MPCCycleBoundary` to express one complete, traceable
+MPC cycle that stops after one current `EMSDecision`.
+
+**Core contracts:** Input preserves exact Context, Horizon, Configuration,
+objective collection, and MPC strategy descriptor identities. Result preserves
+and validates the exact Input -> Problem -> OptimizationResult ->
+OptimizationControlPlan -> MPCCurrentAction -> EMSDecision chain. The decision
+must retain the input Context and strategy descriptor, plus the selected
+step's exact semantic intent and requested power.
+
+**Architecture benefit:** Receding horizon is made explicit without becoming a
+Runtime loop: solve one horizon, select one current action, emit one current
+decision, then stop. A later caller may start another independent cycle with
+new facts. No future action is scheduled or executed automatically.
+
+**Key decision:** No concrete orchestrator is added because the frozen
+`OptimizationBoundary` intentionally yields only `OptimizationResult`; it has
+no plan-construction contract. Adding one would be a separate seam, rather
+than implicit solver behavior in this task.
+
+**Non-goals:** no solver, plan builder, repeated loop, scheduler, clock,
+forecast refresh, state progression, feasibility, Actuation, Simulator,
+Runtime, Device, or Command work.
+
+**Changed files:** `ems_strategy/mpc_cycle.py`, package exports, focused tests,
+`tasks/TASK-109.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
