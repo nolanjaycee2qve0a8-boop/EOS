@@ -7,6 +7,10 @@ from ems_strategy.battery_operating_envelope import (
 )
 from ems_strategy.boundary import EMSStrategyBoundary
 from ems_strategy.context import EMSContext
+from ems_strategy.coordinator import (
+    StrategyCoordinator,
+    StrategyCoordinatorConfiguration,
+)
 from ems_strategy.decision import EMSDecision
 from ems_strategy.descriptor import EMSStrategyDescriptor
 from ems_strategy.feasibility import FeasibilityBoundary, FeasibleDecision
@@ -30,6 +34,8 @@ __all__ = [
     "FeasibilityBoundary",
     "FeasibleDecision",
     "SelfConsumptionStrategy",
+    "StrategyCoordinator",
+    "StrategyCoordinatorConfiguration",
     "TOUStrategy",
     "TOUStrategyConfiguration",
     "ZeroExportBoundary",
