@@ -23,6 +23,7 @@ from ems_strategy.mpc_current_action import (
     MPCDecisionTranslationBoundary,
     MPCDecisionTranslationInput,
 )
+from ems_strategy.mpc_cycle import MPCCycleBoundary, MPCCycleInput, MPCCycleResult
 from ems_strategy.peak_shaving import PeakShavingConfiguration, PeakShavingStrategy
 from ems_strategy.provenance import DecisionProvenance
 from ems_strategy.self_consumption import SelfConsumptionStrategy
@@ -46,6 +47,9 @@ __all__ = [
     "MPCConfiguration",
     "MPCCurrentAction",
     "MPCCurrentActionExtractionBoundary",
+    "MPCCycleBoundary",
+    "MPCCycleInput",
+    "MPCCycleResult",
     "MPCDecisionTranslationBoundary",
     "MPCDecisionTranslationInput",
     "MPCStrategyBoundary",
