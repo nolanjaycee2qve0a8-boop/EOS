@@ -23,6 +23,7 @@ from ems_strategy import (
     PeakShavingConfiguration,
     PeakShavingStrategy,
 )
+from forecast import ForecastHorizon, ForecastPoint
 from kernel.decision import DecisionContext
 from objective import (
     ObjectiveCapabilityActivationComposition,
@@ -82,6 +83,48 @@ def test_load_at_or_below_demand_limit_creates_idle_request(
     assert decision.requested_power_kw == 0.0
 
 
+def make_horizon(*load_powers_kw: float) -> ForecastHorizon:
+    points = tuple(
+        ForecastPoint(
+            datetime(2026, 1, 1, index + 1, tzinfo=UTC),
+            pv_power_kw=0.0,
+            load_power_kw=load_power_kw,
+        )
+        for index, load_power_kw in enumerate(load_powers_kw)
+    )
+    return ForecastHorizon(points)
+
+
+def test_future_load_peak_creates_discharge_request() -> None:
+    decision = PeakShavingStrategy(PeakShavingConfiguration(3.0)).evaluate(
+        make_context(2.0),
+        forecast_horizon=make_horizon(2.5, 4.5),
+    )
+
+    assert decision.intent.action == "discharge"
+    assert decision.requested_power_kw == 1.5
+
+
+def test_current_load_peak_takes_precedence_over_forecast() -> None:
+    decision = PeakShavingStrategy(PeakShavingConfiguration(3.0)).evaluate(
+        make_context(5.0),
+        forecast_horizon=make_horizon(8.0),
+    )
+
+    assert decision.intent.action == "discharge"
+    assert decision.requested_power_kw == 2.0
+
+
+def test_non_exceeding_forecast_keeps_idle_request() -> None:
+    decision = PeakShavingStrategy(PeakShavingConfiguration(3.0)).evaluate(
+        make_context(2.0),
+        forecast_horizon=make_horizon(2.0, 3.0),
+    )
+
+    assert decision.intent.action == "idle"
+    assert decision.requested_power_kw == 0.0
+
+
 def test_decision_preserves_exact_context_and_strategy_descriptor_identity() -> None:
     context = make_context(5.0)
     configuration = PeakShavingConfiguration(3.0)
@@ -93,6 +136,26 @@ def test_decision_preserves_exact_context_and_strategy_descriptor_identity() -> 
     assert decision.source_context is context
     assert decision.source_strategy is strategy.descriptor
     assert strategy.configuration is configuration
+
+
+def test_forecast_input_identity_is_preserved_without_strategy_retention() -> None:
+    context = make_context(2.0)
+    point = ForecastPoint(
+        datetime(2026, 1, 1, 1, tzinfo=UTC),
+        pv_power_kw=0.0,
+        load_power_kw=4.0,
+    )
+    points = (point,)
+    horizon = ForecastHorizon(points)
+    strategy = PeakShavingStrategy(PeakShavingConfiguration(3.0))
+
+    decision = strategy.evaluate(context, forecast_horizon=horizon)
+
+    assert horizon.points is points
+    assert horizon.points[0] is point
+    assert decision.source_context is context
+    assert decision.source_strategy is strategy.descriptor
+    assert not hasattr(strategy, "forecast_horizon")
 
 
 def test_strategy_and_configuration_are_frozen_slotted_without_runtime_state() -> None:
@@ -145,6 +208,7 @@ def test_strategy_has_no_simulation_or_execution_dependency() -> None:
         "ems_strategy.context",
         "ems_strategy.decision",
         "ems_strategy.descriptor",
+        "forecast",
         "math",
         "typing",
     }

@@ -3728,6 +3728,32 @@ Simulator、actuation、Optimization、Forecasting、MPC、Runtime、Device、PC
 
 **验证结果：** 覆盖 legacy no-forecast、future high/low、empty/unavailable/mixed horizon、exact input identity、statelessness 与 dependency isolation。
 
+## TASK-104 Forecast-Aware Peak Shaving Strategy
+
+**Background:** TASK-099 forms a request from current Load, while TASK-102
+keeps future predictions in a caller-owned `ForecastHorizon`, outside current
+`EMSContext` facts.
+
+**Objective:** Extend `PeakShavingStrategy.evaluate` with an optional
+keyword-only `forecast_horizon` input while preserving the no-forecast
+TASK-099 behavior.
+
+**Implementation:** A current Load exceeding `demand_limit_kw` remains the
+primary discharge request. When current Load is not above the limit, the first
+caller-ordered future Load forecast above that limit requests discharge with
+its raw-kW excess. Empty and non-exceeding horizons request idle.
+
+**Architecture benefit:** The forecast remains caller-owned and is not stored,
+copied, or mutated by the frozen Strategy. The fixed look-ahead rule is not
+MPC, optimization, forecast generation, or feasibility evaluation.
+
+**Changed files:** `ems_strategy/peak_shaving.py`,
+`tests/unit/ems_strategy/test_ems_peak_shaving_strategy.py`, and
+`tasks/TASK-104.md`.
+
+**Key decision:** No SOC, Battery/Grid limit, clipping, `EMSDecision`,
+DecisionProvenance, Coordinator, Simulator, or Phase 5–8 contract change.
+
 ```markdown
 ## TASK-XXX
 
