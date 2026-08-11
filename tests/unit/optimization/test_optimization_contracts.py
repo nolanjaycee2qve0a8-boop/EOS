@@ -281,6 +281,8 @@ def test_public_api_exports_optimization_contracts() -> None:
     assert optimization.__all__ == [
         "OptimizationBoundary",
         "OptimizationControlPlan",
+        "OptimizationControlPlanConstructionBoundary",
+        "OptimizationControlPlanConstructionInput",
         "OptimizationControlStep",
         "OptimizationObjective",
         "OptimizationObjectiveCollection",

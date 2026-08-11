@@ -3902,6 +3902,37 @@ Runtime, Device, or Command work.
 **Changed files:** `ems_strategy/mpc_cycle.py`, package exports, focused tests,
 `tasks/TASK-109.md`, and this record.
 
+## TASK-110 Optimization Control Plan Construction Boundary
+
+**Background:** TASK-109 deliberately left the transition from an
+`OptimizationResult` to an `OptimizationControlPlan` undefined, because the
+frozen solver boundary reports only an outcome and has no plan-construction
+contract.
+
+**Objective:** Add immutable `OptimizationControlPlanConstructionInput` and an
+abstract empty-slotted `OptimizationControlPlanConstructionBoundary` for that
+explicit representation seam.
+
+**Core contracts:** Construction input preserves one exact source result. A
+conforming constructor returns an existing EOS control plan that preserves that
+exact object as `plan.source_result`; value-equal reconstructed provenance is
+not accepted by a conforming construction path.
+
+**Architecture benefit:** Solver outcome, future plan representation, current
+action selection, and current decision translation remain independently
+replaceable. The new seam ends at the plan and does not execute it.
+
+**Key decision:** No generic production builder is added. Existing result
+semantics contain no explicit control-step data, so manufacturing future steps
+would invent an optimization outcome rather than represent one.
+
+**Non-goals:** no solver, MPC loop, automatic current-action extraction,
+decision translation, feasibility, Actuation, Simulator, Runtime, Device, or
+Command work.
+
+**Changed files:** `optimization/control_plan_construction.py`, package
+exports, focused tests, `tasks/TASK-110.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
