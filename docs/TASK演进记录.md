@@ -3610,6 +3610,37 @@ SOC/power boundary、statelessness、dependency isolation、full pytest、Ruff�
 **关键设计决策：** 不执行 clipping、SOC calculation、Strategy generation、Grid control、
 Simulator、Runtime、Device、PCS、Command 或 Optimization；不修改既有 contracts。
 
+## TASK-098 Time Of Use Strategy
+
+**背景：** Phase 9 已有 Self Consumption Strategy；TOU 需要作为独立的业务 Strategy，
+不能复用为 Battery/Zero Export constraint 或 Device control。
+
+**目标：** 新增 concrete `TOUStrategy`，通过 immutable caller-supplied tariff configuration
+与当前价格事实产生 semantic charge/discharge/idle `EMSDecision` request。
+
+**实现内容：**
+
+- low price request charge，high price request discharge，normal period request idle；
+- thresholds 使用 signed finite unscaled CNY/kWh，request powers 使用 positive raw kW；
+- exact EMSContext 与 immutable configuration identity 得到保留；
+- Strategy frozen/slotted，无 cache、history、runtime state 或 external price lookup。
+
+**架构意义：** 扩展 Phase 9 的可替换 Strategy 集合，同时仍将 SOC、power、Grid 与 execution
+职责留在 downstream feasibility/handoff layers。
+
+**新增文件：**
+
+- `ems_strategy/tou.py`；
+- `tests/unit/ems_strategy/test_ems_tou_strategy.py`；
+- `tasks/TASK-098.md`。
+
+**验证结果：** low/high/normal、threshold inclusion、identity、immutability、invalid config、
+dependency isolation、full pytest、Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不实现 SOC protection、power limit、clipping、Optimization、Forecasting、
+MPC、coordinator、Simulator、Runtime、Device、PCS、Command 或 external price service；不修改
+existing contracts。
+
 ```markdown
 ## TASK-XXX
 
