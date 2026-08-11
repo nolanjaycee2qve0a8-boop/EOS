@@ -4019,6 +4019,39 @@ Device, or Command work.
 **Changed files:** `optimization/solution_control_plan.py`, package exports,
 focused tests, `tasks/TASK-113.md`, and this record.
 
+## TASK-114 Price-Aware Baseline Optimizer
+
+**Background:** TASK-112 made concrete solved planning values explicit and
+TASK-113 made their representation as EOS plans explicit. The generic
+`OptimizationBoundary` remains result-only and must not be changed merely to
+carry solution values.
+
+**Objective:** Add a solution-producing optimization seam plus the first
+concrete deterministic price-aware baseline implementation.
+
+**Core contracts:** `OptimizationSolveOutput` retains one exact generic result
+and solution, requiring `solution.source_result is result`. The empty-slotted
+`OptimizationSolutionBoundary` explicitly returns that pair. Its baseline
+implementation supports exactly one `energy_cost` / `minimize` objective and
+creates an ordered solution from caller-supplied forecast prices.
+
+**Architecture benefit:** EOS now has a concrete, inspectable optimization
+path without collapsing generic results and solved values or changing the
+result-only frozen seam.
+
+**Key decision:** This is price classification only. It ignores SOC, capacity,
+efficiency, PV, Load, grid, feasibility, Actuation, and simulation facts. A
+missing or unsupported objective deterministically yields `unavailable` with
+an empty solution, rather than claiming arbitrary objective support.
+
+**Non-goals:** no solver framework, mathematical programming, physical model,
+MPC loop, plan construction, current-action extraction, feasibility, Actuation,
+Simulator, Runtime, Device, or Command work.
+
+**Changed files:** solution-producing boundary and output, price-aware baseline
+implementation, package exports, focused tests, `tasks/TASK-114.md`, and this
+record.
+
 ```markdown
 ## TASK-XXX
 
