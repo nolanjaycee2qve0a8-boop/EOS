@@ -3839,6 +3839,35 @@ Command work.
 **Changed files:** `optimization/control_plan.py`, its focused tests,
 `tasks/TASK-107.md`, package exports, and this record.
 
+## TASK-108 MPC Current Action Extraction Contract
+
+**Background:** TASK-107 expresses a complete proposed future control sequence,
+but a plan is not an execution schedule and may not directly trigger future
+steps.
+
+**Objective:** Add immutable `MPCCurrentAction` provenance, abstract current
+action extraction and decision-translation seams, and one explicit first-step
+extractor.
+
+**Core contracts:** A current action preserves exact source plan and selected
+step identity. Reconstructed or foreign steps are rejected with identity
+membership checks. First-step extraction selects exactly `plan.steps[0]` and
+does not mutate or advance the plan. Translation preserves the exact Context
+from plan provenance and an exact caller-supplied MPC descriptor in one
+existing `EMSDecision`.
+
+**Architecture benefit:** Optimization plans remain future proposals;
+`MPCCurrentAction` selects one current interval; only an MPC Strategy request
+continues through Feasibility and Actuation. The future sequence is never
+executed automatically.
+
+**Non-goals:** no solver, optimizer, repeated receding-horizon loop, clock,
+scheduler, automatic progression, SOC/Battery model, feasibility/clipping,
+Simulator, Runtime, Device, or Command work.
+
+**Changed files:** `ems_strategy/mpc_current_action.py`, package exports,
+focused tests, `tasks/TASK-108.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
