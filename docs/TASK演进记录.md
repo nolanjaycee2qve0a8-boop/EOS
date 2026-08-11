@@ -3933,6 +3933,34 @@ Command work.
 **Changed files:** `optimization/control_plan_construction.py`, package
 exports, focused tests, `tasks/TASK-110.md`, and this record.
 
+## TASK-111 Single MPC Cycle Orchestrator
+
+**Background:** TASK-109 defined a complete single-cycle provenance result but
+intentionally omitted a concrete orchestrator until TASK-110 supplied the
+separate `OptimizationResult` to control-plan construction seam.
+
+**Objective:** Add `SingleMPCCycleOrchestrator`, a frozen/slotted implementation
+of `MPCCycleBoundary` that coordinates exactly one caller-owned optimization,
+plan construction, current-action extraction, and decision translation chain.
+
+**Core contracts:** The orchestrator constructs one Problem from exact cycle
+input facts. It invokes each injected boundary once and validates the exact
+Result -> Plan -> CurrentAction -> Decision lineage before emitting one
+`MPCCycleResult`. The first exception stops the chain without retry or
+downstream invocation.
+
+**Architecture benefit:** EOS can now perform one explicit, deterministic MPC
+cycle without letting MPC become a Runtime loop or bypass Feasibility and
+Actuation. All operational seams remain caller supplied and independently
+replaceable.
+
+**Non-goals:** no solver, automatic repeated horizon, clock, scheduler,
+forecast refresh, state/SOC progression, plan execution, feasibility,
+Actuation, Simulator, Runtime, Device, or Command work.
+
+**Changed files:** `ems_strategy/mpc_orchestrator.py`, package exports, focused
+tests, `tasks/TASK-111.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 

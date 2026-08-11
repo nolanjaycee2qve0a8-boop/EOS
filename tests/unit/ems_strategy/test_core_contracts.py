@@ -269,6 +269,7 @@ def test_public_api_exports_strategy_contracts() -> None:
         "PeakShavingConfiguration",
         "PeakShavingStrategy",
         "SelfConsumptionStrategy",
+        "SingleMPCCycleOrchestrator",
         "StrategyCoordinator",
         "StrategyCoordinatorConfiguration",
         "TOUStrategy",
