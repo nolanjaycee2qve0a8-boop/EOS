@@ -3682,6 +3682,37 @@ existing contracts。
 **新增文件：** `forecast/model.py`、`forecast/__init__.py`、`tests/unit/forecast/test_forecast_contracts.py`、`tasks/TASK-102.md`。
 
 **验证结果：** 覆盖 immutable/slotted、optional price、invalid values、strict order、empty horizon、exact identity、public import 与 EMSContext isolation。
+## TASK-099 Peak Shaving Strategy
+
+**背景：** Phase 9 已建立 Self Consumption 与 TOU Strategy。Peak Shaving 作为独立的
+business Strategy，只形成负载超过目标时的 discharge request。
+
+**目标：** 新增 immutable `PeakShavingConfiguration` 与 concrete
+`PeakShavingStrategy`，根据 exact EMSContext 的 Load 与 caller-supplied demand limit 产生
+semantic `EMSDecision`。
+
+**实现内容：**
+
+- Load 超过 demand limit 请求 discharge，requested magnitude 为原始超限差额；
+- Load 等于或低于 limit 请求 idle；
+- configuration 使用 finite non-negative raw kW，保持 exact identity；
+- Strategy frozen/slotted，无 cache、history 或 runtime state。
+
+**架构意义：** Peak Shaving 只表达业务请求，SOC、Battery power、Grid、feasibility 与
+execution 保持在下游各自的边界。
+
+**新增文件：**
+
+- `ems_strategy/peak_shaving.py`；
+- `tests/unit/ems_strategy/test_ems_peak_shaving_strategy.py`；
+- `tasks/TASK-099.md`。
+
+**验证结果：** above-limit discharge、at/below-limit idle、identity、immutability、invalid
+configuration、dependency isolation、full pytest、Ruff、mypy 与 `git diff --check`。
+
+**关键设计决策：** 不读取 SOC 或 Battery power limits，不执行 clipping、feasibility、
+Simulator、actuation、Optimization、Forecasting、MPC、Runtime、Device、PCS 或 Command；
+不修改 existing contracts。
 
 ```markdown
 ## TASK-XXX
