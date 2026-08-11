@@ -36,6 +36,7 @@ packages = [
   "ems_simulator",
   "ems_strategy",
   "forecast",
+  "optimization",
 ]
 
 [tool.pytest.ini_options]
@@ -53,4 +54,5 @@ source = [
   "ems_simulator",
   "ems_strategy",
   "forecast",
+  "optimization",
 ]
