@@ -9,6 +9,7 @@ from ems_strategy.boundary import EMSStrategyBoundary
 from ems_strategy.context import EMSContext
 from ems_strategy.decision import EMSDecision
 from ems_strategy.descriptor import EMSStrategyDescriptor
+from forecast import ForecastHorizon
 
 
 @dataclass(frozen=True, slots=True)
@@ -46,18 +47,33 @@ class PeakShavingStrategy(EMSStrategyBoundary):
         if not isinstance(self.configuration, PeakShavingConfiguration):
             raise TypeError("configuration must be a PeakShavingConfiguration")
 
-    def evaluate(self, context: EMSContext) -> EMSDecision:
-        """Return one request preserving the exact supplied context identity."""
+    def evaluate(
+        self,
+        context: EMSContext,
+        *,
+        forecast_horizon: ForecastHorizon | None = None,
+    ) -> EMSDecision:
+        """Return one request without retaining the optional forecast input.
+
+        Current Load remains the primary input. If it is at or below the
+        configured limit, the first caller-ordered future Load prediction above
+        that limit requests discharge for its raw-kW excess. This fixed
+        look-ahead rule does not plan, solve, or evaluate feasibility.
+        """
         if not isinstance(context, EMSContext):
             raise TypeError("context must be an EMSContext")
+        if forecast_horizon is not None and not isinstance(
+            forecast_horizon,
+            ForecastHorizon,
+        ):
+            raise TypeError("forecast_horizon must be a ForecastHorizon or None")
 
         load_power_kw = context.source_context.load_power_kw
         if load_power_kw > self.configuration.demand_limit_kw:
             intent = DecisionIntent("discharge")
             requested_power_kw = load_power_kw - self.configuration.demand_limit_kw
         else:
-            intent = DecisionIntent("idle")
-            requested_power_kw = 0.0
+            intent, requested_power_kw = self._forecast_request(forecast_horizon)
 
         return EMSDecision(
             source_context=context,
@@ -65,3 +81,17 @@ class PeakShavingStrategy(EMSStrategyBoundary):
             intent=intent,
             requested_power_kw=requested_power_kw,
         )
+
+    def _forecast_request(
+        self,
+        forecast_horizon: ForecastHorizon | None,
+    ) -> tuple[DecisionIntent, float]:
+        """Read the first caller-ordered future peak without changing it."""
+        if forecast_horizon is not None:
+            for point in forecast_horizon.points:
+                if point.load_power_kw > self.configuration.demand_limit_kw:
+                    return (
+                        DecisionIntent("discharge"),
+                        point.load_power_kw - self.configuration.demand_limit_kw,
+                    )
+        return DecisionIntent("idle"), 0.0
