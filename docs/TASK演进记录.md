@@ -3669,6 +3669,20 @@ existing contracts。
 
 **验证结果：** 覆盖 24-step deterministic flow、strategy path/provenance、SOC validity、grid balance、trace identity 与无状态性。
 
+## TASK-102 Forecast Horizon Interface
+
+**背景：** Phase 9 的普通 `EMSContext` 只保存当前 measured facts。未来 TOU/MPC 等策略可能需要 future information，但不能把 prediction、solver state 或 service ownership 塞进 Context。
+
+**目标：** 新增独立 `forecast` package：`ForecastPoint` 表达一个 future timestamp 的 PV、Load 与 optional price prediction；`ForecastHorizon` 表达 caller-supplied ordered points。
+
+**核心契约：** Point frozen/slotted；PV/Load 使用 non-negative finite raw kW，optional price 使用 signed finite raw CNY/kWh。Horizon 只接受 tuple，保留 exact caller tuple 与 point identities，要求 timestamp 严格递增，允许 empty horizon，不排序、去重、补点或创建 prediction。
+
+**架构收益：** 当前 facts 与 future predictions 明确隔离：`EMSContext` 没有 forecast field，Forecast package 也不依赖 EMSContext、Strategy implementation、Simulator 或预测服务。未来 Strategy 只有在独立扩展 API 时才可消费该 artifact。
+
+**新增文件：** `forecast/model.py`、`forecast/__init__.py`、`tests/unit/forecast/test_forecast_contracts.py`、`tasks/TASK-102.md`。
+
+**验证结果：** 覆盖 immutable/slotted、optional price、invalid values、strict order、empty horizon、exact identity、public import 与 EMSContext isolation。
+
 ```markdown
 ## TASK-XXX
 
