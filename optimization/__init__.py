@@ -14,6 +14,7 @@ from optimization.model import (
     OptimizationResult,
     OptimizationSense,
 )
+from optimization.solution import OptimizationSolution, OptimizationSolutionStep
 
 __all__ = [
     "OptimizationBoundary",
@@ -27,4 +28,6 @@ __all__ = [
     "OptimizationProblem",
     "OptimizationResult",
     "OptimizationSense",
+    "OptimizationSolution",
+    "OptimizationSolutionStep",
 ]

@@ -3961,6 +3961,33 @@ Actuation, Simulator, Runtime, Device, or Command work.
 **Changed files:** `ems_strategy/mpc_orchestrator.py`, package exports, focused
 tests, `tasks/TASK-111.md`, and this record.
 
+## TASK-112 Optimization Solution Contracts
+
+**Background:** `OptimizationResult` is intentionally a generic solver outcome
+with exact Problem provenance. It does not contain the future numerical or
+semantic control values required by a later control-plan representation.
+
+**Objective:** Add immutable `OptimizationSolutionStep` and
+`OptimizationSolution` payloads for solver-produced planning values, without
+changing `OptimizationResult` or producing `OptimizationControlPlan` objects.
+
+**Core contracts:** Each solved point retains explicit timezone-aware time,
+semantic `DecisionIntent`, and a finite non-negative raw-kW magnitude. The
+solution preserves the exact source result plus the exact caller tuple and step
+identities in strictly increasing time order.
+
+**Architecture benefit:** Generic solve status, concrete solved values, EOS
+plan construction, and current-action extraction can evolve independently. A
+future solver can report values without a hidden conversion into executable or
+physical behavior.
+
+**Non-goals:** no solver, optimization algorithm, plan builder, MPC logic,
+Battery/SOC model, feasibility, Actuation, Simulator, Runtime, Device, or
+Command work.
+
+**Changed files:** `optimization/solution.py`, package exports, focused tests,
+`tasks/TASK-112.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 

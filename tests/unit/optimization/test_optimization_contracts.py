@@ -290,4 +290,6 @@ def test_public_api_exports_optimization_contracts() -> None:
         "OptimizationProblem",
         "OptimizationResult",
         "OptimizationSense",
+        "OptimizationSolution",
+        "OptimizationSolutionStep",
     ]
