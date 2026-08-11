@@ -3655,6 +3655,20 @@ existing contracts。
 
 **关键设计决策：** priority 是显式 caller policy，不是隐式 ranking、scoring、weighting 或 optimization；没有 runtime state、cache、history、设备、Command、physical model 或 simulator integration。
 
+## TASK-101 EMS End-to-End Integration Runner
+
+**背景：** TASK-090～100 已建立 Strategy、provenance、feasibility、handoff 与 coordinator；Simulator 1.0 已能确定性执行 24 小时物理模型。需要一个应用层把既有边界组合为完整可审计的流程。
+
+**目标：** 增加 `EMSIntegrationRunner`，以 caller-supplied daily facts、`StrategyCoordinator`、`FeasibilityBoundary` 与 `ActuationHandoffBoundary` 执行 24 个显式步骤，并收集完整 evidence traces。
+
+**核心契约：** 每一步保留 exact `EMSContext → EMSDecision → DecisionProvenance → FeasibleDecision → ActuationHandoffResult → SimulationExecutionTrace` 引用。Strategy、Feasibility 和 Handoff 每步恰好一次；SOC source state 与前一步 battery next state 保持 identity 连续性。
+
+**架构收益：** 应用层只编排 caller-owned 边界；没有新 Strategy、constraint、physical correction、Command、Runtime 或 Device ownership。原有 simulator contracts 与输出保持不变。
+
+**新增文件：** `ems_simulator/ems_integration.py`、`tests/integration/test_ems_integration_runner.py`、`tasks/TASK-101.md`。
+
+**验证结果：** 覆盖 24-step deterministic flow、strategy path/provenance、SOC validity、grid balance、trace identity 与无状态性。
+
 ```markdown
 ## TASK-XXX
 

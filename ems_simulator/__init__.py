@@ -1,6 +1,12 @@
 """Application contracts for the EOS EMS Simulator demo."""
 
 from ems_simulator.battery import SimpleBatteryPhysicsModel
+from ems_simulator.ems_integration import (
+    EMSIntegrationResult,
+    EMSIntegrationRunner,
+    EMSIntegrationScenarioInput,
+    EMSIntegrationStepTrace,
+)
 from ems_simulator.grid import GridEnergyBalanceSimulationModel
 from ems_simulator.input import BatteryParameters, DailySimulationScenarioInput
 from ems_simulator.load import LoadProfileSimulationModel
@@ -21,6 +27,10 @@ __all__ = [
     "DailySimulationResult",
     "DailySimulationRunner",
     "DailySimulationScenarioInput",
+    "EMSIntegrationResult",
+    "EMSIntegrationRunner",
+    "EMSIntegrationScenarioInput",
+    "EMSIntegrationStepTrace",
     "GridEnergyBalanceSimulationModel",
     "LoadProfileSimulationModel",
     "PVProfileSimulationModel",

@@ -9,6 +9,10 @@ def test_public_imports() -> None:
         DailySimulationResult,
         DailySimulationRunner,
         DailySimulationScenarioInput,
+        EMSIntegrationResult,
+        EMSIntegrationRunner,
+        EMSIntegrationScenarioInput,
+        EMSIntegrationStepTrace,
         GridEnergyBalanceSimulationModel,
         LoadProfileSimulationModel,
         PVProfileSimulationModel,
@@ -24,6 +28,10 @@ def test_public_imports() -> None:
     assert DailySimulationResult.__name__ == "DailySimulationResult"
     assert DailySimulationRunner.__name__ == "DailySimulationRunner"
     assert DailySimulationScenarioInput.__name__ == "DailySimulationScenarioInput"
+    assert EMSIntegrationResult.__name__ == "EMSIntegrationResult"
+    assert EMSIntegrationRunner.__name__ == "EMSIntegrationRunner"
+    assert EMSIntegrationScenarioInput.__name__ == "EMSIntegrationScenarioInput"
+    assert EMSIntegrationStepTrace.__name__ == "EMSIntegrationStepTrace"
     assert (
         GridEnergyBalanceSimulationModel.__name__ == "GridEnergyBalanceSimulationModel"
     )
