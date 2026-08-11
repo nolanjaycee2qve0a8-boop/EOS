@@ -3811,6 +3811,34 @@ Simulator change, Runtime, Device, or Command work.
 **Changed files:** `optimization/`, package configuration, focused tests,
 `tasks/TASK-106.md`, and this record.
 
+## TASK-107 Optimization Control Plan Contract
+
+**Background:** TASK-106 provides immutable optimization requests and generic
+outcomes but deliberately does not represent the future sequence that an
+eventual solver could propose.
+
+**Objective:** Add `OptimizationControlStep` and `OptimizationControlPlan` as
+solver-independent, immutable contracts for a future semantic control sequence.
+
+**Core contracts:** Each step has caller-supplied timezone-aware time,
+existing `DecisionIntent` semantic action, and finite non-negative raw-kW
+magnitude. Plans preserve exact source `OptimizationResult`, caller tuple, and
+step identities; timestamps must be strictly increasing without automatic
+ordering or progression.
+
+**Architecture benefit:** An optimization result describes solving an
+optimization request; a control plan describes its proposed future sequence;
+a future MPC Strategy alone translates the current plan step to `EMSDecision`.
+Feasibility and Actuation remain downstream physical-permission and execution
+handoff boundaries.
+
+**Non-goals:** no solver, MPC algorithm, receding-horizon loop, Battery model,
+SOC dynamics, feasibility/clipping, Simulator execution, Runtime, Device, or
+Command work.
+
+**Changed files:** `optimization/control_plan.py`, its focused tests,
+`tasks/TASK-107.md`, package exports, and this record.
+
 ```markdown
 ## TASK-XXX
 
