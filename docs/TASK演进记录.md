@@ -4084,6 +4084,35 @@ Simulator, Runtime, Device, or Command work.
 **Changed files:** solution-aware cycle contracts and orchestration, package
 exports, focused tests, `tasks/TASK-115.md`, and this record.
 
+## TASK-116 Battery Planning Physics Contracts
+
+**Background:** `EMSContext` intentionally carries strategy facts and
+provenance, but it is not a battery optimization state container. The simulator
+also owns separate physical execution models that a planning layer must not
+reuse implicitly.
+
+**Objective:** Add immutable current battery state, planning model, and explicit
+optimization input composition artifacts for future physically-aware optimizers.
+
+**Core contracts:** `BatteryOptimizationState` carries only normalized starting
+SOC. `BatteryOptimizationModel` carries usable capacity, SOC bounds, directional
+power magnitudes, and efficiencies. `BatteryOptimizationInput` preserves exact
+caller identities for the optimization problem, state, and model.
+
+**Architecture benefit:** Future optimizers can receive physical planning facts
+explicitly without changing `EMSContext`, importing physical execution types, or
+smuggling signed device power semantics into generic optimization data.
+
+**Key decision:** TASK-116 is data and semantics only. It does not calculate a
+future SOC trajectory, impose feasibility, clip actions, alter the price-aware
+baseline, or execute a plan.
+
+**Non-goals:** no SOC propagation, solver, LP/QP/MILP, degradation model,
+feasibility, Actuation, simulator integration, Runtime, Device, or Command work.
+
+**Changed files:** battery planning contracts, package exports, focused tests,
+`tasks/TASK-116.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 

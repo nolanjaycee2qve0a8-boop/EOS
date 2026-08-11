@@ -1,5 +1,10 @@
 """Public solver-independent EOS optimization contracts."""
 
+from optimization.battery_planning import (
+    BatteryOptimizationInput,
+    BatteryOptimizationModel,
+    BatteryOptimizationState,
+)
 from optimization.boundary import OptimizationBoundary
 from optimization.control_plan import OptimizationControlPlan, OptimizationControlStep
 from optimization.control_plan_construction import (
@@ -30,6 +35,9 @@ from optimization.solution_control_plan import (
 )
 
 __all__ = [
+    "BatteryOptimizationInput",
+    "BatteryOptimizationModel",
+    "BatteryOptimizationState",
     "OptimizationBoundary",
     "OptimizationControlPlan",
     "OptimizationControlPlanConstructionBoundary",
