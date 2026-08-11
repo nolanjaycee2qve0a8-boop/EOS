@@ -25,6 +25,13 @@ from ems_strategy.mpc_current_action import (
 )
 from ems_strategy.mpc_cycle import MPCCycleBoundary, MPCCycleInput, MPCCycleResult
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
+from ems_strategy.mpc_solution_cycle import (
+    MPCSolutionCycleBoundary,
+    MPCSolutionCycleResult,
+)
+from ems_strategy.mpc_solution_orchestrator import (
+    SolutionAwareSingleMPCCycleOrchestrator,
+)
 from ems_strategy.peak_shaving import PeakShavingConfiguration, PeakShavingStrategy
 from ems_strategy.provenance import DecisionProvenance
 from ems_strategy.self_consumption import SelfConsumptionStrategy
@@ -53,12 +60,15 @@ __all__ = [
     "MPCCycleResult",
     "MPCDecisionTranslationBoundary",
     "MPCDecisionTranslationInput",
+    "MPCSolutionCycleBoundary",
+    "MPCSolutionCycleResult",
     "MPCStrategyBoundary",
     "MPCStrategyInput",
     "PeakShavingConfiguration",
     "PeakShavingStrategy",
     "SelfConsumptionStrategy",
     "SingleMPCCycleOrchestrator",
+    "SolutionAwareSingleMPCCycleOrchestrator",
     "StrategyCoordinator",
     "StrategyCoordinatorConfiguration",
     "TOUStrategy",

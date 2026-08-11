@@ -4052,6 +4052,38 @@ Simulator, Runtime, Device, or Command work.
 implementation, package exports, focused tests, `tasks/TASK-114.md`, and this
 record.
 
+## TASK-115 Solution-Aware Single MPC Cycle Integration
+
+**Background:** The generic MPC cycle intentionally carries only an
+`OptimizationResult`. TASK-112 through TASK-114 introduced a separate path
+where a concrete optimizer emits both that generic outcome and exact solved
+planning values. Those values must not be discarded before plan construction.
+
+**Objective:** Add an independent solution-aware single-cycle boundary,
+orchestrator, and immutable result that preserve the complete Problem -> Result
+-> Solution -> ControlPlan -> CurrentAction -> Decision evidence chain.
+
+**Core contracts:** `MPCSolutionCycleResult` retains exact references to every
+artifact. The caller-injected orchestrator constructs one problem, calls each
+solution boundary, plan builder, action extractor, and translator exactly once,
+then stops. Invalid provenance and dependency failures stop the sequence
+without retry or downstream calls.
+
+**Architecture benefit:** Solution-producing optimizers such as the price-aware
+baseline can now participate in one traceable MPC-style decision cycle without
+changing the frozen generic cycle contracts.
+
+**Key decision:** Generic and solution-aware cycles coexist. Empty valid
+solutions remain empty; the existing first-step extraction failure propagates
+rather than being normalized into an invented idle decision.
+
+**Non-goals:** no repeated horizon, scheduler, forecast refresh, state/SOC
+progression, feasibility, Actuation, physical execution, Solver framework,
+Simulator, Runtime, Device, or Command work.
+
+**Changed files:** solution-aware cycle contracts and orchestration, package
+exports, focused tests, `tasks/TASK-115.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
