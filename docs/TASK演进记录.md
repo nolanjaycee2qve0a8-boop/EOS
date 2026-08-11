@@ -3641,6 +3641,20 @@ dependency isolation、full pytest、Ruff、mypy 与 `git diff --check`。
 MPC、coordinator、Simulator、Runtime、Device、PCS、Command 或 external price service；不修改
 existing contracts。
 
+## TASK-100 Strategy Coordinator
+
+**背景：** Phase 9 已有多个独立 Strategy；需要一个明确、可审计的地方协调它们的输出，但不能把协调层扩展为控制器或优化器。
+
+**目标：** 新增 immutable `StrategyCoordinatorConfiguration` 与 `StrategyCoordinator`，让 caller 同时提供 Strategy tuple 和 descriptor identity priority。
+
+**核心契约：** 每个 Strategy 按 caller tuple order 恰好执行一次；priority 只由 caller 提供的 exact `EMSStrategyDescriptor` identity 决定；最终返回原 Strategy 产生的 exact `EMSDecision`。因此 `decision.source_context is context` 和 `decision.source_strategy is selected_strategy.descriptor` 保持成立。reconstructed-but-equal descriptor 会被拒绝。
+
+**架构收益：** Strategy 的业务请求、下游 feasibility 与 physical execution 保持分离。Coordinator 不创建新 Decision，也不创建或重建 `DecisionProvenance`；已有/调用方创建的 provenance evidence 可继续观察同一个 selected decision。
+
+**新增文件：** `ems_strategy/coordinator.py`、`tests/unit/ems_strategy/test_strategy_coordinator.py`、`tasks/TASK-100.md`。
+
+**关键设计决策：** priority 是显式 caller policy，不是隐式 ranking、scoring、weighting 或 optimization；没有 runtime state、cache、history、设备、Command、physical model 或 simulator integration。
+
 ```markdown
 ## TASK-XXX
 
