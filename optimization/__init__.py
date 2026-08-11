@@ -5,6 +5,14 @@ from optimization.battery_planning import (
     BatteryOptimizationModel,
     BatteryOptimizationState,
 )
+from optimization.battery_soc_constraint import (
+    BatterySOCConstraintViolation,
+    BatterySOCConstraintViolationKind,
+    BatterySOCHorizonConstraintBoundary,
+    BatterySOCHorizonConstraintEvaluation,
+    BatterySOCHorizonConstraintInput,
+    DeterministicBatterySOCHorizonConstraintEvaluator,
+)
 from optimization.battery_soc_projection import (
     BatterySOCHorizonProjection,
     BatterySOCHorizonProjectionBoundary,
@@ -45,10 +53,16 @@ __all__ = [
     "BatteryOptimizationInput",
     "BatteryOptimizationModel",
     "BatteryOptimizationState",
+    "BatterySOCConstraintViolation",
+    "BatterySOCConstraintViolationKind",
+    "BatterySOCHorizonConstraintBoundary",
+    "BatterySOCHorizonConstraintEvaluation",
+    "BatterySOCHorizonConstraintInput",
     "BatterySOCHorizonProjection",
     "BatterySOCHorizonProjectionBoundary",
     "BatterySOCHorizonProjectionInput",
     "BatterySOCProjectionStep",
+    "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
     "OptimizationBoundary",
     "OptimizationControlPlan",
