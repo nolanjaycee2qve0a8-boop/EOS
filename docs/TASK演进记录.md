@@ -4113,6 +4113,39 @@ feasibility, Actuation, simulator integration, Runtime, Device, or Command work.
 **Changed files:** battery planning contracts, package exports, focused tests,
 `tasks/TASK-116.md`, and this record.
 
+## TASK-117 Battery SOC Horizon Projection
+
+**Background:** TASK-116 made current battery planning facts explicit without
+mixing them into `EMSContext` or importing simulator execution state. Solved
+optimization values can now be projected mathematically, but this must remain
+separate from feasibility and execution.
+
+**Objective:** Add deterministic SOC-horizon projection contracts and a single
+stateless projector from exact battery planning input, exact optimization
+solution, and explicit control-step duration.
+
+**Core contracts:** Projection input requires that the solution's exact source
+problem is the battery input's exact problem. The projection preserves its
+exact input and preserves every exact source solution-step identity in caller
+order. Each step records starting SOC, ending SOC, and signed energy delta.
+
+**Architecture benefit:** EOS can expose the mathematical consequences of a
+proposed future plan without treating a proposal as physical permission or as
+an executable schedule.
+
+**Key decision:** Charge energy is multiplied by charge efficiency; discharge
+energy is divided by discharge efficiency and represented as a negative delta.
+SOC is intentionally not clamped to battery bounds and requested power is not
+clipped. Any out-of-range result remains explicit evidence for a later
+feasibility layer.
+
+**Non-goals:** no solver, SOC constraint enforcement, power clipping, action
+rewriting, feasibility, Actuation, simulator execution, Runtime, Device, or
+Command work.
+
+**Changed files:** SOC projection contracts and projector, package exports,
+focused tests, `tasks/TASK-117.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
