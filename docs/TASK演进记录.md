@@ -3988,6 +3988,37 @@ Command work.
 **Changed files:** `optimization/solution.py`, package exports, focused tests,
 `tasks/TASK-112.md`, and this record.
 
+## TASK-113 Optimization Solution Control Plan Builder
+
+**Background:** TASK-112 introduced explicit solver-produced planning values
+while preserving the deliberately generic `OptimizationResult`. TASK-110's
+generic construction input cannot carry those values, so it must not be
+silently overloaded.
+
+**Objective:** Add a solution-aware, stateless production adapter that maps one
+exact `OptimizationSolution` to one `OptimizationControlPlan`.
+
+**Core contracts:** The new immutable construction input preserves the exact
+solution reference. The builder maps every solution step to exactly one control
+step in caller order, keeps each semantic intent object and requested-power
+magnitude, and returns a plan with `source_result is solution.source_result`.
+
+**Architecture benefit:** Concrete solved values can now be represented as an
+EOS future sequence without a solver, feasibility check, current-action
+selection, or execution behavior leaking into plan construction.
+
+**Key decision:** The pre-existing generic TASK-110 input and boundary remain
+unchanged. The smallest clean seam is solution-specific because the production
+adapter must receive the exact solution explicitly; it never looks one up or
+infers it from a result.
+
+**Non-goals:** no solver, objective evaluation, SOC/Battery model, feasibility,
+Actuation, current-action extraction, decision translation, Simulator, Runtime,
+Device, or Command work.
+
+**Changed files:** `optimization/solution_control_plan.py`, package exports,
+focused tests, `tasks/TASK-113.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
