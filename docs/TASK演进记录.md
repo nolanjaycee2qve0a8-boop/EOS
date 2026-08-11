@@ -3783,6 +3783,34 @@ logic, or Coordinator change.
 `tests/unit/ems_strategy/test_mpc_strategy_contract.py`,
 `tasks/TASK-105.md`, and this record.
 
+## TASK-106 Optimization Core Contracts
+
+**Background:** TASK-105 established MPC as a future Strategy seam using
+current `EMSContext` and caller-owned `ForecastHorizon`. An advanced Strategy
+needs a solver-independent vocabulary without bypassing existing Decision,
+Feasibility, Actuation, or Simulator contracts.
+
+**Objective:** Create an independent `optimization` package with immutable
+`OptimizationObjective`, ordered `OptimizationObjectiveCollection`,
+identity-preserving `OptimizationProblem`, generic `OptimizationResult`, and
+abstract empty-slotted `OptimizationBoundary`.
+
+**Core contracts:** Objectives state only semantic name and minimize/maximize
+sense. Problems preserve exact Context, Horizon, and objective collection
+references. Results preserve exact source-problem identity and report only a
+generic outcome, without producing decisions, physical actions, or commands.
+
+**Architecture benefit:** Optimization answers what plan or result best serves
+declared objectives; MPC remains the Strategy that may later translate a
+current action into `EMSDecision`; Feasibility and Actuation remain downstream.
+
+**Non-goals:** no solver, LP/QP/MILP, objective weighting algorithm, Battery
+prediction, forecast generation, MPC concrete Strategy, Feasibility/Actuation/
+Simulator change, Runtime, Device, or Command work.
+
+**Changed files:** `optimization/`, package configuration, focused tests,
+`tasks/TASK-106.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
