@@ -3754,6 +3754,35 @@ MPC, optimization, forecast generation, or feasibility evaluation.
 **Key decision:** No SOC, Battery/Grid limit, clipping, `EMSDecision`,
 DecisionProvenance, Coordinator, Simulator, or Phase 5–8 contract change.
 
+## TASK-105 MPC Strategy Contract
+
+**Background:** Phase 9 already separates current facts (`EMSContext`), future
+facts (`ForecastHorizon`), decision requests (`EMSDecision`), physical
+permission (Feasibility), and Simulator handoff (Actuation).
+
+**Objective:** Add immutable `MPCConfiguration` and `MPCStrategyInput`, plus
+the abstract empty-slotted `MPCStrategyBoundary`, without introducing an MPC
+algorithm or changing the generic Strategy ABI.
+
+**Core contracts:** The input keeps exact identity references to Context,
+Horizon, and Configuration. The configuration declares only forecast point
+count and explicit control-step duration. An implementation returns the
+existing `EMSDecision`, preserving exact Context and strategy descriptor
+provenance.
+
+**Architecture benefit:** MPC is frozen as an advanced Strategy seam, not a
+bypass around decision provenance, Feasibility, Actuation, or the Simulator.
+Forecast stays future information; feasibility remains physical permission;
+Actuation remains execution handoff.
+
+**Non-goals:** no solver, LP/QP/MILP, objective weighting, state prediction,
+forecast generation, SOC handling, clipping, simulator/runtime/device/command
+logic, or Coordinator change.
+
+**Changed files:** `ems_strategy/mpc.py`, `ems_strategy/__init__.py`,
+`tests/unit/ems_strategy/test_mpc_strategy_contract.py`,
+`tasks/TASK-105.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 

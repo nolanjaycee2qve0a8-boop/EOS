@@ -15,6 +15,7 @@ from ems_strategy.decision import EMSDecision
 from ems_strategy.descriptor import EMSStrategyDescriptor
 from ems_strategy.feasibility import FeasibilityBoundary, FeasibleDecision
 from ems_strategy.handoff import ActuationHandoffBoundary, ActuationHandoffResult
+from ems_strategy.mpc import MPCConfiguration, MPCStrategyBoundary, MPCStrategyInput
 from ems_strategy.peak_shaving import PeakShavingConfiguration, PeakShavingStrategy
 from ems_strategy.provenance import DecisionProvenance
 from ems_strategy.self_consumption import SelfConsumptionStrategy
@@ -34,6 +35,9 @@ __all__ = [
     "EMSStrategyDescriptor",
     "FeasibilityBoundary",
     "FeasibleDecision",
+    "MPCConfiguration",
+    "MPCStrategyBoundary",
+    "MPCStrategyInput",
     "PeakShavingConfiguration",
     "PeakShavingStrategy",
     "SelfConsumptionStrategy",
