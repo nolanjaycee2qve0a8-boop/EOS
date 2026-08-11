@@ -291,5 +291,8 @@ def test_public_api_exports_optimization_contracts() -> None:
         "OptimizationResult",
         "OptimizationSense",
         "OptimizationSolution",
+        "OptimizationSolutionControlPlanBuilder",
+        "OptimizationSolutionControlPlanConstructionBoundary",
+        "OptimizationSolutionControlPlanConstructionInput",
         "OptimizationSolutionStep",
     ]

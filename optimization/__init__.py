@@ -15,6 +15,11 @@ from optimization.model import (
     OptimizationSense,
 )
 from optimization.solution import OptimizationSolution, OptimizationSolutionStep
+from optimization.solution_control_plan import (
+    OptimizationSolutionControlPlanBuilder,
+    OptimizationSolutionControlPlanConstructionBoundary,
+    OptimizationSolutionControlPlanConstructionInput,
+)
 
 __all__ = [
     "OptimizationBoundary",
@@ -29,5 +34,8 @@ __all__ = [
     "OptimizationResult",
     "OptimizationSense",
     "OptimizationSolution",
+    "OptimizationSolutionControlPlanBuilder",
+    "OptimizationSolutionControlPlanConstructionBoundary",
+    "OptimizationSolutionControlPlanConstructionInput",
     "OptimizationSolutionStep",
 ]
