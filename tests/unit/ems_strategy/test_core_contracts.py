@@ -255,6 +255,9 @@ def test_public_api_exports_strategy_contracts() -> None:
         "EMSStrategyDescriptor",
         "FeasibilityBoundary",
         "FeasibleDecision",
+        "MPCConfiguration",
+        "MPCStrategyBoundary",
+        "MPCStrategyInput",
         "PeakShavingConfiguration",
         "PeakShavingStrategy",
         "SelfConsumptionStrategy",
@@ -311,6 +314,7 @@ def test_package_has_no_simulator_runtime_device_or_command_dependency() -> None
             "peak_shaving.py",
             "self_consumption.py",
             "coordinator.py",
+            "mpc.py",
             "tou.py",
             "zero_export.py",
         }:
