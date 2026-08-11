@@ -1,10 +1,14 @@
 """Solver-independent immutable optimization request and outcome contracts."""
 
-from dataclasses import dataclass
-from typing import Literal
+from __future__ import annotations
 
-from ems_strategy.context import EMSContext
+from dataclasses import dataclass
+from typing import TYPE_CHECKING, Literal
+
 from forecast import ForecastHorizon
+
+if TYPE_CHECKING:
+    from ems_strategy.context import EMSContext
 
 OptimizationSense = Literal["minimize", "maximize"]
 OptimizationOutcome = Literal["optimal", "infeasible", "unavailable"]
@@ -66,6 +70,8 @@ class OptimizationProblem:
     objectives: OptimizationObjectiveCollection
 
     def __post_init__(self) -> None:
+        from ems_strategy.context import EMSContext
+
         if not isinstance(self.context, EMSContext):
             raise TypeError("context must be an EMSContext")
         if not isinstance(self.forecast_horizon, ForecastHorizon):
