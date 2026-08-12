@@ -243,12 +243,15 @@ def test_core_contracts_reject_invalid_reference_types() -> None:
 
 def test_public_api_exports_strategy_contracts() -> None:
     assert ems_strategy.__all__ == [
+        "EXPLAINABLE_MPC_DECISION_CSV_COLUMNS",
         "ActuationHandoffBoundary",
         "ActuationHandoffResult",
         "BatteryOperatingEnvelope",
         "BatteryOperatingEnvelopeBoundary",
         "BatteryOperatingEnvelopeFeasibility",
         "DecisionProvenance",
+        "DeterministicExplainableMPCDecisionCSVRowMapper",
+        "DeterministicExplainableMPCDecisionCSVSerializer",
         "DeterministicExplainableMPCDecisionJournalRecordBuilder",
         "DeterministicMPCDecisionExplanationBuilder",
         "DeterministicMPCDecisionExplanationFormatter",
@@ -256,6 +259,10 @@ def test_public_api_exports_strategy_contracts() -> None:
         "EMSDecision",
         "EMSStrategyBoundary",
         "EMSStrategyDescriptor",
+        "ExplainableMPCDecisionCSVRow",
+        "ExplainableMPCDecisionCSVRowMappingBoundary",
+        "ExplainableMPCDecisionCSVRowMappingInput",
+        "ExplainableMPCDecisionCSVSerializerBoundary",
         "ExplainableMPCDecisionJournalRecord",
         "ExplainableMPCDecisionJournalRecordBoundary",
         "ExplainableMPCDecisionJournalRecordInput",
