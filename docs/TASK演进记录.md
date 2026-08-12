@@ -4283,6 +4283,35 @@ or invokes Simulator behavior.
 terminal objective, Actuation, Simulator, Runtime, Device, or Command work.
 Unsupported objectives remain unavailable and empty.
 
+## TASK-122 Physically-Aware MPC Cycle
+
+**Background:** TASK-121 produces a candidate-to-final physical revision chain,
+but it intentionally stops before MPC control-plan construction and current
+decision translation.
+
+**Objective:** Integrate exactly one physical optimization revision with one
+MPC planning-to-decision cycle while retaining the complete TASK-121 evidence
+artifact unchanged.
+
+**Core contracts:** `PhysicallyAwareMPCCycleInput` adds exact caller-owned
+battery planning state/model to existing MPC facts. The immutable cycle result
+retains the exact optimization problem, battery input, physical input, complete
+physical optimization output, final-derived plan, selected current action, and
+decision.
+
+**Key decision:** Plan construction uses only `final_output.solution`; candidate
+steps cannot become a current EMS decision. The existing MPC configuration is
+the only step-duration source. All dependencies are caller injected and execute
+at most once in stop-first order.
+
+**Architecture benefit:** The final decision remains traceable through current
+action and control-plan step to the final solution, revision step, original
+candidate step, and typed physical revision reasons.
+
+**Non-goals:** no repeated MPC loop, scheduler, forecast refresh, solver,
+downstream strategy feasibility, Actuation, Simulator, Runtime, Device, or
+Command behavior.
+
 ```markdown
 ## TASK-XXX
 

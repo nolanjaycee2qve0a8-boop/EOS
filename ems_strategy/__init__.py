@@ -25,6 +25,12 @@ from ems_strategy.mpc_current_action import (
 )
 from ems_strategy.mpc_cycle import MPCCycleBoundary, MPCCycleInput, MPCCycleResult
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
+from ems_strategy.mpc_physically_aware import (
+    PhysicallyAwareMPCCycleBoundary,
+    PhysicallyAwareMPCCycleInput,
+    PhysicallyAwareMPCCycleResult,
+    PhysicallyAwareSingleMPCCycleOrchestrator,
+)
 from ems_strategy.mpc_solution_cycle import (
     MPCSolutionCycleBoundary,
     MPCSolutionCycleResult,
@@ -66,6 +72,10 @@ __all__ = [
     "MPCStrategyInput",
     "PeakShavingConfiguration",
     "PeakShavingStrategy",
+    "PhysicallyAwareMPCCycleBoundary",
+    "PhysicallyAwareMPCCycleInput",
+    "PhysicallyAwareMPCCycleResult",
+    "PhysicallyAwareSingleMPCCycleOrchestrator",
     "SelfConsumptionStrategy",
     "SingleMPCCycleOrchestrator",
     "SolutionAwareSingleMPCCycleOrchestrator",
