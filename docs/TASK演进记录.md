@@ -4146,6 +4146,42 @@ Command work.
 **Changed files:** SOC projection contracts and projector, package exports,
 focused tests, `tasks/TASK-117.md`, and this record.
 
+## TASK-118 Battery SOC Horizon Constraint Evaluation
+
+**Background:** TASK-117 produces an exact, mathematical SOC trajectory for a
+proposed optimization solution. Projection deliberately preserves values
+outside planning bounds rather than changing them, so a separate evidence layer
+is required to assess those endpoints.
+
+**Objective:** Add a deterministic, immutable SOC-horizon constraint evaluator
+for an exact projection and its exact battery planning model.
+
+**Core contracts:** The constraint input requires the model to be the exact
+model that belongs to the projection's battery input. Evaluation preserves its
+exact input; each ordered violation preserves an exact projection-step
+reference, index, machine-readable kind, original endpoint SOC, and bound.
+
+**Architecture benefit:** EOS now separates a proposed mathematical trajectory
+from evidence of whether that trajectory observes planning SOC bounds. This
+keeps future physically-aware optimization logic from silently rewriting plans.
+
+**Key decision:** Only ending SOC values are evaluated. Bounds are inclusive,
+all violations are collected in projection order, and out-of-range values remain
+unclamped. This task intentionally does not evaluate the planning model's power
+limits.
+
+**Responsibility separation:** Projection answers what SOC path a solution
+produces. SOC horizon evaluation answers whether that path stays in planning
+bounds. Optimization proposes a solution, while strategy feasibility remains a
+separate downstream current-decision concern.
+
+**Non-goals:** no solver, solution correction, plan replacement, clipping,
+power-envelope evaluation, strategy feasibility, Actuation, simulator, Runtime,
+Device, or Command work.
+
+**Changed files:** SOC horizon constraint contracts and evaluator, package
+exports, focused tests, `tasks/TASK-118.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
