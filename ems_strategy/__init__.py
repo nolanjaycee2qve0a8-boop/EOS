@@ -38,6 +38,12 @@ from ems_strategy.mpc_decision_explanation_formatter import (
     MPCDecisionExplanationFormatterBoundary,
     MPCDecisionExplanationLocale,
 )
+from ems_strategy.mpc_decision_journal import (
+    DeterministicExplainableMPCDecisionJournalRecordBuilder,
+    ExplainableMPCDecisionJournalRecord,
+    ExplainableMPCDecisionJournalRecordBoundary,
+    ExplainableMPCDecisionJournalRecordInput,
+)
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
 from ems_strategy.mpc_physically_aware import (
     PhysicallyAwareMPCCycleBoundary,
@@ -65,12 +71,16 @@ __all__ = [
     "BatteryOperatingEnvelopeBoundary",
     "BatteryOperatingEnvelopeFeasibility",
     "DecisionProvenance",
+    "DeterministicExplainableMPCDecisionJournalRecordBuilder",
     "DeterministicMPCDecisionExplanationBuilder",
     "DeterministicMPCDecisionExplanationFormatter",
     "EMSContext",
     "EMSDecision",
     "EMSStrategyBoundary",
     "EMSStrategyDescriptor",
+    "ExplainableMPCDecisionJournalRecord",
+    "ExplainableMPCDecisionJournalRecordBoundary",
+    "ExplainableMPCDecisionJournalRecordInput",
     "FeasibilityBoundary",
     "FeasibleDecision",
     "FirstStepMPCCurrentActionExtractor",
