@@ -1,5 +1,11 @@
 """Public solver-independent EOS optimization contracts."""
 
+from optimization.battery_horizon_constraint import (
+    BatteryHorizonConstraintAggregateBoundary,
+    BatteryHorizonConstraintEvaluation,
+    BatteryHorizonConstraintInput,
+    DeterministicBatteryHorizonConstraintAggregator,
+)
 from optimization.battery_planning import (
     BatteryOptimizationInput,
     BatteryOptimizationModel,
@@ -58,6 +64,9 @@ from optimization.solution_control_plan import (
 )
 
 __all__ = [
+    "BatteryHorizonConstraintAggregateBoundary",
+    "BatteryHorizonConstraintEvaluation",
+    "BatteryHorizonConstraintInput",
     "BatteryOptimizationInput",
     "BatteryOptimizationModel",
     "BatteryOptimizationState",
@@ -75,6 +84,7 @@ __all__ = [
     "BatterySOCHorizonProjectionBoundary",
     "BatterySOCHorizonProjectionInput",
     "BatterySOCProjectionStep",
+    "DeterministicBatteryHorizonConstraintAggregator",
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",

@@ -4218,6 +4218,42 @@ or Command work.
 **Changed files:** battery power constraint contracts and evaluator, package
 exports, focused tests, `tasks/TASK-119.md`, and this record.
 
+## TASK-120 Battery Horizon Constraint Aggregate
+
+**Background:** TASK-118 and TASK-119 established independent typed evidence
+channels for projected SOC bounds and requested power-envelope limits. Callers
+need a horizon-level feasibility view without erasing the source of any
+violation or introducing a new physical rule.
+
+**Objective:** Add deterministic aggregation of one compatible exact SOC
+evaluation and one compatible exact power evaluation.
+
+**Core contracts:** Aggregate input retains exact component evaluation
+references and rejects a pair unless both provenance chains point to the exact
+same optimization solution and both use the exact same battery planning model.
+The aggregate result retains exact input identity and derives feasibility as the
+logical conjunction of the two component values.
+
+**Architecture benefit:** EOS can expose a single battery-horizon planning
+status while preserving separate, typed SOC and power evidence for inspection.
+
+**Key decision:** The result intentionally does not flatten or copy violations.
+Callers inspect them through the exact component evaluations held by the source
+input. The aggregator owns neither projector nor evaluator and never retries,
+corrects, clips, or rewrites a proposed solution.
+
+**Responsibility separation:** SOC evaluation is state-bound evidence; power
+evaluation is action-magnitude evidence; aggregation is combined planning
+evidence. Aggregate is neither optimization nor downstream strategy
+feasibility.
+
+**Non-goals:** no new battery, grid, PV/load, cost, terminal-SOC, or ramp rule;
+no solver, correction, control-plan construction, Actuation, simulator, Runtime,
+Device, or Command work.
+
+**Changed files:** aggregate contracts and deterministic aggregator, package
+exports, focused tests, `tasks/TASK-120.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
