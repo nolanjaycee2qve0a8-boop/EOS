@@ -4182,6 +4182,42 @@ Device, or Command work.
 **Changed files:** SOC horizon constraint contracts and evaluator, package
 exports, focused tests, `tasks/TASK-118.md`, and this record.
 
+## TASK-119 Battery Power Horizon Constraint Evaluation
+
+**Background:** TASK-118 established SOC-bound evidence for a projected future
+trajectory. Battery planning models also declare directional power limits, but
+power magnitude is a separate property of an optimization solution and must not
+be conflated with SOC trajectory evidence.
+
+**Objective:** Add deterministic, immutable battery power-horizon constraint
+evaluation for one exact optimization solution and one exact planning model.
+
+**Core contracts:** The input retains exact caller-owned solution and model
+references. Each ordered violation preserves an exact solution-step identity,
+step index, explicit directional kind, requested magnitude, and applicable
+limit. The evaluation is feasible exactly when its violation tuple is empty.
+
+**Architecture benefit:** EOS can now expose independent SOC and power evidence
+for a proposed horizon without silently clipping a request, rewriting an action,
+or constructing a corrected plan.
+
+**Key decision:** Charge and discharge are evaluated against separate inclusive
+limits. All violations are collected in solution order. Existing contracts do
+not prove a solution-to-model provenance link, so the input preserves both
+exact caller references without claiming stronger lineage.
+
+**Responsibility separation:** SOC evaluation asks whether a projected state
+trajectory violates SOC bounds. Power evaluation asks whether a semantic action
+magnitude violates the battery envelope. These evidence channels do not import
+or call one another.
+
+**Non-goals:** no clipping, action replacement, plan construction, SOC
+projection, solver, strategy feasibility, Actuation, simulator, Runtime, Device,
+or Command work.
+
+**Changed files:** battery power constraint contracts and evaluator, package
+exports, focused tests, `tasks/TASK-119.md`, and this record.
+
 ```markdown
 ## TASK-XXX
 
