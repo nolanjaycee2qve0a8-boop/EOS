@@ -24,6 +24,13 @@ from ems_strategy.mpc_current_action import (
     MPCDecisionTranslationInput,
 )
 from ems_strategy.mpc_cycle import MPCCycleBoundary, MPCCycleInput, MPCCycleResult
+from ems_strategy.mpc_decision_explanation import (
+    DeterministicMPCDecisionExplanationBuilder,
+    MPCDecisionExplanation,
+    MPCDecisionExplanationBoundary,
+    MPCDecisionExplanationInput,
+    MPCDecisionPhysicalExplanation,
+)
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
 from ems_strategy.mpc_physically_aware import (
     PhysicallyAwareMPCCycleBoundary,
@@ -51,6 +58,7 @@ __all__ = [
     "BatteryOperatingEnvelopeBoundary",
     "BatteryOperatingEnvelopeFeasibility",
     "DecisionProvenance",
+    "DeterministicMPCDecisionExplanationBuilder",
     "EMSContext",
     "EMSDecision",
     "EMSStrategyBoundary",
@@ -64,6 +72,10 @@ __all__ = [
     "MPCCycleBoundary",
     "MPCCycleInput",
     "MPCCycleResult",
+    "MPCDecisionExplanation",
+    "MPCDecisionExplanationBoundary",
+    "MPCDecisionExplanationInput",
+    "MPCDecisionPhysicalExplanation",
     "MPCDecisionTranslationBoundary",
     "MPCDecisionTranslationInput",
     "MPCSolutionCycleBoundary",

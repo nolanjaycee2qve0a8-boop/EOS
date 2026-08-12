@@ -4312,6 +4312,34 @@ candidate step, and typed physical revision reasons.
 downstream strategy feasibility, Actuation, Simulator, Runtime, Device, or
 Command behavior.
 
+## TASK-123 MPC Decision Explanation Read Model
+
+**Background:** TASK-122 preserves a complete physical MPC provenance graph,
+but callers would otherwise need to traverse its nested candidate, revision,
+final, plan, and current-action artifacts manually to explain one decision.
+
+**Objective:** Add one immutable, machine-readable read model for the selected
+current action of one completed physical MPC cycle.
+
+**Core contracts:** Explanation input retains the exact cycle result. The
+physical explanation retains exact candidate/final solution-step and revision
+step references, the exact revision-reason tuple, selected-step typed SOC and
+power violation kinds, projection SOC values, and final evaluation feasibility
+booleans. The top-level artifact retains the exact `EMSDecision`.
+
+**Key decision:** The builder maps the selected action by exact control-plan
+step identity, then applies the same index through the final solution, revision,
+candidate solution, and projections. It never matches by timestamp or value and
+never re-runs any domain boundary.
+
+**Architecture benefit:** EOS exposes the current decision's relevant physical
+evidence in a stable form while retaining the original source artifacts for
+full provenance inspection.
+
+**Non-goals:** no narrative renderer, horizon reporting, optimization,
+constraint evaluation, correction, Actuation, Simulator, Runtime, Device,
+Command, I/O, or persistence.
+
 ```markdown
 ## TASK-XXX
 
