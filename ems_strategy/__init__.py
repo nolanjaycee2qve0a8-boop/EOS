@@ -24,6 +24,15 @@ from ems_strategy.mpc_current_action import (
     MPCDecisionTranslationInput,
 )
 from ems_strategy.mpc_cycle import MPCCycleBoundary, MPCCycleInput, MPCCycleResult
+from ems_strategy.mpc_decision_csv import (
+    EXPLAINABLE_MPC_DECISION_CSV_COLUMNS,
+    DeterministicExplainableMPCDecisionCSVRowMapper,
+    DeterministicExplainableMPCDecisionCSVSerializer,
+    ExplainableMPCDecisionCSVRow,
+    ExplainableMPCDecisionCSVRowMappingBoundary,
+    ExplainableMPCDecisionCSVRowMappingInput,
+    ExplainableMPCDecisionCSVSerializerBoundary,
+)
 from ems_strategy.mpc_decision_explanation import (
     DeterministicMPCDecisionExplanationBuilder,
     MPCDecisionExplanation,
@@ -65,12 +74,15 @@ from ems_strategy.tou import TOUStrategy, TOUStrategyConfiguration
 from ems_strategy.zero_export import ZeroExportBoundary, ZeroExportFeasibility
 
 __all__ = [
+    "EXPLAINABLE_MPC_DECISION_CSV_COLUMNS",
     "ActuationHandoffBoundary",
     "ActuationHandoffResult",
     "BatteryOperatingEnvelope",
     "BatteryOperatingEnvelopeBoundary",
     "BatteryOperatingEnvelopeFeasibility",
     "DecisionProvenance",
+    "DeterministicExplainableMPCDecisionCSVRowMapper",
+    "DeterministicExplainableMPCDecisionCSVSerializer",
     "DeterministicExplainableMPCDecisionJournalRecordBuilder",
     "DeterministicMPCDecisionExplanationBuilder",
     "DeterministicMPCDecisionExplanationFormatter",
@@ -78,6 +90,10 @@ __all__ = [
     "EMSDecision",
     "EMSStrategyBoundary",
     "EMSStrategyDescriptor",
+    "ExplainableMPCDecisionCSVRow",
+    "ExplainableMPCDecisionCSVRowMappingBoundary",
+    "ExplainableMPCDecisionCSVRowMappingInput",
+    "ExplainableMPCDecisionCSVSerializerBoundary",
     "ExplainableMPCDecisionJournalRecord",
     "ExplainableMPCDecisionJournalRecordBoundary",
     "ExplainableMPCDecisionJournalRecordInput",

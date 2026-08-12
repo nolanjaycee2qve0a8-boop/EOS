@@ -4396,6 +4396,36 @@ entry. No EventJournal/EventRecord changes, append behavior, I/O, optimizer,
 projection, constraint evaluation, execution, Simulator, Actuation, Runtime,
 Device, or Command behavior is introduced.
 
+## TASK-126 Explainable MPC Decision CSV Export
+
+**Background:** TASK-125 provides an immutable history/read-model record that
+keeps raw decision evidence alongside human text, but it is not yet a stable
+machine serialization shape for spreadsheet or offline inspection.
+
+**Objective:** Map explainable MPC journal records into a fixed primitive CSV
+schema and serialize caller-ordered rows into deterministic, header-inclusive
+CSV text.
+
+**Core contracts:** The row uses only `str`, `float`, and `bool` fields. Its
+explicit public 24-column tuple prevents accidental schema changes from
+dataclass ordering. Mapping receives one exact record; serialization receives a
+tuple of rows and preserves its order.
+
+**Key decision:** Raw floats retain their domain meaning, booleans serialize as
+lowercase tokens, ordered reason/evidence tuples use `|`, and formatted text is
+copied directly from the journal record. Python's standard-library CSV writer
+owns escaping of commas, quotes, and multiline text with deterministic `\n`
+line terminators.
+
+**Architecture benefit:** EOS can support analytics and human inspection in
+one CSV payload without rebuilding explanations or losing machine-readable
+evidence.
+
+**Non-goals:** CSV text is not filesystem persistence. No EventJournal,
+EventRecord, optimizer, projector, evaluator, explanation/formatter rerun,
+MPC, Simulator, Actuation, Runtime, Device, Command, database, network, or
+output-path behavior is added.
+
 ```markdown
 ## TASK-XXX
 
