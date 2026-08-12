@@ -4254,6 +4254,35 @@ Device, or Command work.
 **Changed files:** aggregate contracts and deterministic aggregator, package
 exports, focused tests, `tasks/TASK-120.md`, and this record.
 
+## TASK-121 Physically-Aware Price Baseline Revision
+
+**Background:** TASK-114 produces deterministic price-only candidate values;
+TASK-117 through TASK-120 project and evaluate those values but intentionally do
+not correct them.
+
+**Objective:** Add one deterministic battery-physics-aware revision path while
+retaining the original candidate and all of its exact violation evidence.
+
+**Core contracts:** `PhysicallyAwareBaselineOptimizationInput` retains the
+exact battery planning input and duration. `BatterySolutionRevision` preserves
+candidate-to-final step identity mappings and typed, deterministic revision
+reasons. The physically-aware output retains both complete candidate and final
+projection, SOC evidence, power evidence, and aggregate evidence chains.
+
+**Architecture benefit:** EOS can now explain what price-only optimization
+requested, why a specific step changed, and why the final horizon is physically
+acceptable without conflating evidence, correction, or downstream strategy
+feasibility.
+
+**Key decision:** Revision is a single caller-ordered pass using TASK-117
+planning physics. It limits only current battery max charge/discharge power and
+SOC headroom; it never reverses a request, iterates, clips existing artifacts,
+or invokes Simulator behavior.
+
+**Non-goals:** no generic solver, retries, grid/PV/load rules, Zero Export,
+terminal objective, Actuation, Simulator, Runtime, Device, or Command work.
+Unsupported objectives remain unavailable and empty.
+
 ```markdown
 ## TASK-XXX
 

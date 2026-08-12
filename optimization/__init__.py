@@ -48,6 +48,15 @@ from optimization.model import (
     OptimizationResult,
     OptimizationSense,
 )
+from optimization.physically_aware_baseline import (
+    BatterySolutionRevision,
+    BatterySolutionRevisionReason,
+    BatterySolutionRevisionStep,
+    PhysicallyAwareBaselineOptimizationInput,
+    PhysicallyAwareOptimizationBoundary,
+    PhysicallyAwareOptimizationSolveOutput,
+    PhysicallyAwarePriceBaselineOptimizer,
+)
 from optimization.price_aware_baseline import (
     PriceAwareBaselineOptimizationConfiguration,
     PriceAwareBaselineOptimizer,
@@ -84,6 +93,9 @@ __all__ = [
     "BatterySOCHorizonProjectionBoundary",
     "BatterySOCHorizonProjectionInput",
     "BatterySOCProjectionStep",
+    "BatterySolutionRevision",
+    "BatterySolutionRevisionReason",
+    "BatterySolutionRevisionStep",
     "DeterministicBatteryHorizonConstraintAggregator",
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
@@ -106,6 +118,10 @@ __all__ = [
     "OptimizationSolutionControlPlanConstructionInput",
     "OptimizationSolutionStep",
     "OptimizationSolveOutput",
+    "PhysicallyAwareBaselineOptimizationInput",
+    "PhysicallyAwareOptimizationBoundary",
+    "PhysicallyAwareOptimizationSolveOutput",
+    "PhysicallyAwarePriceBaselineOptimizer",
     "PriceAwareBaselineOptimizationConfiguration",
     "PriceAwareBaselineOptimizer",
 ]
