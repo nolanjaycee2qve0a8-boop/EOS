@@ -4367,6 +4367,35 @@ artifact as the authoritative evidence layer.
 Simulator, Actuation, Runtime, Device, Command, filesystem, logging side
 effect, network, cache, or arbitrary template system.
 
+## TASK-125 Explainable MPC Decision Journal Record
+
+**Background:** TASK-122 preserves complete physical MPC provenance, TASK-123
+organizes current-decision evidence, and TASK-124 presents that evidence for
+people. A history or future export consumer needs one stable per-decision
+read-model record without coupling EMS artifacts to the kernel Event system.
+
+**Objective:** Bundle one exact physical cycle, machine explanation, and
+formatted explanation into one immutable explainable journal record.
+
+**Core contracts:** Input requires exact chained provenance: explanation to
+cycle and formatted explanation to machine explanation. The record preserves
+exact input, timestamp from the original decision context, exact strategy
+descriptor, exact candidate/final intents, exact reason and violation tuples,
+raw physical values, and the existing formatted text.
+
+**Key decision:** The deterministic builder consumes TASK-123 and TASK-124 as
+source-of-truth read models. It never re-walks the deep optimization graph,
+reruns an evaluator or formatter, or invents a journaling timestamp.
+
+**Architecture benefit:** Later CSV, JSON, CLI, API, UI, replay inspection, or
+an explicit kernel Event adapter can consume a compact record while retaining
+both raw evidence and human presentation.
+
+**Non-goals:** The record is not persistence and not a `kernel.event.EventJournal`
+entry. No EventJournal/EventRecord changes, append behavior, I/O, optimizer,
+projection, constraint evaluation, execution, Simulator, Actuation, Runtime,
+Device, or Command behavior is introduced.
+
 ```markdown
 ## TASK-XXX
 
