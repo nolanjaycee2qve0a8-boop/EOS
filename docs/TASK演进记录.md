@@ -4340,6 +4340,33 @@ full provenance inspection.
 constraint evaluation, correction, Actuation, Simulator, Runtime, Device,
 Command, I/O, or persistence.
 
+## TASK-124 MPC Decision Explanation Formatter
+
+**Background:** TASK-123 provides an exact, machine-readable read model for
+one physical MPC decision, but it intentionally does not present that evidence
+for operator-facing diagnostics.
+
+**Objective:** Add deterministic plain-text presentation for one exact
+`MPCDecisionExplanation` in `zh-CN` or `en-US`.
+
+**Core contracts:** Format input preserves the exact machine explanation and
+explicit locale. Formatted output preserves exact input identity and non-empty
+text. The formatter boundary is abstract, stateless, and template based.
+
+**Key decision:** The formatter reads only TASK-123 fields. It never walks the
+deep provenance graph to recreate values, and never reruns optimization, SOC
+projection, constraint evaluation, MPC, or execution. Candidate-horizon
+feasibility is displayed from its explicit horizon boolean rather than inferred
+from current-step violations.
+
+**Architecture benefit:** EOS can offer stable explanation text for logs, CLI,
+diagnostics, and future API/UI consumers while retaining the source machine
+artifact as the authoritative evidence layer.
+
+**Non-goals:** no AI prose generation, solver, physical recomputation,
+Simulator, Actuation, Runtime, Device, Command, filesystem, logging side
+effect, network, cache, or arbitrary template system.
+
 ```markdown
 ## TASK-XXX
 
