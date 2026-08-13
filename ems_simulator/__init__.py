@@ -15,6 +15,12 @@ from ems_simulator.explainable_mpc_daily import (
     ExplainableMPCDailySimulationStepTrace,
 )
 from ems_simulator.grid import GridEnergyBalanceSimulationModel
+from ems_simulator.headroom_aware_explainable_mpc_daily import (
+    HeadroomAwareExplainableMPCDailySimulationBoundary,
+    HeadroomAwareExplainableMPCDailySimulationResult,
+    HeadroomAwareExplainableMPCDailySimulationRunner,
+    HeadroomAwareExplainableMPCDailySimulationStepTrace,
+)
 from ems_simulator.input import BatteryParameters, DailySimulationScenarioInput
 from ems_simulator.load import LoadProfileSimulationModel
 from ems_simulator.output import (
@@ -44,6 +50,10 @@ __all__ = [
     "ExplainableMPCDailySimulationRunner",
     "ExplainableMPCDailySimulationStepTrace",
     "GridEnergyBalanceSimulationModel",
+    "HeadroomAwareExplainableMPCDailySimulationBoundary",
+    "HeadroomAwareExplainableMPCDailySimulationResult",
+    "HeadroomAwareExplainableMPCDailySimulationRunner",
+    "HeadroomAwareExplainableMPCDailySimulationStepTrace",
     "LoadProfileSimulationModel",
     "PVProfileSimulationModel",
     "SimpleBatteryPhysicsModel",

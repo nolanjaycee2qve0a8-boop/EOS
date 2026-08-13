@@ -4692,6 +4692,25 @@ final”，外层结果则保留“original candidate → reservation → adjust
 **非目标：** 不接入 daily runner、不扩大 horizon、不修改解释/CSV schema，不新增
 MPC loop、Feasibility、Actuation、Simulator 或 Runtime。
 
+## TASK-138 Headroom-Aware Explainable Daily Simulation Integration
+
+**目标：** 将 TASK-137 的 one-cycle headroom-aware MPC 接入 24 个 caller-driven
+simulation steps；每一小时保留 outer headroom result，同时沿用稳定的 physical
+explanation、journal 与 CSV 管道。
+
+**核心契约：** 每个 trace 保留 exact `HeadroomAwareMPCCycleResult` 及其 exact
+`physical_cycle_view`。后者仅作为既有 TASK-123+ 契约的 compatibility view；
+Feasibility 使用 outer result 的同一 exact decision，随后交给 handoff 与
+Simulator。
+
+**状态语义：** 首小时使用 initial SOC，后续 planning SOC 和 grid context 来自
+上一小时实际 Simulator state/result，而不是 forecast 或 optimization projection。
+任何 step 失败立即停止，全部 24 小时成功前不序列化或写入 partial CSV。
+
+**限制：** 物理 CSV 仍只叙述“headroom-adjusted candidate → physical final”，更丰富
+的 original candidate / headroom reservation evidence 保留在 trace 内；不改变
+forecast horizon 长度，也不新增 demo/CLI。
+
 ```markdown
 ## TASK-XXX
 

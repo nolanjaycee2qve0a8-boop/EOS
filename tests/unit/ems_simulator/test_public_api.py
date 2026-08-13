@@ -19,6 +19,10 @@ def test_public_imports() -> None:
         ExplainableMPCDailySimulationRunner,
         ExplainableMPCDailySimulationStepTrace,
         GridEnergyBalanceSimulationModel,
+        HeadroomAwareExplainableMPCDailySimulationBoundary,
+        HeadroomAwareExplainableMPCDailySimulationResult,
+        HeadroomAwareExplainableMPCDailySimulationRunner,
+        HeadroomAwareExplainableMPCDailySimulationStepTrace,
         LoadProfileSimulationModel,
         PVProfileSimulationModel,
         SimpleBatteryPhysicsModel,
@@ -59,6 +63,22 @@ def test_public_imports() -> None:
     )
     assert (
         GridEnergyBalanceSimulationModel.__name__ == "GridEnergyBalanceSimulationModel"
+    )
+    assert (
+        HeadroomAwareExplainableMPCDailySimulationBoundary.__name__
+        == "HeadroomAwareExplainableMPCDailySimulationBoundary"
+    )
+    assert (
+        HeadroomAwareExplainableMPCDailySimulationResult.__name__
+        == "HeadroomAwareExplainableMPCDailySimulationResult"
+    )
+    assert (
+        HeadroomAwareExplainableMPCDailySimulationRunner.__name__
+        == "HeadroomAwareExplainableMPCDailySimulationRunner"
+    )
+    assert (
+        HeadroomAwareExplainableMPCDailySimulationStepTrace.__name__
+        == "HeadroomAwareExplainableMPCDailySimulationStepTrace"
     )
     assert LoadProfileSimulationModel.__name__ == "LoadProfileSimulationModel"
     assert PVProfileSimulationModel.__name__ == "PVProfileSimulationModel"
