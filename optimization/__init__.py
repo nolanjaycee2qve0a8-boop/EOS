@@ -48,6 +48,10 @@ from optimization.model import (
     OptimizationResult,
     OptimizationSense,
 )
+from optimization.net_load_aware_baseline import (
+    NetLoadAwareBaselineOptimizationConfiguration,
+    NetLoadAwareBaselineOptimizer,
+)
 from optimization.physically_aware_baseline import (
     BatterySolutionRevision,
     BatterySolutionRevisionReason,
@@ -101,6 +105,8 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "NetLoadAwareBaselineOptimizationConfiguration",
+    "NetLoadAwareBaselineOptimizer",
     "OptimizationBoundary",
     "OptimizationControlPlan",
     "OptimizationControlPlanConstructionBoundary",

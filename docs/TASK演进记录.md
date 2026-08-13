@@ -4533,6 +4533,28 @@ Simulator 1.0 CLI.
 **非目标：** 不新增 Net-Load-Aware 规则、PV/Load/Grid 约束、Zero Export、求解器、Simulator 或
 下游 Feasibility/Actuation 行为。
 
+## TASK-130 Net-Load-Aware Baseline Optimizer
+
+**背景：** Price-aware baseline 只读取电价，高价时可能在 PV 已覆盖家庭负荷的时段继续请求放电，
+从而增加无意义的外送。TASK-130A 已将物理修正提升为通用候选边界，允许新增候选规则复用既有
+SOC/功率证据与修正链路。
+
+**目标：** 增加确定性的 `NetLoadAwareBaselineOptimizer`，以 forecast 的 Price、PV 与 Load
+形成更符合户用能量流的候选动作；不修改 PriceAwareBaselineOptimizer。
+
+**核心规则：** PV surplus 优先按精确 surplus 请求充电；高价且存在 load deficit 时，按精确
+deficit 请求放电，绝不超过净负荷；低价且无 PV surplus 时，按 caller 提供的 grid-charge 功率
+请求充电；其他情况 idle。
+
+**架构收益：** 价格语义、PV 自发自用语义与电池物理许可仍分层。新候选直接组合
+`PhysicallyAwareBaselineOptimizer`，由后者负责 SOC 与功率修正及完整候选到最终证据。
+
+**已知限制：** 本任务不为未来 PV 预留电池 headroom；夜间低价 grid charge 仍可能使电池在日出前
+达到高 SOC。此问题留给未来 horizon economic/headroom optimization。
+
+**非目标：** 不新增 MILP/QP、全局调度、Zero Export、export tariff、PV curtailment、Grid
+constraint、SOC/功率 clipping、Actuation、Simulator 或 TASK-129 demo 切换。
+
 ```markdown
 ## TASK-XXX
 
