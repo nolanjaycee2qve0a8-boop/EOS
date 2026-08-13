@@ -3,7 +3,7 @@
 import ast
 import inspect
 from abc import ABC
-from dataclasses import FrozenInstanceError, fields
+from dataclasses import FrozenInstanceError, dataclass, fields
 from math import inf, nan
 from pathlib import Path
 from typing import Any, cast, get_type_hints
@@ -11,6 +11,7 @@ from typing import Any, cast, get_type_hints
 import pytest
 
 import optimization
+from decision_formation import DecisionIntent
 from forecast import ForecastPoint
 from optimization import (
     BatteryHorizonConstraintAggregateBoundary,
@@ -27,8 +28,14 @@ from optimization import (
     DeterministicBatterySOCHorizonConstraintEvaluator,
     DeterministicBatterySOCHorizonProjector,
     OptimizationObjective,
+    OptimizationProblem,
+    OptimizationResult,
+    OptimizationSolution,
+    OptimizationSolutionBoundary,
     OptimizationSolutionStep,
+    OptimizationSolveOutput,
     PhysicallyAwareBaselineOptimizationInput,
+    PhysicallyAwareBaselineOptimizer,
     PhysicallyAwareOptimizationBoundary,
     PhysicallyAwareOptimizationSolveOutput,
     PhysicallyAwarePriceBaselineOptimizer,
@@ -104,6 +111,29 @@ class MinimalPhysicalBoundary(PhysicallyAwareOptimizationBoundary):
         optimization_input: PhysicallyAwareBaselineOptimizationInput,
     ) -> PhysicallyAwareOptimizationSolveOutput:
         return make_optimizer().solve_physically(optimization_input)
+
+
+@dataclass(frozen=True, slots=True)
+class ChargeCandidateOptimizer(OptimizationSolutionBoundary):
+    """Test-only non-price candidate source for generic revision coverage."""
+
+    requested_power_kw: float
+
+    def solve_with_solution(
+        self, problem: OptimizationProblem
+    ) -> OptimizationSolveOutput:
+        if not isinstance(problem, OptimizationProblem):
+            raise TypeError("problem must be an OptimizationProblem")
+        result = OptimizationResult(problem, "optimal")
+        steps = tuple(
+            OptimizationSolutionStep(
+                point.timestamp,
+                DecisionIntent("charge"),
+                self.requested_power_kw,
+            )
+            for point in problem.forecast_horizon.points
+        )
+        return OptimizationSolveOutput(result, OptimizationSolution(result, steps))
 
 
 def test_input_and_revision_artifacts_are_frozen_slotted_and_validate_duration() -> (
@@ -300,7 +330,7 @@ def test_boundary_contract_is_abstract_slotted_with_explicit_dependencies() -> N
         "optimization_input": PhysicallyAwareBaselineOptimizationInput,
         "return": PhysicallyAwareOptimizationSolveOutput,
     }
-    assert optimizer.price_optimizer is not None
+    assert optimizer.candidate_optimizer is not None
     assert isinstance(optimizer.soc_projector, BatterySOCHorizonProjectionBoundary)
     assert isinstance(optimizer.soc_evaluator, BatterySOCHorizonConstraintBoundary)
     assert isinstance(optimizer.power_evaluator, BatteryPowerHorizonConstraintBoundary)
@@ -311,6 +341,42 @@ def test_boundary_contract_is_abstract_slotted_with_explicit_dependencies() -> N
     with pytest.raises(TypeError):
         PhysicallyAwareOptimizationBoundary()  # type: ignore[abstract]
     assert not hasattr(MinimalPhysicalBoundary(), "__dict__")
+
+
+def test_generic_revision_accepts_non_price_boundary() -> None:
+    physical_input = make_input(
+        (point(1, 0.2),),
+        soc=0.7,
+        model=make_model(max_soc=0.9, max_charge=5.0),
+    )
+    candidate_optimizer = ChargeCandidateOptimizer(8.0)
+    optimizer = PhysicallyAwareBaselineOptimizer(
+        candidate_optimizer,
+        DeterministicBatterySOCHorizonProjector(),
+        DeterministicBatterySOCHorizonConstraintEvaluator(),
+        DeterministicBatteryPowerHorizonConstraintEvaluator(),
+        DeterministicBatteryHorizonConstraintAggregator(),
+    )
+
+    output = optimizer.solve_physically(physical_input)
+
+    candidate = output.candidate_output.solution.steps[0]
+    final = output.final_output.solution.steps[0]
+    assert optimizer.candidate_optimizer is candidate_optimizer
+    assert (
+        output.candidate_output.result.source_problem
+        is physical_input.battery_input.problem
+    )
+    assert (
+        output.candidate_output.solution.source_result is output.candidate_output.result
+    )
+    assert candidate.intent.action == "charge"
+    assert candidate.requested_power_kw == 8.0
+    assert final.intent.action == "charge"
+    assert 0 < final.requested_power_kw < 5.0
+    assert output.revision.steps[0].source_candidate_step is candidate
+    assert output.revision.steps[0].revised_step is final
+    assert output.revision.steps[0].reasons == ("charge_power_limit", "max_soc_limit")
 
 
 def test_module_has_no_strategy_feasibility_simulator_or_execution_dependency() -> None:
@@ -346,6 +412,7 @@ def test_public_api_exports_physically_aware_revision_contracts() -> None:
         "BatterySolutionRevisionReason",
         "BatterySolutionRevisionStep",
         "PhysicallyAwareBaselineOptimizationInput",
+        "PhysicallyAwareBaselineOptimizer",
         "PhysicallyAwareOptimizationBoundary",
         "PhysicallyAwareOptimizationSolveOutput",
         "PhysicallyAwarePriceBaselineOptimizer",

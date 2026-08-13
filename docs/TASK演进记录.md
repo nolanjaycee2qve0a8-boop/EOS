@@ -4511,6 +4511,28 @@ separately available in the TASK-128 result; projected SOC is not realized SOC.
 forecast provider, device/command integration, or modification of the original
 Simulator 1.0 CLI.
 
+## TASK-130A Generalize Physically-Aware Candidate Optimizer
+
+**背景：** TASK-121 的物理修正已能保留候选、SOC/功率约束证据、单次修正与最终证据，但其
+候选输入被具体绑定为 `PriceAwareBaselineOptimizer`，阻止后续不同候选优化器复用同一物理
+修正链路。
+
+**目标：** 将候选依赖提升为稳定的 `OptimizationSolutionBoundary`，使物理修正只消费一个
+具有严格 provenance 的候选 `OptimizationSolveOutput`，而不关心候选是否由价格规则产生。
+
+**核心契约：** `PhysicallyAwareBaselineOptimizer` 要求 exact candidate boundary、exact
+`OptimizationProblem` 与 result/solution identity。候选只调用一次；候选、修正、最终 solution
+以及全部 SOC/功率证据结构均保持原有契约。
+
+**兼容性：** `PhysicallyAwarePriceBaselineOptimizer` 保留为历史 price-baseline 入口的兼容别名；
+既有 TASK-121～129 调用无需改变其语义。
+
+**架构收益：** 物理修正从“price-only 的附属逻辑”恢复为可复用的独立层。后续 Net-Load-Aware
+候选优化器可以复用相同的 SOC/功率修正与可解释证据，而不必复制物理逻辑。
+
+**非目标：** 不新增 Net-Load-Aware 规则、PV/Load/Grid 约束、Zero Export、求解器、Simulator 或
+下游 Feasibility/Actuation 行为。
+
 ```markdown
 ## TASK-XXX
 

@@ -1,4 +1,4 @@
-"""One-pass physical revision of the deterministic price-only candidate."""
+"""One-pass physical revision of any explicit optimization candidate."""
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -28,9 +28,11 @@ from optimization.battery_soc_projection import (
     BatterySOCHorizonProjectionInput,
 )
 from optimization.model import OptimizationResult
-from optimization.price_aware_baseline import PriceAwareBaselineOptimizer
 from optimization.solution import OptimizationSolution, OptimizationSolutionStep
-from optimization.solution_boundary import OptimizationSolveOutput
+from optimization.solution_boundary import (
+    OptimizationSolutionBoundary,
+    OptimizationSolveOutput,
+)
 
 BatterySolutionRevisionReason = Literal[
     "charge_power_limit",
@@ -347,18 +349,20 @@ class PhysicallyAwareOptimizationBoundary(ABC):
 
 
 @dataclass(frozen=True, slots=True)
-class PhysicallyAwarePriceBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
-    """Perform exactly one deterministic physical revision of a price candidate."""
+class PhysicallyAwareBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
+    """Perform exactly one deterministic physical revision of one candidate."""
 
-    price_optimizer: PriceAwareBaselineOptimizer
+    candidate_optimizer: OptimizationSolutionBoundary
     soc_projector: BatterySOCHorizonProjectionBoundary
     soc_evaluator: BatterySOCHorizonConstraintBoundary
     power_evaluator: BatteryPowerHorizonConstraintBoundary
     constraint_aggregator: BatteryHorizonConstraintAggregateBoundary
 
     def __post_init__(self) -> None:
-        if not isinstance(self.price_optimizer, PriceAwareBaselineOptimizer):
-            raise TypeError("price_optimizer must be a PriceAwareBaselineOptimizer")
+        if not isinstance(self.candidate_optimizer, OptimizationSolutionBoundary):
+            raise TypeError(
+                "candidate_optimizer must be an OptimizationSolutionBoundary"
+            )
         if not isinstance(self.soc_projector, BatterySOCHorizonProjectionBoundary):
             raise TypeError(
                 "soc_projector must be a BatterySOCHorizonProjectionBoundary"
@@ -391,9 +395,16 @@ class PhysicallyAwarePriceBaselineOptimizer(PhysicallyAwareOptimizationBoundary)
             raise TypeError(
                 "optimization_input must be a PhysicallyAwareBaselineOptimizationInput"
             )
-        candidate_output = self.price_optimizer.solve_with_solution(
+        candidate_output = self.candidate_optimizer.solve_with_solution(
             optimization_input.battery_input.problem
         )
+        problem = optimization_input.battery_input.problem
+        if candidate_output.result.source_problem is not problem:
+            raise ValueError(
+                "candidate output must preserve exact input problem identity"
+            )
+        if candidate_output.solution.source_result is not candidate_output.result:
+            raise ValueError("candidate solution must preserve exact result identity")
         (
             candidate_projection,
             candidate_soc_evaluation,
@@ -575,3 +586,8 @@ class PhysicallyAwarePriceBaselineOptimizer(PhysicallyAwareOptimizationBoundary)
         else:
             energy_delta = 0.0
         return current_soc + energy_delta / model.usable_capacity_kwh
+
+
+# Compatibility alias retained for callers that explicitly name the historical
+# price-candidate entry point. The implementation is intentionally generic.
+PhysicallyAwarePriceBaselineOptimizer = PhysicallyAwareBaselineOptimizer
