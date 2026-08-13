@@ -306,6 +306,8 @@ def test_public_api_exports_optimization_contracts() -> None:
         "DeterministicBatteryPowerHorizonConstraintEvaluator",
         "DeterministicBatterySOCHorizonConstraintEvaluator",
         "DeterministicBatterySOCHorizonProjector",
+        "NetLoadAwareBaselineOptimizationConfiguration",
+        "NetLoadAwareBaselineOptimizer",
         "OptimizationBoundary",
         "OptimizationControlPlan",
         "OptimizationControlPlanConstructionBoundary",
