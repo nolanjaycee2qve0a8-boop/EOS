@@ -4555,6 +4555,26 @@ deficit 请求放电，绝不超过净负荷；低价且无 PV surplus 时，按
 **非目标：** 不新增 MILP/QP、全局调度、Zero Export、export tariff、PV curtailment、Grid
 constraint、SOC/功率 clipping、Actuation、Simulator 或 TASK-129 demo 切换。
 
+## TASK-131 Net-Load-Aware 24h MPC Demo Integration
+
+**背景：** TASK-129 冻结了 price-only 的可解释物理感知 24 小时 MPC demo；TASK-130 仅建立
+Price + PV + Load 的候选优化器，尚未证明其可以穿过完整 MPC、物理修正、解释与 Simulator 链路。
+
+**目标：** 在不改变 TASK-129 CLI、场景、下游 Feasibility/Actuation 或 Simulator 的前提下，新增独立
+`net_load_mpc_demo`，将 `NetLoadAwareBaselineOptimizer` 组合进同一条 24 小时执行链，并提供可复现 A/B
+行为证据。
+
+**核心语义：** 高价且 PV surplus 时，候选必须是按 surplus 充电，绝不能因为高价转为放电；高价且
+load deficit 时，候选放电功率等于 `load - pv`，不超过当前净家庭负荷。物理层仍可因满电将候选充电
+修正为 idle，并保留 `max_soc_limit` 证据。
+
+**架构收益：** 新旧 demo 使用同一预测、物理修正、MPC、解释、journal、CSV、Feasibility、Actuation 和
+Simulator 主链，仅替换候选优化器与 strategy descriptor。因此得到的是候选策略变化的可解释 A/B 对比，
+不是另一套执行架构。
+
+**已知限制：** 仍未为未来 PV 预留 battery headroom。廉价夜间 grid charge 可能在白天 surplus 之前填满
+电池，因此 PV 本身造成的外送仍可能明显存在；TASK-131 不将其误判为失败。
+
 ```markdown
 ## TASK-XXX
 
