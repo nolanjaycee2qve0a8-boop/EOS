@@ -52,6 +52,11 @@ from optimization.headroom_aware_candidate_planning import (
     HeadroomAwareCandidatePlanningInput,
     HeadroomAwareCandidatePlanningResult,
 )
+from optimization.headroom_aware_physical_optimization import (
+    DeterministicHeadroomAwarePhysicalOptimizer,
+    HeadroomAwarePhysicalOptimizationBoundary,
+    HeadroomAwarePhysicalOptimizationSolveOutput,
+)
 from optimization.model import (
     OptimizationObjective,
     OptimizationObjectiveCollection,
@@ -130,6 +135,7 @@ __all__ = [
     "DeterministicExplicitCandidatePhysicalReviser",
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
+    "DeterministicHeadroomAwarePhysicalOptimizer",
     "DeterministicPVHeadroomRequirementCalculator",
     "ExplicitCandidatePhysicalRevisionBoundary",
     "ExplicitCandidatePhysicalRevisionInput",
@@ -139,6 +145,8 @@ __all__ = [
     "HeadroomAwareGridChargeReservation",
     "HeadroomAwareGridChargeReservationBoundary",
     "HeadroomAwareGridChargeReservationInput",
+    "HeadroomAwarePhysicalOptimizationBoundary",
+    "HeadroomAwarePhysicalOptimizationSolveOutput",
     "NetLoadAwareBaselineOptimizationConfiguration",
     "NetLoadAwareBaselineOptimizer",
     "OptimizationBoundary",
