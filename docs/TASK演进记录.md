@@ -4637,6 +4637,24 @@ discharge、idle 和索引大于零的未来步骤都保持候选动作与功率
 step，绝不把同一个 SOC 独立套用到未来步骤。horizon-wide reservation scheduling 需要后续的显式 SOC 轨迹设计；
 现有 4-hour horizon 在午夜仍看不到中午 PV。
 
+## TASK-135 Explicit Candidate Physical Revision Seam
+
+**背景：** TASK-134 可以创建已应用 grid-charge reservation 的 `OptimizationSolveOutput`，但原有
+`PhysicallyAwareBaselineOptimizer` 自己调用 candidate optimizer；若直接接入会重新求解并丢失 reservation，
+若另写物理修正则会复制 TASK-121 的 SOC/功率证据与单次修正规则。
+
+**目标：** 抽取 `ExplicitCandidatePhysicalRevisionInput`、抽象 boundary 与确定性 revisor，使任何已创建的
+candidate output 能结合既有 `PhysicallyAwareBaselineOptimizationInput` 进入同一份物理修正实现。
+
+**核心语义：** wrapper 要求 candidate result 的 source problem 与 physical input 的 exact problem 相同，
+且 solution 保留 exact result。输出 `PhysicallyAwareOptimizationSolveOutput.candidate_output` 就是 caller supplied
+的同一个对象；final result/solution 保持 distinct，但仍引用同一个 source problem。
+
+**架构收益：** 原 `PhysicallyAwareBaselineOptimizer` 退化为兼容的 convenience composer：candidate optimizer
+只执行一次，然后委托 explicit revisor。投影、SOC/Power evaluation、aggregate、顺序修正与 final evidence
+仍只有一份实现。TASK-134 final candidate 可直接进入物理层，物理层不了解 headroom、price、PV reservation
+或 NetLoad candidate logic。
+
 ```markdown
 ## TASK-XXX
 
