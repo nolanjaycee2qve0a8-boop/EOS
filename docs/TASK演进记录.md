@@ -4486,6 +4486,31 @@ forecast generation, new optimizer rule, physics change, feasibility/actuation
 change, simulator change, EventJournal, directory creation, device, or command
 behavior.
 
+## TASK-129 Explainable MPC Daily Demo
+
+**Background:** TASK-128 offers a caller-owned finite daily physically-aware
+MPC API, but it does not itself demonstrate how a CLI application constructs
+daily horizons and exposes the resulting decision evidence.
+
+**Objective:** Provide a deterministic `python -m ems_simulator.mpc_demo`
+application that reuses the household profiles, real MPC/explanation/CSV
+components, and the existing simulation export layer.
+
+**Core design:** The demo caller supplies 24 distinct four-point forecast
+horizons. Near the end of the day, forecasts repeat the profiles by absolute
+hour modulo 24; this is a demo-only perfect forecast, not a forecast service.
+The CLI uses actual simulator SOC and grid progression through TASK-128, then
+writes one MPC decision CSV plus the ordinary simulation CSV/SVG outputs and a
+summary of energy and decision counts.
+
+**Evidence distinction:** The MPC decision CSV is decision evidence, not an
+execution log. Downstream feasible decision, handoff, and simulator trace stay
+separately available in the TASK-128 result; projected SOC is not realized SOC.
+
+**Non-goals:** no Runtime scheduler, new optimizer/constraint/physics rule,
+forecast provider, device/command integration, or modification of the original
+Simulator 1.0 CLI.
+
 ```markdown
 ## TASK-XXX
 
