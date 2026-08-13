@@ -46,6 +46,12 @@ from optimization.grid_charge_reservation import (
     HeadroomAwareGridChargeReservationBoundary,
     HeadroomAwareGridChargeReservationInput,
 )
+from optimization.headroom_aware_candidate_planning import (
+    DeterministicHeadroomAwareCandidatePlanner,
+    HeadroomAwareCandidatePlanningBoundary,
+    HeadroomAwareCandidatePlanningInput,
+    HeadroomAwareCandidatePlanningResult,
+)
 from optimization.model import (
     OptimizationObjective,
     OptimizationObjectiveCollection,
@@ -118,8 +124,12 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
     "DeterministicPVHeadroomRequirementCalculator",
+    "HeadroomAwareCandidatePlanningBoundary",
+    "HeadroomAwareCandidatePlanningInput",
+    "HeadroomAwareCandidatePlanningResult",
     "HeadroomAwareGridChargeReservation",
     "HeadroomAwareGridChargeReservationBoundary",
     "HeadroomAwareGridChargeReservationInput",
