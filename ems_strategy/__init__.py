@@ -59,6 +59,11 @@ from ems_strategy.mpc_decision_journal import (
     ExplainableMPCDecisionJournalRecordBoundary,
     ExplainableMPCDecisionJournalRecordInput,
 )
+from ems_strategy.mpc_headroom_aware import (
+    HeadroomAwareMPCCycleBoundary,
+    HeadroomAwareMPCCycleResult,
+    HeadroomAwareSingleMPCCycleOrchestrator,
+)
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
 from ems_strategy.mpc_physically_aware import (
     PhysicallyAwareMPCCycleBoundary,
@@ -111,6 +116,9 @@ __all__ = [
     "FeasibleDecision",
     "FirstStepMPCCurrentActionExtractor",
     "FormattedMPCDecisionExplanation",
+    "HeadroomAwareMPCCycleBoundary",
+    "HeadroomAwareMPCCycleResult",
+    "HeadroomAwareSingleMPCCycleOrchestrator",
     "MPCConfiguration",
     "MPCCurrentAction",
     "MPCCurrentActionExtractionBoundary",

@@ -4673,6 +4673,25 @@ Net-Load candidate optimizer。
 **非目标：** 不扩展 horizon、不接入 MPC/demo/Simulator、不执行下游
 Feasibility/Actuation，也不新增重复求解或重复修正循环。
 
+## TASK-137 Headroom-Aware MPC Cycle Integration
+
+**目标：** 将 TASK-136 的完整 headroom-aware optimization evidence 接入一个
+MPC cycle，并严格只让 physical final solution 进入 control plan、current action
+与 `EMSDecision`。
+
+**核心契约：** `HeadroomAwareMPCCycleResult` 同时保留 original Net-Load
+candidate、PV headroom requirement、reservation、headroom-adjusted candidate、
+physical revision evidence 与最终 decision。TASK-136 boundary 在一个 cycle 内
+只执行一次；组合器不直接调用 candidate/headroom/physical 子组件。
+
+**兼容性：** `physical_cycle_view` 使用同一批已计算对象构造
+`PhysicallyAwareMPCCycleResult`，作为既有 TASK-123+ explanation 链的兼容视图，
+不是第二条执行路径。现有解释继续说明“headroom-adjusted candidate → physical
+final”，外层结果则保留“original candidate → reservation → adjusted candidate”。
+
+**非目标：** 不接入 daily runner、不扩大 horizon、不修改解释/CSV schema，不新增
+MPC loop、Feasibility、Actuation、Simulator 或 Runtime。
+
 ```markdown
 ## TASK-XXX
 
