@@ -4453,6 +4453,39 @@ integration, optimizer, projection, evaluator, explanation/formatter rerun,
 MPC, Simulator, Actuation, Runtime, Device, Command, database, network, JSON,
 or batch simulation integration.
 
+## TASK-128 Explainable Daily MPC Integration
+
+**Background:** TASK-121 through TASK-127 establish physically revised MPC
+evidence, explanation, formatting, journal records, deterministic CSV mapping,
+serialization, and file export as separate seams. The existing simulator can
+already progress actual battery and grid state for 24 explicit steps.
+
+**Objective:** Compose these existing seams into one finite, explicit 24-hour
+receding-horizon application flow without turning it into a Runtime scheduler.
+
+**Core contracts:** The daily input carries one exact integration scenario,
+24 exact caller-owned horizons, exact MPC/model/objective/strategy references,
+one locale, and a caller-owned output path. A per-step trace preserves the
+complete planning, explanation, downstream feasibility/handoff, and simulator
+evidence chain. The result preserves 24 exact traces/records/rows plus the
+single serialized CSV and file result.
+
+**Key decision:** Each new MPC cycle reads the actual SOC and grid result from
+the previous simulation trace. Forecast horizons are indexed directly by hour;
+they are never shifted, extrapolated, padded, or shortened. The CSV is created
+only after all 24 steps succeed and describes the MPC decision request rather
+than an execution/actuation log.
+
+**Architecture benefit:** EOS gains an inspectable, deterministic daily MPC
+application path while preserving the distinctions `Forecast != Actual`,
+`Projected SOC != Realized Simulator SOC`, and `MPC Decision != Feasible
+Decision != Actuation`.
+
+**Non-goals:** no scheduler, infinite loop, wall-clock ownership, retry,
+forecast generation, new optimizer rule, physics change, feasibility/actuation
+change, simulator change, EventJournal, directory creation, device, or command
+behavior.
+
 ```markdown
 ## TASK-XXX
 

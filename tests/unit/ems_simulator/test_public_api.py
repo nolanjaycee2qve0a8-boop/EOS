@@ -13,6 +13,11 @@ def test_public_imports() -> None:
         EMSIntegrationRunner,
         EMSIntegrationScenarioInput,
         EMSIntegrationStepTrace,
+        ExplainableMPCDailySimulationBoundary,
+        ExplainableMPCDailySimulationInput,
+        ExplainableMPCDailySimulationResult,
+        ExplainableMPCDailySimulationRunner,
+        ExplainableMPCDailySimulationStepTrace,
         GridEnergyBalanceSimulationModel,
         LoadProfileSimulationModel,
         PVProfileSimulationModel,
@@ -32,6 +37,26 @@ def test_public_imports() -> None:
     assert EMSIntegrationRunner.__name__ == "EMSIntegrationRunner"
     assert EMSIntegrationScenarioInput.__name__ == "EMSIntegrationScenarioInput"
     assert EMSIntegrationStepTrace.__name__ == "EMSIntegrationStepTrace"
+    assert (
+        ExplainableMPCDailySimulationBoundary.__name__
+        == "ExplainableMPCDailySimulationBoundary"
+    )
+    assert (
+        ExplainableMPCDailySimulationInput.__name__
+        == "ExplainableMPCDailySimulationInput"
+    )
+    assert (
+        ExplainableMPCDailySimulationResult.__name__
+        == "ExplainableMPCDailySimulationResult"
+    )
+    assert (
+        ExplainableMPCDailySimulationRunner.__name__
+        == "ExplainableMPCDailySimulationRunner"
+    )
+    assert (
+        ExplainableMPCDailySimulationStepTrace.__name__
+        == "ExplainableMPCDailySimulationStepTrace"
+    )
     assert (
         GridEnergyBalanceSimulationModel.__name__ == "GridEnergyBalanceSimulationModel"
     )

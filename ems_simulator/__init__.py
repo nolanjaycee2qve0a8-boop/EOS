@@ -7,6 +7,13 @@ from ems_simulator.ems_integration import (
     EMSIntegrationScenarioInput,
     EMSIntegrationStepTrace,
 )
+from ems_simulator.explainable_mpc_daily import (
+    ExplainableMPCDailySimulationBoundary,
+    ExplainableMPCDailySimulationInput,
+    ExplainableMPCDailySimulationResult,
+    ExplainableMPCDailySimulationRunner,
+    ExplainableMPCDailySimulationStepTrace,
+)
 from ems_simulator.grid import GridEnergyBalanceSimulationModel
 from ems_simulator.input import BatteryParameters, DailySimulationScenarioInput
 from ems_simulator.load import LoadProfileSimulationModel
@@ -31,6 +38,11 @@ __all__ = [
     "EMSIntegrationRunner",
     "EMSIntegrationScenarioInput",
     "EMSIntegrationStepTrace",
+    "ExplainableMPCDailySimulationBoundary",
+    "ExplainableMPCDailySimulationInput",
+    "ExplainableMPCDailySimulationResult",
+    "ExplainableMPCDailySimulationRunner",
+    "ExplainableMPCDailySimulationStepTrace",
     "GridEnergyBalanceSimulationModel",
     "LoadProfileSimulationModel",
     "PVProfileSimulationModel",
