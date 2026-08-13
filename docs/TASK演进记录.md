@@ -4575,6 +4575,27 @@ Simulator 主链，仅替换候选优化器与 strategy descriptor。因此得�
 **已知限制：** 仍未为未来 PV 预留 battery headroom。廉价夜间 grid charge 可能在白天 surplus 之前填满
 电池，因此 PV 本身造成的外送仍可能明显存在；TASK-131 不将其误判为失败。
 
+## TASK-132 Forecast-Aware PV Headroom Requirement
+
+**背景：** TASK-131 证明 Net-Load-Aware 候选消除了高价时额外放电造成的 4.8 kWh 外送，但廉价夜间
+充电仍可能在日间 PV 到来前占满电池。需要先将“未来 PV 需要多少电池空间”表达为独立可审计事实，
+而不是直接篡改任一优化器行为。
+
+**目标：** 新增确定性的 PV headroom requirement evidence。它从 caller 提供的 ForecastHorizon、
+BatteryOptimizationModel 与显式步长计算 future surplus、battery-absorbable input、stored energy、
+required headroom 与 recommended pre-PV max SOC。
+
+**核心公式：** 每点 surplus 为 `max(PV - Load, 0)`；可吸收充电功率为 `min(surplus, max_charge_power)`；
+储能机会为 `absorbable input energy * charge efficiency`。总 headroom 按 usable SOC window cap，推荐上限
+不低于模型 min SOC。forecast surplus 与 absorbable input 两种能量事实保持分离。
+
+**架构收益：** 该层只提供未来 PV 机会的 planning evidence，保留 exact ForecastPoint identity 与 caller
+order；不依赖 price、current SOC、DecisionIntent、OptimizationSolution、物理修正或 Simulator。后续任务可
+再将 headroom、当前 SOC 与电价组合成 overnight grid-charge reservation。
+
+**重要限制：** TASK-131 的 4-point/4-hour horizon 在午夜看不到中午 PV。因此 TASK-132 本身不声称能解决
+现有 demo 的 overnight overcharging；后续集成必须显式提供足够长的 planning horizon。
+
 ```markdown
 ## TASK-XXX
 

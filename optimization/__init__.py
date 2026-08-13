@@ -66,6 +66,13 @@ from optimization.price_aware_baseline import (
     PriceAwareBaselineOptimizationConfiguration,
     PriceAwareBaselineOptimizer,
 )
+from optimization.pv_headroom import (
+    DeterministicPVHeadroomRequirementCalculator,
+    PVHeadroomForecastStep,
+    PVHeadroomRequirement,
+    PVHeadroomRequirementBoundary,
+    PVHeadroomRequirementInput,
+)
 from optimization.solution import OptimizationSolution, OptimizationSolutionStep
 from optimization.solution_boundary import (
     OptimizationSolutionBoundary,
@@ -105,6 +112,7 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "DeterministicPVHeadroomRequirementCalculator",
     "NetLoadAwareBaselineOptimizationConfiguration",
     "NetLoadAwareBaselineOptimizer",
     "OptimizationBoundary",
@@ -125,6 +133,10 @@ __all__ = [
     "OptimizationSolutionControlPlanConstructionInput",
     "OptimizationSolutionStep",
     "OptimizationSolveOutput",
+    "PVHeadroomForecastStep",
+    "PVHeadroomRequirement",
+    "PVHeadroomRequirementBoundary",
+    "PVHeadroomRequirementInput",
     "PhysicallyAwareBaselineOptimizationInput",
     "PhysicallyAwareBaselineOptimizer",
     "PhysicallyAwareOptimizationBoundary",
