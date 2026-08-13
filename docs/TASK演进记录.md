@@ -4426,6 +4426,33 @@ EventRecord, optimizer, projector, evaluator, explanation/formatter rerun,
 MPC, Simulator, Actuation, Runtime, Device, Command, database, network, or
 output-path behavior is added.
 
+## TASK-127 Explainable MPC CSV File Exporter
+
+**Background:** TASK-126 produces deterministic, complete CSV text but
+intentionally has no filesystem side effect. Callers need an explicit,
+policy-preserving boundary to persist that exact document.
+
+**Objective:** Write already serialized CSV text to one caller-supplied `.csv`
+path without introducing serialization, mapping, append, or simulation logic.
+
+**Core contracts:** The immutable input requires a `pathlib.Path`, `.csv`
+extension, and pre-existing parent directory. The immutable result preserves
+the exact input and Path identity plus the actual UTF-8 byte length.
+
+**Key decision:** Export uses one full UTF-8 overwrite with no newline
+translation; existing regular files are replaced rather than appended because
+TASK-126 text is already a complete header-inclusive document. Parent creation
+and any output-directory policy remain caller-owned.
+
+**Architecture benefit:** EOS gains a small, testable persistence seam for
+explainable decision CSVs while preserving stable ownership boundaries for row
+mapping, serialization, and storage.
+
+**Non-goals:** no directory creation, append, locking, EventJournal/EventRecord
+integration, optimizer, projection, evaluator, explanation/formatter rerun,
+MPC, Simulator, Actuation, Runtime, Device, Command, database, network, JSON,
+or batch simulation integration.
+
 ```markdown
 ## TASK-XXX
 

@@ -33,6 +33,12 @@ from ems_strategy.mpc_decision_csv import (
     ExplainableMPCDecisionCSVRowMappingInput,
     ExplainableMPCDecisionCSVSerializerBoundary,
 )
+from ems_strategy.mpc_decision_csv_file_export import (
+    DeterministicExplainableMPCDecisionCSVFileExporter,
+    ExplainableMPCDecisionCSVFileExporterBoundary,
+    ExplainableMPCDecisionCSVFileExportInput,
+    ExplainableMPCDecisionCSVFileExportResult,
+)
 from ems_strategy.mpc_decision_explanation import (
     DeterministicMPCDecisionExplanationBuilder,
     MPCDecisionExplanation,
@@ -81,6 +87,7 @@ __all__ = [
     "BatteryOperatingEnvelopeBoundary",
     "BatteryOperatingEnvelopeFeasibility",
     "DecisionProvenance",
+    "DeterministicExplainableMPCDecisionCSVFileExporter",
     "DeterministicExplainableMPCDecisionCSVRowMapper",
     "DeterministicExplainableMPCDecisionCSVSerializer",
     "DeterministicExplainableMPCDecisionJournalRecordBuilder",
@@ -90,6 +97,9 @@ __all__ = [
     "EMSDecision",
     "EMSStrategyBoundary",
     "EMSStrategyDescriptor",
+    "ExplainableMPCDecisionCSVFileExportInput",
+    "ExplainableMPCDecisionCSVFileExportResult",
+    "ExplainableMPCDecisionCSVFileExporterBoundary",
     "ExplainableMPCDecisionCSVRow",
     "ExplainableMPCDecisionCSVRowMappingBoundary",
     "ExplainableMPCDecisionCSVRowMappingInput",
