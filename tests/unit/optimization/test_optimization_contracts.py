@@ -325,6 +325,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "OptimizationSolutionStep",
         "OptimizationSolveOutput",
         "PhysicallyAwareBaselineOptimizationInput",
+        "PhysicallyAwareBaselineOptimizer",
         "PhysicallyAwareOptimizationBoundary",
         "PhysicallyAwareOptimizationSolveOutput",
         "PhysicallyAwarePriceBaselineOptimizer",
