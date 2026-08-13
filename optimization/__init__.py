@@ -40,6 +40,12 @@ from optimization.control_plan_construction import (
     OptimizationControlPlanConstructionBoundary,
     OptimizationControlPlanConstructionInput,
 )
+from optimization.grid_charge_reservation import (
+    DeterministicHeadroomAwareGridChargeReservationCalculator,
+    HeadroomAwareGridChargeReservation,
+    HeadroomAwareGridChargeReservationBoundary,
+    HeadroomAwareGridChargeReservationInput,
+)
 from optimization.model import (
     OptimizationObjective,
     OptimizationObjectiveCollection,
@@ -112,7 +118,11 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "DeterministicHeadroomAwareGridChargeReservationCalculator",
     "DeterministicPVHeadroomRequirementCalculator",
+    "HeadroomAwareGridChargeReservation",
+    "HeadroomAwareGridChargeReservationBoundary",
+    "HeadroomAwareGridChargeReservationInput",
     "NetLoadAwareBaselineOptimizationConfiguration",
     "NetLoadAwareBaselineOptimizer",
     "OptimizationBoundary",
