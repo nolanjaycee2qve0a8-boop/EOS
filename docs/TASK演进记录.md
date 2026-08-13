@@ -4596,6 +4596,26 @@ order；不依赖 price、current SOC、DecisionIntent、OptimizationSolution、
 **重要限制：** TASK-131 的 4-point/4-hour horizon 在午夜看不到中午 PV。因此 TASK-132 本身不声称能解决
 现有 demo 的 overnight overcharging；后续集成必须显式提供足够长的 planning horizon。
 
+## TASK-133 Headroom-Aware Grid Charge Reservation
+
+**背景：** TASK-132 已把 future PV opportunity 表达为 recommended pre-PV max SOC，但它不读取 current SOC，
+不能回答“当前 cheap-grid charge request 在保留这些 headroom 后允许多少”。
+
+**目标：** 新增确定性的 grid-charge reservation evidence，组合 exact TASK-132 requirement、current
+BatteryOptimizationState、同一 exact BatteryOptimizationModel、caller request 与 step duration，输出当前可允许
+的 cheap-grid charging power。
+
+**核心公式：** SOC room 为 `max(target - current, 0)`；stored room 按 capacity 换算后除以 charge efficiency
+得到 input energy，再除以 duration 得到 SOC-limited power。最终 allowance 为 request、max charge power、SOC
+allowance 三者的最小值。SOC 已达到/超过 target 时 allowance 为零。
+
+**架构收益：** TASK-133 仅限制 cheap-grid charge，不创建 generic charge prohibition，因此不会阻止后续真实
+PV surplus 充电。它不读取 price 或 raw ForecastHorizon，保留 requirement identity，并要求 battery model 与
+TASK-132 source model 为 exact 同一对象，避免混用规划假设。
+
+**重要限制：** 该计算仍不能修复 TASK-131 午夜的 4-hour horizon 看不到中午 PV 的问题。需要后续用足够长的
+planning horizon 将 requirement、current SOC 和 cheap-grid candidate 集成；TASK-133 本身不改优化器或 demo。
+
 ```markdown
 ## TASK-XXX
 
