@@ -334,6 +334,59 @@ class PhysicallyAwareOptimizationSolveOutput:
             raise ValueError(f"{stage} aggregate must preserve exact power evaluation")
 
 
+@dataclass(frozen=True, slots=True)
+class ExplicitCandidatePhysicalRevisionInput:
+    """Compose physical facts with one already-created candidate output.
+
+    This is orchestration input only.  The output keeps the exact nested
+    ``PhysicallyAwareBaselineOptimizationInput`` as its source input so all
+    downstream evidence contracts remain unchanged.
+    """
+
+    physically_aware_input: PhysicallyAwareBaselineOptimizationInput
+    candidate_output: OptimizationSolveOutput
+
+    def __post_init__(self) -> None:
+        if not isinstance(
+            self.physically_aware_input,
+            PhysicallyAwareBaselineOptimizationInput,
+        ):
+            raise TypeError(
+                "physically_aware_input must be a "
+                "PhysicallyAwareBaselineOptimizationInput"
+            )
+        if not isinstance(self.candidate_output, OptimizationSolveOutput):
+            raise TypeError("candidate_output must be an OptimizationSolveOutput")
+        problem = self.physically_aware_input.battery_input.problem
+        if self.candidate_output.result.source_problem is not problem:
+            raise ValueError(
+                "candidate output must preserve exact input problem identity"
+            )
+        if (
+            self.candidate_output.solution.source_result
+            is not self.candidate_output.result
+        ):
+            raise ValueError("candidate solution must preserve exact result identity")
+        if self.candidate_output.result.outcome == "unavailable" and (
+            self.candidate_output.solution.steps
+        ):
+            raise ValueError("unavailable candidate output must be empty")
+
+
+class ExplicitCandidatePhysicalRevisionBoundary(ABC):
+    """Define one physical revision of one explicit candidate without solving."""
+
+    __slots__ = ()
+
+    @abstractmethod
+    def revise(
+        self,
+        revision_input: ExplicitCandidatePhysicalRevisionInput,
+    ) -> PhysicallyAwareOptimizationSolveOutput:
+        """Evaluate and revise the supplied candidate exactly once."""
+        raise NotImplementedError
+
+
 class PhysicallyAwareOptimizationBoundary(ABC):
     """Define one explicit candidate-evidence-revision-final horizon flow."""
 
@@ -349,20 +402,17 @@ class PhysicallyAwareOptimizationBoundary(ABC):
 
 
 @dataclass(frozen=True, slots=True)
-class PhysicallyAwareBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
-    """Perform exactly one deterministic physical revision of one candidate."""
+class DeterministicExplicitCandidatePhysicalReviser(
+    ExplicitCandidatePhysicalRevisionBoundary
+):
+    """Perform the single shared physical revision of an explicit candidate."""
 
-    candidate_optimizer: OptimizationSolutionBoundary
     soc_projector: BatterySOCHorizonProjectionBoundary
     soc_evaluator: BatterySOCHorizonConstraintBoundary
     power_evaluator: BatteryPowerHorizonConstraintBoundary
     constraint_aggregator: BatteryHorizonConstraintAggregateBoundary
 
     def __post_init__(self) -> None:
-        if not isinstance(self.candidate_optimizer, OptimizationSolutionBoundary):
-            raise TypeError(
-                "candidate_optimizer must be an OptimizationSolutionBoundary"
-            )
         if not isinstance(self.soc_projector, BatterySOCHorizonProjectionBoundary):
             raise TypeError(
                 "soc_projector must be a BatterySOCHorizonProjectionBoundary"
@@ -384,27 +434,19 @@ class PhysicallyAwareBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
                 "BatteryHorizonConstraintAggregateBoundary"
             )
 
-    def solve_physically(
+    def revise(
         self,
-        optimization_input: PhysicallyAwareBaselineOptimizationInput,
+        revision_input: ExplicitCandidatePhysicalRevisionInput,
     ) -> PhysicallyAwareOptimizationSolveOutput:
         if not isinstance(
-            optimization_input,
-            PhysicallyAwareBaselineOptimizationInput,
+            revision_input,
+            ExplicitCandidatePhysicalRevisionInput,
         ):
             raise TypeError(
-                "optimization_input must be a PhysicallyAwareBaselineOptimizationInput"
+                "revision_input must be an ExplicitCandidatePhysicalRevisionInput"
             )
-        candidate_output = self.candidate_optimizer.solve_with_solution(
-            optimization_input.battery_input.problem
-        )
-        problem = optimization_input.battery_input.problem
-        if candidate_output.result.source_problem is not problem:
-            raise ValueError(
-                "candidate output must preserve exact input problem identity"
-            )
-        if candidate_output.solution.source_result is not candidate_output.result:
-            raise ValueError("candidate solution must preserve exact result identity")
+        optimization_input = revision_input.physically_aware_input
+        candidate_output = revision_input.candidate_output
         (
             candidate_projection,
             candidate_soc_evaluation,
@@ -586,6 +628,61 @@ class PhysicallyAwareBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
         else:
             energy_delta = 0.0
         return current_soc + energy_delta / model.usable_capacity_kwh
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicallyAwareBaselineOptimizer(PhysicallyAwareOptimizationBoundary):
+    """Convenience composer: solve one candidate, then delegate revision."""
+
+    candidate_optimizer: OptimizationSolutionBoundary
+    soc_projector: BatterySOCHorizonProjectionBoundary
+    soc_evaluator: BatterySOCHorizonConstraintBoundary
+    power_evaluator: BatteryPowerHorizonConstraintBoundary
+    constraint_aggregator: BatteryHorizonConstraintAggregateBoundary
+
+    def __post_init__(self) -> None:
+        if not isinstance(self.candidate_optimizer, OptimizationSolutionBoundary):
+            raise TypeError(
+                "candidate_optimizer must be an OptimizationSolutionBoundary"
+            )
+        # The shared explicit reviser owns all physical evaluation and revision.
+        DeterministicExplicitCandidatePhysicalReviser(
+            self.soc_projector,
+            self.soc_evaluator,
+            self.power_evaluator,
+            self.constraint_aggregator,
+        )
+
+    def solve_physically(
+        self,
+        optimization_input: PhysicallyAwareBaselineOptimizationInput,
+    ) -> PhysicallyAwareOptimizationSolveOutput:
+        if not isinstance(
+            optimization_input,
+            PhysicallyAwareBaselineOptimizationInput,
+        ):
+            raise TypeError(
+                "optimization_input must be a PhysicallyAwareBaselineOptimizationInput"
+            )
+        candidate_output = self.candidate_optimizer.solve_with_solution(
+            optimization_input.battery_input.problem
+        )
+        return self._reviser().revise(
+            ExplicitCandidatePhysicalRevisionInput(
+                optimization_input,
+                candidate_output,
+            )
+        )
+
+    def _reviser(self) -> DeterministicExplicitCandidatePhysicalReviser:
+        """Create a stateless delegating revisor without retaining extra state."""
+
+        return DeterministicExplicitCandidatePhysicalReviser(
+            self.soc_projector,
+            self.soc_evaluator,
+            self.power_evaluator,
+            self.constraint_aggregator,
+        )
 
 
 # Compatibility alias retained for callers that explicitly name the historical

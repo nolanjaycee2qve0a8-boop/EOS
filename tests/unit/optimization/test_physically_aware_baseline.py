@@ -12,7 +12,7 @@ import pytest
 
 import optimization
 from decision_formation import DecisionIntent
-from forecast import ForecastPoint
+from forecast import ForecastHorizon, ForecastPoint
 from optimization import (
     BatteryHorizonConstraintAggregateBoundary,
     BatteryOptimizationInput,
@@ -27,6 +27,9 @@ from optimization import (
     DeterministicBatteryPowerHorizonConstraintEvaluator,
     DeterministicBatterySOCHorizonConstraintEvaluator,
     DeterministicBatterySOCHorizonProjector,
+    DeterministicExplicitCandidatePhysicalReviser,
+    ExplicitCandidatePhysicalRevisionBoundary,
+    ExplicitCandidatePhysicalRevisionInput,
     OptimizationObjective,
     OptimizationProblem,
     OptimizationResult,
@@ -41,6 +44,21 @@ from optimization import (
     PhysicallyAwarePriceBaselineOptimizer,
     PriceAwareBaselineOptimizationConfiguration,
     PriceAwareBaselineOptimizer,
+)
+from optimization.grid_charge_reservation import (
+    DeterministicHeadroomAwareGridChargeReservationCalculator,
+)
+from optimization.headroom_aware_candidate_planning import (
+    DeterministicHeadroomAwareCandidatePlanner,
+    HeadroomAwareCandidatePlanningInput,
+)
+from optimization.net_load_aware_baseline import (
+    NetLoadAwareBaselineOptimizationConfiguration,
+    NetLoadAwareBaselineOptimizer,
+)
+from optimization.pv_headroom import (
+    DeterministicPVHeadroomRequirementCalculator,
+    PVHeadroomRequirementInput,
 )
 from tests.unit.optimization.test_price_aware_baseline_optimizer import (
     make_problem,
@@ -134,6 +152,15 @@ class ChargeCandidateOptimizer(OptimizationSolutionBoundary):
             for point in problem.forecast_horizon.points
         )
         return OptimizationSolveOutput(result, OptimizationSolution(result, steps))
+
+
+def make_reviser() -> DeterministicExplicitCandidatePhysicalReviser:
+    return DeterministicExplicitCandidatePhysicalReviser(
+        DeterministicBatterySOCHorizonProjector(),
+        DeterministicBatterySOCHorizonConstraintEvaluator(),
+        DeterministicBatteryPowerHorizonConstraintEvaluator(),
+        DeterministicBatteryHorizonConstraintAggregator(),
+    )
 
 
 def test_input_and_revision_artifacts_are_frozen_slotted_and_validate_duration() -> (
@@ -379,6 +406,116 @@ def test_generic_revision_accepts_non_price_boundary() -> None:
     assert output.revision.steps[0].reasons == ("charge_power_limit", "max_soc_limit")
 
 
+def test_explicit_reviser_preserves_exact_precomputed_candidate_output() -> None:
+    physical_input = make_input(
+        (point(1, 0.2),), soc=0.1, model=make_model(max_charge=3.0)
+    )
+    candidate = ChargeCandidateOptimizer(6.0).solve_with_solution(
+        physical_input.battery_input.problem
+    )
+
+    output = make_reviser().revise(
+        ExplicitCandidatePhysicalRevisionInput(physical_input, candidate)
+    )
+
+    assert output.source_input is physical_input
+    assert output.candidate_output is candidate
+    assert output.final_output.solution.steps[0].requested_power_kw == 3.0
+    assert output.revision.steps[0].reasons == ("charge_power_limit",)
+
+
+def test_headroom_aware_final_candidate_enters_explicit_reviser_directly() -> None:
+    physical_input = make_input((point(1, 0.2),), soc=0.45)
+    model = physical_input.battery_input.battery_model
+    requirement = DeterministicPVHeadroomRequirementCalculator().calculate(
+        PVHeadroomRequirementInput(
+            ForecastHorizon(
+                (
+                    point(1, None, pv=3.0, load=0.0),
+                    point(2, None, pv=1.0, load=0.0),
+                )
+            ),
+            model,
+            3600.0,
+        )
+    )
+    planner = DeterministicHeadroomAwareCandidatePlanner(
+        NetLoadAwareBaselineOptimizer(
+            NetLoadAwareBaselineOptimizationConfiguration(0.3, 0.8, 3.0)
+        ),
+        DeterministicHeadroomAwareGridChargeReservationCalculator(),
+    )
+    planning = planner.plan(
+        HeadroomAwareCandidatePlanningInput(
+            physical_input.battery_input,
+            requirement,
+            3600.0,
+        )
+    )
+
+    output = make_reviser().revise(
+        ExplicitCandidatePhysicalRevisionInput(physical_input, planning.final_output)
+    )
+
+    assert output.candidate_output is planning.final_output
+    assert output.candidate_output.solution.steps[0].intent.action == "charge"
+    assert output.candidate_output.solution.steps[
+        0
+    ].requested_power_kw == pytest.approx(0.5)
+    assert output.final_output.solution.steps[0].requested_power_kw == pytest.approx(
+        0.5
+    )
+
+
+def test_pv_surplus_candidate_bypasses_reservation_then_hits_physical_power_limit() -> (
+    None
+):
+    physical_input = make_input(
+        (point(1, 0.2, pv=6.0, load=0.0),),
+        soc=0.1,
+        model=make_model(max_charge=3.0),
+    )
+    model = physical_input.battery_input.battery_model
+    requirement = DeterministicPVHeadroomRequirementCalculator().calculate(
+        PVHeadroomRequirementInput(
+            ForecastHorizon((point(1, None, pv=1.0, load=0.0),)),
+            model,
+            3600.0,
+        )
+    )
+    planner = DeterministicHeadroomAwareCandidatePlanner(
+        NetLoadAwareBaselineOptimizer(
+            NetLoadAwareBaselineOptimizationConfiguration(0.3, 0.8, 3.0)
+        ),
+        DeterministicHeadroomAwareGridChargeReservationCalculator(),
+    )
+    planning = planner.plan(
+        HeadroomAwareCandidatePlanningInput(
+            physical_input.battery_input,
+            requirement,
+            3600.0,
+        )
+    )
+
+    output = make_reviser().revise(
+        ExplicitCandidatePhysicalRevisionInput(physical_input, planning.final_output)
+    )
+
+    assert planning.grid_charge_reservation is None
+    assert output.candidate_output is planning.final_output
+    assert output.candidate_output.solution.steps[0].requested_power_kw == 6.0
+    assert output.final_output.solution.steps[0].requested_power_kw == 3.0
+    assert output.revision.steps[0].reasons == ("charge_power_limit",)
+
+
+def test_explicit_revision_contract_is_abstract_and_reviser_has_no_candidate() -> None:
+    with pytest.raises(TypeError):
+        cast(Any, ExplicitCandidatePhysicalRevisionBoundary)()
+    reviser = make_reviser()
+    assert not hasattr(reviser, "candidate_optimizer")
+    assert not hasattr(reviser, "__dict__")
+
+
 def test_module_has_no_strategy_feasibility_simulator_or_execution_dependency() -> None:
     module_path = Path(optimization.__file__).parent / "physically_aware_baseline.py"
     source = module_path.read_text(encoding="utf-8")
@@ -411,6 +548,9 @@ def test_public_api_exports_physically_aware_revision_contracts() -> None:
         "BatterySolutionRevision",
         "BatterySolutionRevisionReason",
         "BatterySolutionRevisionStep",
+        "DeterministicExplicitCandidatePhysicalReviser",
+        "ExplicitCandidatePhysicalRevisionBoundary",
+        "ExplicitCandidatePhysicalRevisionInput",
         "PhysicallyAwareBaselineOptimizationInput",
         "PhysicallyAwareBaselineOptimizer",
         "PhysicallyAwareOptimizationBoundary",
