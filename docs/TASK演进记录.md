@@ -4655,6 +4655,24 @@ candidate output 能结合既有 `PhysicallyAwareBaselineOptimizationInput` 进�
 仍只有一份实现。TASK-134 final candidate 可直接进入物理层，物理层不了解 headroom、price、PV reservation
 或 NetLoad candidate logic。
 
+## TASK-136 Headroom-Aware Physical Optimization Composition
+
+**目标：** 将 TASK-132 的 PV headroom evidence、TASK-134 的当前 cheap-grid
+candidate planning，以及 TASK-135 的显式物理修正串联为一个可审计入口；不改变
+任一既有组件的职责或行为。
+
+**核心契约：** `HeadroomAwarePhysicalOptimizationSolveOutput` 同时保留 exact
+source input、headroom requirement、candidate planning result 与 physical output。
+其中 physical output 必须修正 planner 的 exact `final_output`，而不是重新调用
+Net-Load candidate optimizer。
+
+**架构收益：** headroom reservation 与物理 revision evidence 严格分层：前者是
+规划保留，后者仅表达 SOC/功率物理修正。组合层对三个 caller-injected boundary
+各执行一次，并完整保留三阶段 provenance。
+
+**非目标：** 不扩展 horizon、不接入 MPC/demo/Simulator、不执行下游
+Feasibility/Actuation，也不新增重复求解或重复修正循环。
+
 ```markdown
 ## TASK-XXX
 
