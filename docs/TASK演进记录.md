@@ -4616,6 +4616,27 @@ TASK-132 source model 为 exact 同一对象，避免混用规划假设。
 **重要限制：** 该计算仍不能修复 TASK-131 午夜的 4-hour horizon 看不到中午 PV 的问题。需要后续用足够长的
 planning horizon 将 requirement、current SOC 和 cheap-grid candidate 集成；TASK-133 本身不改优化器或 demo。
 
+## TASK-134 Headroom-Aware Candidate Planning Boundary
+
+**背景：** TASK-132 已将未来 PV 的储能空间需求表达为 headroom，TASK-133 已将该 headroom 与当前 SOC 转为
+cheap-grid charge allowance；二者都没有改变 TASK-130 的候选优化器。直接把电池状态或 headroom 放入
+`OptimizationProblem` 会污染其通用问题契约。
+
+**目标：** 新增显式 planning seam，组合 exact `BatteryOptimizationInput`、`PVHeadroomRequirement`、TASK-130
+Net-Load candidate output 与 TASK-133 reservation evidence，输出保留原始候选和新的 headroom-aware candidate output。
+
+**核心语义：** 仅当第一个 forecast point 为“无 PV surplus + 低价”的 TASK-130 cheap-grid charge 时，才使用
+reservation 替换当前 action 的请求功率；allowance 为零时该当前步骤显式变为 idle。PV surplus charge 不受限制；
+discharge、idle 和索引大于零的未来步骤都保持候选动作与功率不变。
+
+**架构收益：** 用公开 forecast facts 与公开 TASK-130 configuration 识别 cheap-grid charge，不调用私有 helper，
+也不从 `DecisionIntent("charge")` 单独推断来源。候选、reservation 与最终输出形成可审计的精确 provenance 链，
+而下游 TASK-121/130A physical revision 保持独立。
+
+**重要限制：** 当前 `BatteryOptimizationState` 仅描述 horizon 起点 SOC，因此 TASK-134 只修改 current/first
+step，绝不把同一个 SOC 独立套用到未来步骤。horizon-wide reservation scheduling 需要后续的显式 SOC 轨迹设计；
+现有 4-hour horizon 在午夜仍看不到中午 PV。
+
 ```markdown
 ## TASK-XXX
 
