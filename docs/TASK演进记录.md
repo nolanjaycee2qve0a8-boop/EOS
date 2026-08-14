@@ -4876,6 +4876,16 @@ schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以
 aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
 daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
 
+## TASK-151 Multi-Opportunity Schedule-Aware MPC Cycle Integration
+
+**背景：** TASK-150 已完成多机会 schedule、候选 reservation 与显式物理修正的一次性组合，但完成的 physical final solution 尚未接入 MPC 当前动作链。直接从 candidate、reservation 或 schedule 生成动作会跳过 physical evidence，破坏 planning 与 physical permission 的边界。
+
+**设计目的：** 新增 `MultiOpportunitySingleMPCCycleOrchestrator`，只消费一次 TASK-150 的 `MultiOpportunityPhysicalOptimizationSolveOutput`，再执行 `final solution → ControlPlan → CurrentAction → EMSDecision`。输入通过 `MultiOpportunityMPCCycleInput` 保留既有物理 MPC 输入的 exact identity，并显式注入 TASK-150 所需的 candidate 与 opportunity configuration。
+
+**核心契约：** `MultiOpportunityMPCCycleResult` 保留完整 TASK-150 outer output，且其 plan 的 source result 必须是 exact `physical_output.final_output.result`。`physical_cycle_view` 仅由同一 problem、physical output、plan、action 与 decision 构成，完全兼容既有 physical explanation 链，不产生第二次优化、revision 或 decision translation。
+
+**架构收益：** 多机会 schedule provenance 能无损进入 MPC 当前决策，同时 TASK-122 physical、TASK-137 full-horizon headroom 和 TASK-143 rolling headroom 路径保持冻结不变。TASK-151 不检查 schedule、不重算 reservation、不引入 feasibility、actuation、simulator 或 runtime。
+
 ## TASK-150 Multi-Opportunity Schedule-Aware Physical Optimization Composition
 
 **背景：** TASK-147/148/149 已分别建立 multi-opportunity schedule、current allowance 与并行
