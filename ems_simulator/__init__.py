@@ -23,6 +23,13 @@ from ems_simulator.headroom_aware_explainable_mpc_daily import (
 )
 from ems_simulator.input import BatteryParameters, DailySimulationScenarioInput
 from ems_simulator.load import LoadProfileSimulationModel
+from ems_simulator.multi_opportunity_explainable_mpc_daily import (
+    MultiOpportunityExplainableMPCDailySimulationBoundary,
+    MultiOpportunityExplainableMPCDailySimulationInput,
+    MultiOpportunityExplainableMPCDailySimulationResult,
+    MultiOpportunityExplainableMPCDailySimulationRunner,
+    MultiOpportunityExplainableMPCDailySimulationStepTrace,
+)
 from ems_simulator.output import (
     DailyEnergySummary,
     DailySimulationExport,
@@ -61,6 +68,11 @@ __all__ = [
     "HeadroomAwareExplainableMPCDailySimulationRunner",
     "HeadroomAwareExplainableMPCDailySimulationStepTrace",
     "LoadProfileSimulationModel",
+    "MultiOpportunityExplainableMPCDailySimulationBoundary",
+    "MultiOpportunityExplainableMPCDailySimulationInput",
+    "MultiOpportunityExplainableMPCDailySimulationResult",
+    "MultiOpportunityExplainableMPCDailySimulationRunner",
+    "MultiOpportunityExplainableMPCDailySimulationStepTrace",
     "PVProfileSimulationModel",
     "RollingHeadroomAwareExplainableMPCDailySimulationBoundary",
     "RollingHeadroomAwareExplainableMPCDailySimulationResult",
