@@ -40,6 +40,12 @@ from optimization.control_plan_construction import (
     OptimizationControlPlanConstructionBoundary,
     OptimizationControlPlanConstructionInput,
 )
+from optimization.economic_grid_charge_value import (
+    DeterministicEconomicGridChargeValueCalculator,
+    EconomicGridChargeValueBoundary,
+    EconomicGridChargeValueInput,
+    EconomicGridChargeValueResult,
+)
 from optimization.economic_planning import (
     DeterministicEconomicPlanningCalculator,
     EconomicPlanningBoundary,
@@ -189,6 +195,7 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "DeterministicEconomicGridChargeValueCalculator",
     "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
     "DeterministicHeadroomAwareCandidatePlanner",
@@ -203,6 +210,9 @@ __all__ = [
     "DeterministicPVOpportunityWindowSelector",
     "DeterministicRollingHeadroomAwarePhysicalOptimizer",
     "DeterministicRollingPVHeadroomRequirementCalculator",
+    "EconomicGridChargeValueBoundary",
+    "EconomicGridChargeValueInput",
+    "EconomicGridChargeValueResult",
     "EconomicPlanningBoundary",
     "EconomicPlanningEvidence",
     "EconomicPlanningInput",
