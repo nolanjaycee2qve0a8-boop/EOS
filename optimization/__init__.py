@@ -89,6 +89,12 @@ from optimization.multi_opportunity_headroom_schedule import (
     PVOpportunitySequenceEntry,
     PVOpportunitySequenceInput,
 )
+from optimization.multi_opportunity_physical_optimization import (
+    DeterministicMultiOpportunityPhysicalOptimizer,
+    MultiOpportunityPhysicalOptimizationBoundary,
+    MultiOpportunityPhysicalOptimizationInput,
+    MultiOpportunityPhysicalOptimizationSolveOutput,
+)
 from optimization.net_load_aware_baseline import (
     NetLoadAwareBaselineOptimizationConfiguration,
     NetLoadAwareBaselineOptimizer,
@@ -182,6 +188,7 @@ __all__ = [
     "DeterministicMultiOpportunityCandidatePlanner",
     "DeterministicMultiOpportunityGridChargeReservationCalculator",
     "DeterministicMultiOpportunityHeadroomScheduleCalculator",
+    "DeterministicMultiOpportunityPhysicalOptimizer",
     "DeterministicPVHeadroomRequirementCalculator",
     "DeterministicPVOpportunitySequenceCalculator",
     "DeterministicPVOpportunityWindowSelector",
@@ -207,6 +214,9 @@ __all__ = [
     "MultiOpportunityHeadroomScheduleBoundary",
     "MultiOpportunityHeadroomScheduleEntry",
     "MultiOpportunityHeadroomScheduleInput",
+    "MultiOpportunityPhysicalOptimizationBoundary",
+    "MultiOpportunityPhysicalOptimizationInput",
+    "MultiOpportunityPhysicalOptimizationSolveOutput",
     "NetLoadAwareBaselineOptimizationConfiguration",
     "NetLoadAwareBaselineOptimizer",
     "OptimizationBoundary",
