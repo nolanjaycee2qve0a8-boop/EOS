@@ -4876,6 +4876,32 @@ schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以
 aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
 daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
 
+## TASK-148 Multi-Opportunity Schedule-Aware Grid Charge Reservation
+
+**背景：** TASK-146 证明 first-opportunity-only rolling reservation 可能在夜间允许过多
+cheap-grid charge，进而占用第二段 PV opportunity 所需的空间。TASK-147 已经用 schedule
+而非单标量 target 保留多机会与 inter-opportunity natural-depletion evidence，但尚未有边界把
+该 evidence 转换为当前时段 allowance。
+
+**设计目的：** 新增 parallel reservation path，严格保持 TASK-133 为 frozen comparison
+baseline。`MultiOpportunityGridChargeReservation` 只消费 exact completed schedule、current
+`BatteryOptimizationState`、exact matching battery model、requested power 与 duration；非空
+schedule 只选 exact `entries[0]` 的 schedule-adjusted target，空 schedule 则显式使用
+`max_soc`，不施加 future-PV reservation。
+
+**核心契约：** 强制 `schedule.source_input.battery_model is battery_model`。根据
+`soc_room = max(target - current, 0)` 计算 stored room，除以 charge efficiency 得到 required
+input energy，再除以 duration 得到 SOC-limited power；最终 allowance 为 requested、model max
+charge power 与该 SOC power 的最小值。`reservation_applied` 表示 final allowance 小于 request，
+不将减额归因于某一种限制。
+
+**架构收益：** Result 保留 input、exact selected schedule entry、opportunity、TASK-132 evidence、
+gap depletion 和 schedule target 的可导航 provenance。该边界不 import raw forecast、不调用
+TASK-132/TASK-147、不重算 segmentation/depletion，也不改 candidate planning、physical revision、
+MPC、runner 或 demo。TASK-146/TASK-147 型双机会 fixture 证明在相关 future headroom 未被 gap
+完全恢复时，schedule-aware allowance 比首机会 standalone allowance 更严格；是否请求该 charge
+仍属于上游策略/候选规划职责。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
