@@ -4876,6 +4876,16 @@ schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以
 aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
 daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
 
+## TASK-152 Multi-Opportunity Schedule-Aware Explainable Daily Simulation Integration
+
+**背景：** TASK-151 已将 TASK-150 的 multi-opportunity physical final solution 接入单次 MPC 决策，但尚未形成一个以真实 Simulator 状态闭环的 24 小时 explainable application path。直接把 projected SOC、schedule target 或 candidate estimate 作为下一小时事实，会混淆 planning evidence 与真实执行结果。
+
+**设计目的：** 新增并行 `MultiOpportunityExplainableMPCDailySimulationRunner`。它每小时仅调用一次 TASK-151 outer cycle，随后把 exact `physical_cycle_view` 交给既有 explanation、journal 与 CSV chain，把 outer exact `EMSDecision` 交给 feasibility/handoff，并执行既有 Simulator。
+
+**核心契约：** 第 0 小时使用 daily input 的 `initial_soc`；后续 planning SOC 严格来自上一 Simulator trace 的 `next_state.soc`，context grid power 严格来自上一 Simulator trace 的 actual grid result。trace 同时保存 outer `MultiOpportunityMPCCycleResult` 和 exact compatibility view，使 full forecast → opportunity sequence → per-opportunity requirements/depletion/targets → candidate/reservation → physical final → plan/action/decision → execution 全链可导航。
+
+**架构收益：** TASK-128、TASK-138、TASK-144 runner 保持冻结；每个执行阶段均仅一次，且仅在 24 小时全部成功后才序列化并写出一次 CSV。既有 CSV schema 不增加 schedule 专属列，完整 schedule evidence 保持在 outer cycle provenance 中，避免用 read model 扩展反向污染优化边界。
+
 ## TASK-151 Multi-Opportunity Schedule-Aware MPC Cycle Integration
 
 **背景：** TASK-150 已完成多机会 schedule、候选 reservation 与显式物理修正的一次性组合，但完成的 physical final solution 尚未接入 MPC 当前动作链。直接从 candidate、reservation 或 schedule 生成动作会跳过 physical evidence，破坏 planning 与 physical permission 的边界。
