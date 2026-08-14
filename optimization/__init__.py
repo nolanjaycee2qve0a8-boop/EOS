@@ -101,6 +101,12 @@ from optimization.pv_opportunity_window import (
     PVOpportunityWindowSelectionInput,
     PVOpportunityWindowStep,
 )
+from optimization.rolling_pv_headroom import (
+    DeterministicRollingPVHeadroomRequirementCalculator,
+    RollingPVHeadroomRequirement,
+    RollingPVHeadroomRequirementBoundary,
+    RollingPVHeadroomRequirementInput,
+)
 from optimization.solution import OptimizationSolution, OptimizationSolutionStep
 from optimization.solution_boundary import (
     OptimizationSolutionBoundary,
@@ -146,6 +152,7 @@ __all__ = [
     "DeterministicHeadroomAwarePhysicalOptimizer",
     "DeterministicPVHeadroomRequirementCalculator",
     "DeterministicPVOpportunityWindowSelector",
+    "DeterministicRollingPVHeadroomRequirementCalculator",
     "ExplicitCandidatePhysicalRevisionBoundary",
     "ExplicitCandidatePhysicalRevisionInput",
     "HeadroomAwareCandidatePlanningBoundary",
@@ -192,4 +199,7 @@ __all__ = [
     "PhysicallyAwarePriceBaselineOptimizer",
     "PriceAwareBaselineOptimizationConfiguration",
     "PriceAwareBaselineOptimizer",
+    "RollingPVHeadroomRequirement",
+    "RollingPVHeadroomRequirementBoundary",
+    "RollingPVHeadroomRequirementInput",
 ]

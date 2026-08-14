@@ -4748,6 +4748,28 @@ trailing inactive points。明显分离的第二机会不合并。
 surplus evidence，不隐式构造 sliced horizon。TASK-140 不触碰 TASK-132 公式；后续 composition
 才能显式把选窗 evidence 适配至 headroom accounting，因此 TASK-139 当前 demo 行为保持不变。
 
+## TASK-141 Rolling PV Opportunity Headroom Composition
+
+**背景：** TASK-132 从所有 caller-supplied horizon points 计算 PV headroom；TASK-139 的
+repeating 24-hour forecast 因而可能重复看见近完整 PV 日并表现得保守。TASK-140 已能选出一个
+next/current PV opportunity，但故意不构造切片 horizon 或计算能量。
+
+**设计目的：** 以显式、可审计的组合层连接 TASK-140 与 TASK-132：full forecast -> exact
+opportunity window -> newly constructed selected forecast horizon -> unchanged headroom requirement。
+
+**核心契约：** `RollingPVHeadroomRequirementInput` 保留 full horizon、battery model、duration
+与 window configuration 的 exact identity；输出同时保留 exact input、window、selected horizon
+和 TASK-132 requirement。selected horizon 是新 artifact，但每个 point 都是 window step 和原始
+full horizon 中的同一 `ForecastPoint` 对象。selector 与 headroom calculator 每次仅调用一次。
+
+**行为语义：** TASK-140 保留的 cloud inactive gap 会原样进入 selected horizon，并由 TASK-132
+自然贡献零 surplus；明显分离的第二机会不进入计算。空机会会复用 `ForecastHorizon(())` 和
+TASK-132 原有的 zero-headroom/max-SOC 结果，不另造公式或特殊结果。
+
+**架构收益：** selection、headroom energy formula 与后续 reservation/optimizer 仍严格分层。
+TASK-132 与 TASK-140 均未修改；TASK-139 demo 也保持不变，后续 integration 可以显式选择
+采用 single-opportunity headroom evidence，而非隐藏地改变现有行为。
+
 ```markdown
 ## TASK-XXX
 
