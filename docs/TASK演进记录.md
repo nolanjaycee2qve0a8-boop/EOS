@@ -4731,6 +4731,23 @@ net-load-aware 基线（29.0 kWh）；TASK-139 记录 long-horizon headroom-awar
 它是行为验证，不调优 TASK-132～135 公式；repeating-day wrap 仅为 demo 输入，不是 forecast
 provider 或 runtime schedule。
 
+## TASK-140 Rolling PV Opportunity Window
+
+**背景：** TASK-139 的 24-point repeating horizon 证明 headroom reservation 有效，但 TASK-132
+会对全部 caller supplied forecast surplus 求和；滚动周期可能反复看到一整天 PV，使推荐 pre-PV
+SOC 过于保守。
+
+**目标：** 新增纯 selection contract，在原始 `ForecastHorizon` 中只选择 next/current 的第一段
+已确认 PV-surplus opportunity。active 的定义是 `max(PV - Load, 0) > 0`，而不是 raw PV > 0。
+
+**gap 语义：** `max_inactive_gap_points` 以 point count 表达可容忍短云隙。gap 后若 surplus
+恢复则保留该 inactive evidence；若 gap 超过 tolerance 或 horizon 在 gap 中结束，则丢弃未确认的
+trailing inactive points。明显分离的第二机会不合并。
+
+**架构收益：** `PVOpportunityWindowStep` 保存 exact ForecastPoint identity、source index 与
+surplus evidence，不隐式构造 sliced horizon。TASK-140 不触碰 TASK-132 公式；后续 composition
+才能显式把选窗 evidence 适配至 headroom accounting，因此 TASK-139 当前 demo 行为保持不变。
+
 ```markdown
 ## TASK-XXX
 
