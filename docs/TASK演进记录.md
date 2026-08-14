@@ -4850,6 +4850,32 @@ partial file。
 
 **架构收益：** 输出严格区分 accounting effect、reservation effect 和 actual control effect，且所有 rolling fields 仅从 TASK-143 outer result 的 exact opportunity/headroom provenance 读取，不从 raw profile 反推。该诊断反例表明“更少保守的目标”不自动等价于全天能量收益。
 
+## TASK-147 Multi-Opportunity Headroom Schedule Contract
+
+**背景：** TASK-146 的有限、非重复双机会诊断同时暴露了两个过于简单的 accounting 极端：
+full-horizon 汇总在早期同时预留所有未来 PV 空间，可能过度保守；仅选择第一个 opportunity
+则可能允许 cheap-grid charge 占用随后机会需要的空间。二者都不能表达机会之间由 `Load > PV`
+自然形成的可恢复 battery headroom。
+
+**设计目的：** 新增纯 planning-evidence schedule，而不是新增 control path。
+`PVOpportunitySequence` 按 TASK-140 完全相同的 active/gap semantics 分段所有可见
+opportunity；每段 exact selected horizon 复用 TASK-132 生成 standalone
+`PVHeadroomRequirement`；`MultiOpportunityHeadroomSchedule` 再按机会倒推，显式记录
+相邻机会间的 deficit/depletion evidence 与 schedule-adjusted pre-opportunity SOC target。
+
+**核心契约：** gap 的 `gap_net_deficit_load_energy_kwh` 是 load-side kWh；
+`battery_stored_energy_depletion_potential_kwh = load-side deficit / discharge_efficiency`
+是 potential stored-energy decrease，绝不是实际执行的放电。倒推 recurrence 为
+`R_i = min(usable range, own_i + max(R_(i+1) - depletion_i, 0))`，随后以
+`max_soc - R_i / capacity` 计算并夹紧 target。每个 entry 同时保留 TASK-132 standalone
+target 与新的 schedule target；不覆盖既有 evidence。
+
+**架构收益：** identity/provenance 链从 schedule input 到 sequence、exact ForecastPoint、
+selected horizon、TASK-132 requirement、gap evidence 和 target 均可直接导航。无机会返回 empty
+schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以落在 first-only 与 blind full
+aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
+daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
