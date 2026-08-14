@@ -40,6 +40,14 @@ from optimization.control_plan_construction import (
     OptimizationControlPlanConstructionBoundary,
     OptimizationControlPlanConstructionInput,
 )
+from optimization.economic_planning import (
+    DeterministicEconomicPlanningCalculator,
+    EconomicPlanningBoundary,
+    EconomicPlanningEvidence,
+    EconomicPlanningInput,
+    EconomicPlanningStepEvidence,
+    EconomicShiftClassification,
+)
 from optimization.grid_charge_reservation import (
     DeterministicHeadroomAwareGridChargeReservationCalculator,
     HeadroomAwareGridChargeReservation,
@@ -181,6 +189,7 @@ __all__ = [
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
+    "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
@@ -194,6 +203,11 @@ __all__ = [
     "DeterministicPVOpportunityWindowSelector",
     "DeterministicRollingHeadroomAwarePhysicalOptimizer",
     "DeterministicRollingPVHeadroomRequirementCalculator",
+    "EconomicPlanningBoundary",
+    "EconomicPlanningEvidence",
+    "EconomicPlanningInput",
+    "EconomicPlanningStepEvidence",
+    "EconomicShiftClassification",
     "ExplicitCandidatePhysicalRevisionBoundary",
     "ExplicitCandidatePhysicalRevisionInput",
     "HeadroomAwareCandidatePlanningBoundary",

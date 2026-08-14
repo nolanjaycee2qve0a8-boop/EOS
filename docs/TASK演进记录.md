@@ -1,5 +1,15 @@
 # EOS TASK 演进记录
 
+## TASK-155 Economic Planning Objective / Cost Evidence Contract
+
+**目标：** 在既有 physical/headroom planning 之外，建立不带控制副作用的 import-cost 跨时移能经济证据。它仅量化“当前 1 kWh 电网充电输入在未来抵消进口电的毛价值”。
+
+**实现：** 新增 immutable、slotted 的经济输入、逐点证据、整体证据、抽象边界与确定性计算器。每个点只从更晚的带价格 forecast point 中选择最高价，同价选择最早 index；证据严格保留 source horizon 和当前/选定未来 `ForecastPoint` 的 exact identity。
+
+**语义：** `round_trip_efficiency = charge_efficiency * discharge_efficiency`；`gross_shift_margin = future_price * round_trip_efficiency - current_price`；`break_even_future_price = current_price / round_trip_efficiency`。该 margin 未扣 degradation 或其他成本，也不推断 export value。
+
+**边界：** source price 缺失时证据不可用；future 缺失价格会跳过，若不存在有效 future 则 margin 不可用。合同不读取 SOC、不使用 headroom/reservation/candidate，不决定功率或能量，也不接入 MPC、Feasibility、Actuation 或 Simulator。
+
 ## TASK-154 Schedule-Aware Multi-Scenario Behavioral Evaluation
 
 **目标：** 在不改变 Full、Rolling 或 Schedule-aware 优化/预约/MPC/仿真路径的前提下，对八个有限、确定性的 24 小时场景进行并行观测，区分 accounting 语义与实际控制效果。
