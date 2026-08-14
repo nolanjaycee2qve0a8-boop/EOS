@@ -1,5 +1,15 @@
 # EOS TASK 演进记录
 
+## TASK-156 Economic + Headroom Grid-Charge Value Evidence
+
+**目标：** 组合已完成的 TASK-148 headroom allowance 与 TASK-155 import-cost 跨时经济证据，回答当前已允许的 grid charge 中有多少被毛经济价值支持。
+
+**实现：** 新增 immutable input/result、抽象边界与确定性组合器。输入严格要求 reservation schedule 和 economic evidence 的 source `ForecastHorizon`、`BatteryOptimizationModel` 均为 exact 同一对象；结果保留 exact reservation result、selected economic step 与 requested/allowed/supported 三种功率。
+
+**语义：** 只有 TASK-155 `POSITIVE` margin 保留完整 headroom allowance；`BREAK_EVEN`、`NEGATIVE`、`UNAVAILABLE` 均为 0 kW。BREAK_EVEN 保守处理，因为 gross margin 尚未计入 degradation、不确定性、辅助损耗和机会成本。经济支持永不超过 headroom allowance，也不会制造新请求。
+
+**边界：** 该层不调用 schedule/reservation/economic calculator，不改 candidate 或控制，不接入 MPC、Feasibility、Actuation、Simulator、Runtime 或设备。它是 evidence gate，不是最终电池决策。
+
 ## TASK-155 Economic Planning Objective / Cost Evidence Contract
 
 **目标：** 在既有 physical/headroom planning 之外，建立不带控制副作用的 import-cost 跨时移能经济证据。它仅量化“当前 1 kWh 电网充电输入在未来抵消进口电的毛价值”。
