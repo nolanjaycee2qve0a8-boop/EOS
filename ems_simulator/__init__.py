@@ -31,6 +31,12 @@ from ems_simulator.output import (
     SimulationVisualization,
 )
 from ems_simulator.pv import PVProfileSimulationModel
+from ems_simulator.rolling_headroom_aware_explainable_mpc_daily import (
+    RollingHeadroomAwareExplainableMPCDailySimulationBoundary,
+    RollingHeadroomAwareExplainableMPCDailySimulationResult,
+    RollingHeadroomAwareExplainableMPCDailySimulationRunner,
+    RollingHeadroomAwareExplainableMPCDailySimulationStepTrace,
+)
 from ems_simulator.runner import DailySimulationResult, DailySimulationRunner
 
 __all__ = [
@@ -56,6 +62,10 @@ __all__ = [
     "HeadroomAwareExplainableMPCDailySimulationStepTrace",
     "LoadProfileSimulationModel",
     "PVProfileSimulationModel",
+    "RollingHeadroomAwareExplainableMPCDailySimulationBoundary",
+    "RollingHeadroomAwareExplainableMPCDailySimulationResult",
+    "RollingHeadroomAwareExplainableMPCDailySimulationRunner",
+    "RollingHeadroomAwareExplainableMPCDailySimulationStepTrace",
     "SimpleBatteryPhysicsModel",
     "SimulationExportPaths",
     "SimulationResultExporter",
