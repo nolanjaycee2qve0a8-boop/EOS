@@ -4876,6 +4876,28 @@ schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以
 aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
 daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
 
+## TASK-150 Multi-Opportunity Schedule-Aware Physical Optimization Composition
+
+**背景：** TASK-147/148/149 已分别建立 multi-opportunity schedule、current allowance 与并行
+candidate planner，但 schedule-aware candidate 还没有进入 frozen TASK-135 physical revision 的
+composition seam。将 planning evidence 直接视为 physical feasibility 会混淆“希望什么”与“允许什么”。
+
+**设计目的：** 新增 `DeterministicMultiOpportunityPhysicalOptimizer`，固定一次性链路：TASK-147
+schedule calculation -> TASK-149 candidate planning -> TASK-135 explicit physical revision。它注入
+三个 boundary，各调用一次；不直接调用 net-load optimizer、不分类 cheap-grid/PV charge、不读取
+reservation details，也不复制 TASK-132、TASK-147 或 TASK-135 公式。
+
+**核心契约：** `MultiOpportunityPhysicalOptimizationInput` 保留 exact problem、configuration、battery
+state/model、window configuration 与 duration；输出同时保留 exact schedule、candidate planning result
+及 physical output。schedule 必须引用 exact full forecast/model/configuration；candidate 必须引用 exact
+computed schedule；TASK-135 `physical_output.candidate_output` 必须是 exact
+`candidate_planning_result.final_output`。physical 内层 input 复用 exact problem/state/model。
+
+**架构收益：** schedule accounting、candidate reservation、physical SOC/power evidence 的完整 provenance
+可以从一个输出直接导航。双 opportunity fixture 证明 schedule 可先调整 current cheap-grid request，
+而 TASK-135 仍可对未来 PV charge 施加 power/SOC revision；planning != physical feasibility。TASK-136
+full-horizon path、TASK-142 rolling path，以及 MPC、feasibility、actuation、runner、simulator 全部未修改。
+
 ## TASK-149 Multi-Opportunity Schedule-Aware Candidate Planning
 
 **背景：** TASK-147 已把多段 PV opportunity、独立 TASK-132 evidence、gap depletion 与
