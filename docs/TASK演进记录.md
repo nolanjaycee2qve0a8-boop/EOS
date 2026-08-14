@@ -4826,6 +4826,18 @@ indexes、recommended SOC 或 reservation reason；这些 richer facts 暂时只
 outer rolling result。所有 24 个 cycle 成功之后才序列化/写入一次 CSV，失败不留下
 partial file。
 
+## TASK-145 Full Headroom vs Rolling Headroom 24h Demo
+
+**背景：** TASK-139 已提供 full-horizon headroom 的 24h canonical demo；TASK-144 已把 rolling PV opportunity 的 outer provenance 接入相同的实际 Simulator feedback。两条路径都正确，但没有可直接审阅的同场景 A/B 导出，因此不能仅凭结构推断 rolling accounting 或控制效果。
+
+**设计目的：** 新增一个 measurement-only CLI，以同一 canonical scenario、initial SOC、电池参数、tariff 与 24-point caller-owned repeating forecast 分别运行 frozen TASK-138/full path 和 TASK-144/rolling path。它不改变任一优化公式或运行器，仅从各自 exact outer cycle evidence 读取比较字段。
+
+**核心证据：** 每小时 CSV 记录 entering actual SOC、full 与 rolling headroom/reservation、rolling opportunity timestamp/index、candidate 与 physical-final action/power，以及实际 battery/grid/next SOC。三个 SVG 分别比较 recommended SOC target、actual SOC 和 actual grid power；daily summary 汇总能量、决策、物理修正、reservation 与 Rolling - Full delta。
+
+**实际观察：** 在 TASK-139 canonical repeating-day horizon 下，两个路径的 Grid import 为 11.200000 kWh、Grid export 为 23.736842 kWh、Final SOC 为 20%，并且 charge/discharge/idle 均为 3/5/16。两边每小时都得到 8.0 kWh required headroom 与 20% recommended target，rolling 选到的第一段连续 PV opportunity 在该输入中与 full 可见 surplus accounting 等价。因此此比较没有显示 rolling 更少保守或带来控制收益。
+
+**架构收益：** 该结果将“窗口选择可能更少保守”的假设与可复现实测区分开。rolling 与 full provenance 保持独立，后续可在多机会、非重复或 cloud-gap 场景中继续比较，而无需重写 TASK-132 formula、physical revision 或 Simulator。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
