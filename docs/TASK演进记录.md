@@ -4785,3 +4785,28 @@ TASK-132 与 TASK-140 均未修改；TASK-139 demo 也保持不变，后续 inte
 
 **关键设计决策：**
 ```
+
+## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
+
+**背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
+`OptimizationProblem` 的 full forecast；TASK-141 则故意创建只含首个 next/current PV
+opportunity 的新 selected horizon。这两种 provenance 都正确，但不能以隐式替换方式混合。
+
+**设计目的：** 增加并行 composition path：full optimization forecast -> TASK-141 rolling
+window -> selected horizon -> unchanged TASK-132 headroom -> TASK-134 candidate planning ->
+TASK-135 physical revision，并完整保留各阶段证据。
+
+**核心契约：** `RollingHeadroomAwarePhysicalOptimizationSolveOutput` 同时保存 exact source
+input、`RollingPVHeadroomRequirement`、candidate planning result 与 physical output。它要求
+rolling input 仍引用 exact full problem horizon；但内层 TASK-132 requirement 必须引用 exact
+selected horizon。planner 使用该内层 requirement；physical revisor 使用 planner 的 exact
+`final_output`，不再求 candidate。
+
+**执行与配置：** rolling calculator、candidate planner、explicit physical reviser 各仅执行一次。
+`PVOpportunityWindowConfiguration` 由 deterministic optimizer 显式注入，并可通过 rolling
+input 的 exact identity 审计。TASK-140 的 cloud-gap/first-opportunity 语义与 TASK-132 的
+energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
+
+**架构收益：** TASK-136 full-horizon path 保持原样，仍可作为对照基线；新的 rolling path
+为后续 MPC/demo integration 提供正确的 selected-opportunity headroom seam。TASK-139 暂不接入，
+因此既有 Grid import 11.2 kWh、Grid export 23.736842 kWh 的行为结论不变。
