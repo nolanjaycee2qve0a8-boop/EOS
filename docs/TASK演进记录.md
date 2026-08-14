@@ -1,5 +1,34 @@
 # EOS TASK 演进记录
 
+## TASK-153 Full vs Rolling vs Schedule-Aware Behavioral Demo
+
+**背景：** TASK-146 的有限双机会诊断表明，first-opportunity rolling 在 00:00 允许额外
+cheap-grid charge，之后减少了第二段 PV 机会可吸收的能量。TASK-147 至 TASK-152 已建立
+multi-opportunity schedule-aware accounting、reservation、physical revision、MPC cycle 和
+daily runner，需要在同一组事实下验证其实际行为，而不是预设其结果。
+
+**设计目的：** 新增独立三路径 read-model demo，复用 TASK-146 的非重复有限 24 小时场景，
+并行执行既有 Full、Rolling 与 TASK-152 Schedule-aware runner。该 demo 仅读取每条路径保存
+的 outer provenance 并导出 CSV、SVG 与 summary；不重算机会、headroom、depletion 或
+reservation，也不改变任何优化逻辑。
+
+**核心契约：** 三条路径共享 exact 日输入和 caller-owned horizons，后续小时均以真实
+Simulator `next_state.soc` 和真实 grid result 为事实反馈。Schedule 证据严格来自
+`outer cycle -> optimization output -> headroom schedule -> entries[0] -> reservation ->
+physical output`。输出明确分开 accounting（headroom/target）、reservation（cheap-grid
+allowance）与 control（实际 SOC/grid/PV absorption）。
+
+**实际观察：** 00:00 Full 的 required headroom/target/allowance 为
+`8.0 kWh / 0.20 / 0.0 kW`；Rolling 为 `3.8 kWh / 0.62 / 1.263158 kW`；Schedule-aware
+以两段机会和 `2.526316 kWh` 的 inter-opportunity depletion potential 得到
+`8.0 kWh / 0.20 / 0.0 kW`。日级 Schedule-aware 与 Full 相同：import `12.1 kWh`、export
+`7.536842 kWh`、estimated absorbed PV surplus `5.263158 kWh`、final SOC `0.20`；Rolling
+分别为 `13.363158 kWh`、`8.8 kWh`、`4.0 kWh`、`0.20`。因此该 fixture 中 schedule-aware
+恢复了 Rolling 损失的 `1.263158 kWh` PV absorption，但不宣称跨场景最优。
+
+**架构收益：** 把多机会 schedule 的语义正确性与日级控制效果分离为可重复观测证据；保留
+Full 与 Rolling 两个冻结基线，避免把 demo 结论倒灌为 planning/physical 规则。
+
 ## 1. 记录说明
 
 本文记录 EOS 从 TASK-001 开始的工程演进。每个 TASK 均按目标、实现、架构意义、
