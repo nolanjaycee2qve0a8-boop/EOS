@@ -312,6 +312,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "DeterministicHeadroomAwarePhysicalOptimizer",
         "DeterministicPVHeadroomRequirementCalculator",
         "DeterministicPVOpportunityWindowSelector",
+        "DeterministicRollingPVHeadroomRequirementCalculator",
         "ExplicitCandidatePhysicalRevisionBoundary",
         "ExplicitCandidatePhysicalRevisionInput",
         "HeadroomAwareCandidatePlanningBoundary",
@@ -358,4 +359,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "PhysicallyAwarePriceBaselineOptimizer",
         "PriceAwareBaselineOptimizationConfiguration",
         "PriceAwareBaselineOptimizer",
+        "RollingPVHeadroomRequirement",
+        "RollingPVHeadroomRequirementBoundary",
+        "RollingPVHeadroomRequirementInput",
     ]
