@@ -4806,6 +4806,26 @@ solution；candidate/adjusted candidate 只作为 evidence，永不直接驱动�
 逻辑。兼容视图复用同一组已经计算出的 artifacts，使既有 explanation chain
 无需第二次优化或重算即可解释 rolling 路径。
 
+## TASK-144 Rolling Headroom 24h Daily Runner Integration
+
+**背景：** TASK-143 已经完成单次 rolling-headroom MPC cycle，但尚未接入有限
+24 小时的实际 Simulator state feedback。TASK-138 的 full-horizon runner 保留为
+冻结的对照路径，不能通过替换内部 composition 来改变其语义。
+
+**设计目的：** 新增并行 daily runner，逐小时使用 exact caller forecast horizon，
+通过 TASK-143 outer cycle 产生 decision，再沿既有 feasibility、handoff、Simulator
+路径执行。下一小时仅使用上一小时实际执行得到的 SOC 和 Grid power。
+
+**核心契约：** 每个 step trace 保留 exact outer rolling cycle 及它的 exact
+`physical_cycle_view`。后者只用于兼容既有 physical explanation/journal/CSV
+contracts，不是第二次优化、第二个 decision 或第二次 execution。滚动 window、
+selected forecast 和 reservation evidence 仍在 outer cycle 中完整可审计。
+
+**CSV 限制：** 既有 CSV schema 不新增 rolling opportunity 的 start/end、selected
+indexes、recommended SOC 或 reservation reason；这些 richer facts 暂时只存在于
+outer rolling result。所有 24 个 cycle 成功之后才序列化/写入一次 CSV，失败不留下
+partial file。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
