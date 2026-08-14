@@ -4786,6 +4786,26 @@ TASK-132 与 TASK-140 均未修改；TASK-139 demo 也保持不变，后续 inte
 **关键设计决策：**
 ```
 
+## TASK-143 Rolling Headroom-Aware MPC Cycle Integration
+
+**背景：** TASK-142 已经把 full forecast、rolling PV opportunity、selected
+horizon、headroom、candidate planning 与 physical revision 组合为完整可审计的
+优化输出；但它尚未进入 MPC 的 current-action/decision 链。
+
+**设计目的：** 新增并行 one-cycle MPC adapter，只调用一次 TASK-142 boundary，
+再从其 physical final solution 构造 ControlPlan、CurrentAction 与 EMSDecision。
+TASK-137 的 full-horizon 版本保持不变，继续作为独立的 provenance 基线。
+
+**核心契约：** `RollingHeadroomAwareMPCCycleResult` 同时保留 exact MPC input、
+problem、battery input、physical input、rolling output、plan、current action、
+decision 与 `physical_cycle_view`。ControlPlan 只能来自 exact physical final
+solution；candidate/adjusted candidate 只作为 evidence，永不直接驱动当前决策。
+
+**架构收益：** rolling opportunity 的选择权仍属于 TASK-140/141，headroom
+公式仍属于 TASK-132，physical revision 仍属于 TASK-135；MPC 层不复制这些
+逻辑。兼容视图复用同一组已经计算出的 artifacts，使既有 explanation chain
+无需第二次优化或重算即可解释 rolling 路径。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
