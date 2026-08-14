@@ -46,6 +46,12 @@ from optimization.economic_grid_charge_value import (
     EconomicGridChargeValueInput,
     EconomicGridChargeValueResult,
 )
+from optimization.economic_multi_opportunity_candidate_planning import (
+    DeterministicEconomicMultiOpportunityCandidatePlanner,
+    EconomicMultiOpportunityCandidatePlanningBoundary,
+    EconomicMultiOpportunityCandidatePlanningInput,
+    EconomicMultiOpportunityCandidatePlanningResult,
+)
 from optimization.economic_planning import (
     DeterministicEconomicPlanningCalculator,
     EconomicPlanningBoundary,
@@ -196,6 +202,7 @@ __all__ = [
     "DeterministicBatterySOCHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonProjector",
     "DeterministicEconomicGridChargeValueCalculator",
+    "DeterministicEconomicMultiOpportunityCandidatePlanner",
     "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
     "DeterministicHeadroomAwareCandidatePlanner",
@@ -213,6 +220,9 @@ __all__ = [
     "EconomicGridChargeValueBoundary",
     "EconomicGridChargeValueInput",
     "EconomicGridChargeValueResult",
+    "EconomicMultiOpportunityCandidatePlanningBoundary",
+    "EconomicMultiOpportunityCandidatePlanningInput",
+    "EconomicMultiOpportunityCandidatePlanningResult",
     "EconomicPlanningBoundary",
     "EconomicPlanningEvidence",
     "EconomicPlanningInput",
