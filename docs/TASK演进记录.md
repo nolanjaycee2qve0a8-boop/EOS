@@ -4711,6 +4711,26 @@ Simulator。
 的 original candidate / headroom reservation evidence 保留在 trace 内；不改变
 forecast horizon 长度，也不新增 demo/CLI。
 
+## TASK-139 Longer-Horizon Headroom-Aware 24h MPC Demo
+
+**目标：** 在不改变 TASK-129 price-only 与 TASK-131 net-load-aware 基线行为的前提下，
+新增独立 24 小时 headroom-aware demo。每个小时 caller 显式提供 24 个 forecast points，
+以 repeating-day 的确定性 demo 数据让夜间周期能够看到日间 PV 机会。
+
+**实现：** 复用 TASK-132～138 的 headroom requirement、cheap-grid reservation、candidate
+planning、explicit physical revision、headroom MPC cycle 与 headroom-aware daily runner；新 demo
+只负责组合、执行、导出和测量。`daily_summary.txt` 在不修改既有 CSV schema 的情况下新增
+reservation 数量、reduced/zeroed 数量、minimum recommended SOC 与 maximum required headroom。
+
+**行为证据：** 每个 daily trace 保留 exact outer `HeadroomAwareMPCCycleResult`，因而可审计
+original Net-Load candidate → headroom requirement/reservation → adjusted candidate → physical
+final。下一小时仍只使用实际 Simulator SOC/Grid，而不是预测或投影 SOC。
+
+**三阶段对比：** TASK-129 为历史 price-only 基线（Grid export 33.8 kWh）；TASK-131 为
+net-load-aware 基线（29.0 kWh）；TASK-139 记录 long-horizon headroom-aware 的实际测量结果。
+它是行为验证，不调优 TASK-132～135 公式；repeating-day wrap 仅为 demo 输入，不是 forecast
+provider 或 runtime schedule。
+
 ```markdown
 ## TASK-XXX
 
