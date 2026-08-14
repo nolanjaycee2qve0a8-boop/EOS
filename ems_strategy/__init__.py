@@ -71,6 +71,11 @@ from ems_strategy.mpc_physically_aware import (
     PhysicallyAwareMPCCycleResult,
     PhysicallyAwareSingleMPCCycleOrchestrator,
 )
+from ems_strategy.mpc_rolling_headroom_aware import (
+    RollingHeadroomAwareMPCCycleBoundary,
+    RollingHeadroomAwareMPCCycleResult,
+    RollingHeadroomAwareSingleMPCCycleOrchestrator,
+)
 from ems_strategy.mpc_solution_cycle import (
     MPCSolutionCycleBoundary,
     MPCSolutionCycleResult,
@@ -144,6 +149,9 @@ __all__ = [
     "PhysicallyAwareMPCCycleInput",
     "PhysicallyAwareMPCCycleResult",
     "PhysicallyAwareSingleMPCCycleOrchestrator",
+    "RollingHeadroomAwareMPCCycleBoundary",
+    "RollingHeadroomAwareMPCCycleResult",
+    "RollingHeadroomAwareSingleMPCCycleOrchestrator",
     "SelfConsumptionStrategy",
     "SingleMPCCycleOrchestrator",
     "SolutionAwareSingleMPCCycleOrchestrator",
