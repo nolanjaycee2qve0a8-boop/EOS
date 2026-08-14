@@ -65,6 +65,12 @@ from optimization.model import (
     OptimizationResult,
     OptimizationSense,
 )
+from optimization.multi_opportunity_candidate_planning import (
+    DeterministicMultiOpportunityCandidatePlanner,
+    MultiOpportunityCandidatePlanningBoundary,
+    MultiOpportunityCandidatePlanningInput,
+    MultiOpportunityCandidatePlanningResult,
+)
 from optimization.multi_opportunity_grid_charge_reservation import (
     DeterministicMultiOpportunityGridChargeReservationCalculator,
     MultiOpportunityGridChargeReservationBoundary,
@@ -173,6 +179,7 @@ __all__ = [
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
     "DeterministicHeadroomAwarePhysicalOptimizer",
+    "DeterministicMultiOpportunityCandidatePlanner",
     "DeterministicMultiOpportunityGridChargeReservationCalculator",
     "DeterministicMultiOpportunityHeadroomScheduleCalculator",
     "DeterministicPVHeadroomRequirementCalculator",
@@ -190,6 +197,9 @@ __all__ = [
     "HeadroomAwareGridChargeReservationInput",
     "HeadroomAwarePhysicalOptimizationBoundary",
     "HeadroomAwarePhysicalOptimizationSolveOutput",
+    "MultiOpportunityCandidatePlanningBoundary",
+    "MultiOpportunityCandidatePlanningInput",
+    "MultiOpportunityCandidatePlanningResult",
     "MultiOpportunityGridChargeReservationBoundary",
     "MultiOpportunityGridChargeReservationInput",
     "MultiOpportunityGridChargeReservationResult",

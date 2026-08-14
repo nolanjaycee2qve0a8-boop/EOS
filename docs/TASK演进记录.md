@@ -4876,6 +4876,29 @@ schedule；单机会与 TASK-132 完全一致；多机会时早期 target 可以
 aggregation 之间。TASK-147 未修改 reservation、candidate planner、physical revision、MPC、
 daily runner 或 demo，后续 TASK 才可显式选择是否消费该 schedule。
 
+## TASK-149 Multi-Opportunity Schedule-Aware Candidate Planning
+
+**背景：** TASK-147 已把多段 PV opportunity、独立 TASK-132 evidence、gap depletion 与
+schedule-adjusted SOC target 组合为 completed schedule；TASK-148 也已将该 schedule 转换为
+current cheap-grid charge allowance。但这两层都不应自行产生或改写 candidate，因此尚缺少一个
+可审计的并行 candidate-planning seam 来消费这些 evidence。
+
+**设计目的：** `DeterministicMultiOpportunityCandidatePlanner` 只调用一次 exact
+`NetLoadAwareBaselineOptimizer`，并只考察 index 0。当前 candidate 为 charge 且 `PV > Load`
+时，它明确为 PV-surplus charge，完全不调用 reservation；charge 且无 PV surplus 时，才调用
+TASK-148 至多一次。discharge、idle 与 unavailable/empty path 原样返回 source candidate。
+
+**核心契约：** input 保留 exact problem/configuration/battery state/model/schedule 与显式
+duration；result 同时保留 exact source candidate、optional reservation 与 final output。未减额时
+`final_output is source_candidate_output`；部分减额只重建 index 0 的 charge step，零 allowance
+变成 idle/0，绝不反转方向。所有 future steps 保留 source candidate 的 exact object identity。
+
+**架构收益：** TASK-149 只消费 TASK-147/148 的 completed evidence，不重新分段机会、不重算
+TASK-132/147 或 depletion，也不接入 physical revision、MPC、feasibility、actuation 或 simulator。
+TASK-146/147/148 风格的双 opportunity fixture 证明，当 later opportunity 仍需 headroom 时，
+schedule-adjusted allowance 会比 first-opportunity standalone target 更严格；这只是语义耦合证明，
+并不声称任意场景下的日级最优性。TASK-134 与所有既有 full/rolling 路径保持冻结。
+
 ## TASK-148 Multi-Opportunity Schedule-Aware Grid Charge Reservation
 
 **背景：** TASK-146 证明 first-opportunity-only rolling reservation 可能在夜间允许过多
