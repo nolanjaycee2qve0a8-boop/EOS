@@ -64,6 +64,12 @@ from ems_strategy.mpc_headroom_aware import (
     HeadroomAwareMPCCycleResult,
     HeadroomAwareSingleMPCCycleOrchestrator,
 )
+from ems_strategy.mpc_multi_opportunity import (
+    MultiOpportunityMPCCycleBoundary,
+    MultiOpportunityMPCCycleInput,
+    MultiOpportunityMPCCycleResult,
+    MultiOpportunitySingleMPCCycleOrchestrator,
+)
 from ems_strategy.mpc_orchestrator import SingleMPCCycleOrchestrator
 from ems_strategy.mpc_physically_aware import (
     PhysicallyAwareMPCCycleBoundary,
@@ -143,6 +149,10 @@ __all__ = [
     "MPCSolutionCycleResult",
     "MPCStrategyBoundary",
     "MPCStrategyInput",
+    "MultiOpportunityMPCCycleBoundary",
+    "MultiOpportunityMPCCycleInput",
+    "MultiOpportunityMPCCycleResult",
+    "MultiOpportunitySingleMPCCycleOrchestrator",
     "PeakShavingConfiguration",
     "PeakShavingStrategy",
     "PhysicallyAwareMPCCycleBoundary",
