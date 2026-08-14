@@ -203,8 +203,26 @@ def run_demo(output_directory: Path) -> ScheduleAwareHeadroomComparisonExecution
 
     if not isinstance(output_directory, Path):
         raise TypeError("output_directory must be a pathlib.Path")
-    output_directory.mkdir(parents=True, exist_ok=True)
     full_source = create_demo_input(output_directory)
+    return run_comparison(full_source, output_directory)
+
+
+def run_comparison(
+    full_source: ExplainableMPCDailySimulationInput,
+    output_directory: Path,
+) -> ScheduleAwareHeadroomComparisonExecutionResult:
+    """Run frozen three-path execution for one caller-owned scenario input.
+
+    This composition helper owns only path cloning and deterministic read-model
+    export.  Planning, reservation, physical revision, and daily execution
+    remain within the existing TASK-138, TASK-144, and TASK-152 runners.
+    """
+
+    if not isinstance(full_source, ExplainableMPCDailySimulationInput):
+        raise TypeError("full_source must be an ExplainableMPCDailySimulationInput")
+    if not isinstance(output_directory, Path):
+        raise TypeError("output_directory must be a pathlib.Path")
+    output_directory.mkdir(parents=True, exist_ok=True)
     rolling_source = ExplainableMPCDailySimulationInput(
         full_source.integration_input,
         full_source.forecast_horizons,

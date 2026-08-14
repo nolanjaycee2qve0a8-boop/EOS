@@ -1,5 +1,15 @@
 # EOS TASK 演进记录
 
+## TASK-154 Schedule-Aware Multi-Scenario Behavioral Evaluation
+
+**目标：** 在不改变 Full、Rolling 或 Schedule-aware 优化/预约/MPC/仿真路径的前提下，对八个有限、确定性的 24 小时场景进行并行观测，区分 accounting 语义与实际控制效果。
+
+**实现：** 新增 S0–S7 场景矩阵、三路径逐场景执行结果、早期 headroom/target/allowance 证据、成对差异分类，以及稳定 CSV、文本报告和四张 SVG 汇总图。各场景复用现有 TASK-153 三路径执行；新的 evaluation 层只读取已有 provenance，不重算机会、headroom、reservation 或物理修正。
+
+**关键观察：** S0 复现 TASK-153 基线；S1 的大间隔可被自然负荷耗尽，使 Schedule-aware 与 Rolling 同样允许早期 1.263158 kW cheap-grid charge；S2 小间隔仍需保留后续机会 headroom，Schedule-aware 与 Full 一致；S4 小第二机会形成介于 Full/Rolling 之间的结果；S7 高初始 SOC 使三路径均不允许廉价电充电。该结果表明多机会 schedule 的语义可观测且动态，但局部 reservation 放宽不天然保证全日更优。
+
+**边界：** 这是只读诊断与报告能力：没有修改 TASK-132/147/148/149/150/151/152 的公式或执行行为，也未引入 Runtime、设备、控制器或新的优化策略。
+
 ## TASK-153 Full vs Rolling vs Schedule-Aware Behavioral Demo
 
 **背景：** TASK-146 的有限双机会诊断表明，first-opportunity rolling 在 00:00 允许额外
