@@ -4838,6 +4838,18 @@ partial file。
 
 **架构收益：** 该结果将“窗口选择可能更少保守”的假设与可复现实测区分开。rolling 与 full provenance 保持独立，后续可在多机会、非重复或 cloud-gap 场景中继续比较，而无需重写 TASK-132 formula、physical revision 或 Simulator。
 
+## TASK-146 Multi-Opportunity Rolling Headroom Behavioral Validation
+
+**背景：** TASK-145 的 repeating-day forecast 中，rolling 选到的第一段连续 PV opportunity 与 full path 的可见 surplus accounting 等价，因而没有暴露 early target 或控制差异。不能由该单一结果判断 TASK-140/141 在真正分离机会下的语义价值。
+
+**设计目的：** 新增独立、有限且 non-repeating 的 24 小时诊断 demo。它在 08:00–10:00 放置一段 modest PV surplus，在 11:00–13:00 放置超过 `max_inactive_gap_points=1` 的真实 non-surplus gap，在 14:00–17:00 放置第二段更大的 PV surplus。每个 horizon 从该小时的剩余日内事实继续到 explicit zero-surplus tail，绝不 wrap 同一天。
+
+**核心证据：** full path 在 00:00 看到两段机会，required headroom 为 8.000000 kWh、recommended max SOC 为 20%；rolling exact outer provenance 只选取 08:00–10:00，得到 3.800000 kWh 与 62%。两边请求 3 kW cheap-grid charge，但 full allowance 为 0，rolling allowance 为 1.263158 kW。cycle 11 从第一机会转为第二机会，cycle 18 后无剩余机会。
+
+**实际控制结果：** accounting 与 reservation 差异真实进入 simulator，但不产生收益。rolling 的额外夜间充电使其提前达到 100% SOC；14:00 full 仍能实际充 1.263158 kW，而 rolling 为 0。最终 rolling 相对 full 多 1.263158 kWh grid import、也多 1.263158 kWh grid export，estimated PV-surplus absorption 少 1.263158 kWh；两边 final SOC 均为 20%。
+
+**架构收益：** 输出严格区分 accounting effect、reservation effect 和 actual control effect，且所有 rolling fields 仅从 TASK-143 outer result 的 exact opportunity/headroom provenance 读取，不从 raw profile 反推。该诊断反例表明“更少保守的目标”不自动等价于全天能量收益。
+
 ## TASK-142 Rolling Headroom-Aware Physical Optimization Composition
 
 **背景：** TASK-136 的 full-horizon output 明确要求 `PVHeadroomRequirement` 直接引用
