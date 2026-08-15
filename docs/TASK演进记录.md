@@ -1,5 +1,19 @@
 # EOS TASK 演进记录
 
+## TASK-161 Schedule-Aware vs Economic Schedule-Aware Behavioral Comparison
+
+- Adds a deterministic observation demo for the frozen TASK-152 and TASK-160 daily
+  runners. It reads exact outer provenance and actual Simulator traces; it does not
+  change economic formulas, schedule recurrence, candidate planning, physical revision,
+  MPC, Feasibility, Actuation, or Simulator semantics.
+- E0/E1/E2 measure positive, negative, and break-even gross import-price economics over
+  the same finite two-opportunity physical fixture. Hourly A/B evidence, actual grid
+  import cost, suppressed cheap-grid charge, summary data, and E1 SOC/Grid charts are
+  emitted deterministically.
+- Economic classification, candidate gating, actual control, and observed import cost
+  remain distinct layers. Observed import cost excludes degradation, export revenue,
+  auxiliary consumption, fixed charges, and uncertainty.
+
 ## TASK-156 Economic + Headroom Grid-Charge Value Evidence
 
 **目标：** 组合已完成的 TASK-148 headroom allowance 与 TASK-155 import-cost 跨时经济证据，回答当前已允许的 grid charge 中有多少被毛经济价值支持。
