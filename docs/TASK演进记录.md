@@ -5164,3 +5164,7 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-168 — Extended Economic Outcome Evidence
 
 新增与 TASK-163 并行的扩展经济结果证据边界：`ExtendedEconomicOutcomeInput`、`ExtendedEconomicOutcomeEvidence`、抽象 `ExtendedEconomicOutcomeBoundary` 和确定性计算器。冻结公式为 `adjusted_net_economic_cost = realized_import_cost - realized_export_revenue + battery_degradation_cost - terminal_energy_value`。四项输入/证据均为 caller 提供的既有会计事实；模块仅聚合，不重算关税、并网轨迹、终端价值、吞吐量、候选方案、MPC 或仿真。所有成本/收入标量必须是有限非负值，允许结果为负且不截断；负值不等于已实现现金利润。终端价值证据维持 exact identity。TASK-163 的原有契约和公式保持不变；当上网收入与退化成本均为零时，两条路径在共享 exact 证据下给出相同数值结果，但 TASK-168 不调用 TASK-163。
+
+# TASK-169 — Deterministic Export Revenue Evidence
+
+新增纯会计证据边界 `ExportRevenueInput`、`ExportRevenueEvidence`、抽象 `ExportRevenueBoundary` 和确定性计算器。冻结公式为 `realized_export_revenue = realized_export_energy_kwh * export_tariff_per_kwh`：已实现上网电量与明确上网电价均由 caller 提供，均须为有限非负值，允许零值；结果保留 exact source input identity。TASK-169 不读取 grid power 符号、不从 PV/负载/电池推导上网电量，也不引入动态上网电价、预测、Zero Export 改动、候选规划、MPC 或仿真。它的收入结果可无转换地作为 TASK-168 的 `realized_export_revenue` 输入；结算仍只是观察/会计证据，不改变控制。
