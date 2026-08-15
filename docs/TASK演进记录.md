@@ -5156,3 +5156,7 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-166 — Terminal Valuation Price Sensitivity Evaluation
 
 在保持 TASK-165 两条实际控制轨迹完全固定的前提下，新增终端能量估值价格敏感性观察：每个价格点仅调用 TASK-162 终端价值与 TASK-163 经济结果会计证据，不重新运行 MPC、优化、可行性、执行交接或仿真。新增 `TerminalValuationBreakEvenEvidence`、`TerminalValuationSensitivityPoint`、`TerminalValuationSensitivityResult` 和确定性 CLI 输出。基于实际差值计算的终端估值 break-even 约为 `0.886427` currency/kWh；低于该阈值时 Economic 路径的有限净经济成本更低，高于该阈值时 Schedule-aware 路径更低。该阈值仅是 TASK-163 限定会计模型的观察结果，不是电池优化影子价格，也不足以单独授权把终端价值并入控制。
+
+# TASK-167 — Terminal Value Robustness Matrix
+
+在 TASK-165/TASK-166 单场景终端估值敏感性基础上，新增 R1/R2/R3 三个固定实际控制场景的稳健性矩阵。每个场景只运行一次既有 Schedule-aware / Economic Schedule-aware 路径，随后对各终端估值点仅构造 TASK-162/163 会计证据。R3 保留 TASK-165 原始基线并复现约 `0.886427` 的阈值；矩阵明确把阈值拆分为实际购电成本差与可交付终端能量差，避免把 SOC 差异本身误读为唯一驱动因素。所有阈值仍仅为 TASK-163 限定模型下的会计阈值，不代表优化影子价格，也不授权直接进入控制目标。
