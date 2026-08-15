@@ -1,5 +1,17 @@
 # EOS TASK 演进记录
 
+## TASK-164 Terminal-Value-Adjusted Economic Behavior Re-evaluation
+
+- TASK-164 以独立 read-model 重跑 exact TASK-161 E0/E1/E2 两条冻结 daily paths；它只读取已观察的
+  `grid_import_cost` 和 actual Simulator terminal SOC，再调用 TASK-162/163 各一次形成终端价值与
+  `net_economic_cost` evidence。没有改动任何 planning、MPC、Feasibility、Actuation 或 Simulator 行为。
+- 每个场景的 Schedule/Economic 路径使用该场景 TASK-161 tariff profile 的同一最高 import price 作为
+  terminal valuation price。E0 两路径完全相同；E1/E2 两路径均以 SOC `1.0` 结束，终端 credit 相同，
+  所以观察到的 `-0.817950` realized import-cost delta 不变地成为 limited net-economic-cost delta。
+- 此结果说明 terminal-state valuation 在这些 fixture 中不改变 TASK-161 的路径比较；它是 import cost
+  减 assigned terminal energy value 的有限 accounting，不代表完整 profit，也不含 export revenue、
+  degradation、fixed/demand charges、tax、不确定性或 capital cost。
+
 ## TASK-163 Economic Outcome / Net Cost Evidence
 
 - TASK-161 的 realized grid-import cost 不对 horizon 终点的 stored energy 估值；TASK-162 独立产生
