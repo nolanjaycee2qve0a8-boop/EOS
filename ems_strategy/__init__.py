@@ -59,6 +59,12 @@ from ems_strategy.mpc_decision_journal import (
     ExplainableMPCDecisionJournalRecordBoundary,
     ExplainableMPCDecisionJournalRecordInput,
 )
+from ems_strategy.mpc_economic_multi_opportunity import (
+    EconomicMultiOpportunityMPCCycleBoundary,
+    EconomicMultiOpportunityMPCCycleInput,
+    EconomicMultiOpportunityMPCCycleResult,
+    EconomicMultiOpportunitySingleMPCCycleOrchestrator,
+)
 from ems_strategy.mpc_headroom_aware import (
     HeadroomAwareMPCCycleBoundary,
     HeadroomAwareMPCCycleResult,
@@ -113,6 +119,10 @@ __all__ = [
     "EMSDecision",
     "EMSStrategyBoundary",
     "EMSStrategyDescriptor",
+    "EconomicMultiOpportunityMPCCycleBoundary",
+    "EconomicMultiOpportunityMPCCycleInput",
+    "EconomicMultiOpportunityMPCCycleResult",
+    "EconomicMultiOpportunitySingleMPCCycleOrchestrator",
     "ExplainableMPCDecisionCSVFileExportInput",
     "ExplainableMPCDecisionCSVFileExportResult",
     "ExplainableMPCDecisionCSVFileExporterBoundary",
