@@ -1,5 +1,19 @@
 # EOS TASK 演进记录
 
+## TASK-165 Terminal-SOC-Divergence Economic Observation
+
+- TASK-164 的 E0/E1/E2 均在终点 SOC 收敛，终端价值没有改变 realized import-cost 的路径结论。TASK-165
+  增加独立有限 24h read-model fixture：初始 SOC `0.50`、前六小时 `0.80`、后续 `0.85`，以负 gross margin
+  让 existing Economic gate 抑制 early cheap-grid charge；白天 PV 被限制在 `0.60 kW`，始终不超过负载，
+  因而后段不会用 PV surplus 把实际状态重新拉齐。
+- 这完全通过既有 runner/physical chain 形成 actual divergence：cycle 0 后 Schedule/Economic SOC 为
+  `0.785/0.500`，终点为 `1.0/0.5`。共同 terminal valuation price 为 `0.85`；Economic minus Schedule
+  realized import-cost delta 是 `-4.210526`，但 terminal-value delta 为 `-4.037500`，最终 net-economic-cost
+  delta 收缩为 `-0.173026`，未发生反转。
+- 因此 terminal state value 在这个 diagnostic fixture 中确实改变了成本解释的强度，但仍是 import cost
+  减 assigned terminal energy value 的有限 accounting，不是完整 profit，也没有倒灌到 candidate planning、
+  MPC、Feasibility、Actuation 或 Simulator 控制。
+
 ## TASK-164 Terminal-Value-Adjusted Economic Behavior Re-evaluation
 
 - TASK-164 以独立 read-model 重跑 exact TASK-161 E0/E1/E2 两条冻结 daily paths；它只读取已观察的
