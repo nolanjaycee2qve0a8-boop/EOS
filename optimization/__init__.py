@@ -58,6 +58,12 @@ from optimization.economic_multi_opportunity_physical_optimization import (
     EconomicMultiOpportunityPhysicalOptimizationInput,
     EconomicMultiOpportunityPhysicalOptimizationSolveOutput,
 )
+from optimization.economic_outcome import (
+    DeterministicEconomicOutcomeCalculator,
+    EconomicOutcomeBoundary,
+    EconomicOutcomeEvidence,
+    EconomicOutcomeInput,
+)
 from optimization.economic_planning import (
     DeterministicEconomicPlanningCalculator,
     EconomicPlanningBoundary,
@@ -216,6 +222,7 @@ __all__ = [
     "DeterministicEconomicGridChargeValueCalculator",
     "DeterministicEconomicMultiOpportunityCandidatePlanner",
     "DeterministicEconomicMultiOpportunityPhysicalOptimizer",
+    "DeterministicEconomicOutcomeCalculator",
     "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
     "DeterministicHeadroomAwareCandidatePlanner",
@@ -240,6 +247,9 @@ __all__ = [
     "EconomicMultiOpportunityPhysicalOptimizationBoundary",
     "EconomicMultiOpportunityPhysicalOptimizationInput",
     "EconomicMultiOpportunityPhysicalOptimizationSolveOutput",
+    "EconomicOutcomeBoundary",
+    "EconomicOutcomeEvidence",
+    "EconomicOutcomeInput",
     "EconomicPlanningBoundary",
     "EconomicPlanningEvidence",
     "EconomicPlanningInput",
