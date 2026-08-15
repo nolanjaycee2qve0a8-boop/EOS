@@ -5069,3 +5069,14 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 - economics 可抑制 cheap-grid charge；physical revision 只能继续约束请求，不能把已抑制的
   charge 重新创造出来。PV-surplus candidate 绕过经济 gating，但仍进入 physical revision。
 - 未引入 MPC、Feasibility、Actuation、Simulator 或 Runtime；TASK-150 对照路径不变。
+
+## TASK-159 Economic Schedule-Aware MPC Cycle Integration
+
+- 新增单周期 MPC composition：TASK-158 physical final → ControlPlan → CurrentAction →
+  EMSDecision；TASK-158、plan、action 与 translation 各仅执行一次。
+- ControlPlan 只消费 exact physical final solution；输出保留完整 economic schedule、
+  candidate 与 physical provenance。
+- `physical_cycle_view` 仅作为兼容 artifact，复用 exact physical output、plan、action
+  和 decision，不产生第二条优化或执行路径。
+- 不读取价格/经济分类/schedule/reservation，不直接调用 TASK-147/155/157/135；未接入
+  runner、Simulator、Feasibility 或 Actuation，TASK-151 对照路径保持不变。
