@@ -323,6 +323,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "DeterministicPVOpportunityWindowSelector",
         "DeterministicRollingHeadroomAwarePhysicalOptimizer",
         "DeterministicRollingPVHeadroomRequirementCalculator",
+        "DeterministicTerminalEnergyValueCalculator",
         "EconomicGridChargeValueBoundary",
         "EconomicGridChargeValueInput",
         "EconomicGridChargeValueResult",
@@ -405,4 +406,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "RollingPVHeadroomRequirement",
         "RollingPVHeadroomRequirementBoundary",
         "RollingPVHeadroomRequirementInput",
+        "TerminalEnergyValueBoundary",
+        "TerminalEnergyValueEvidence",
+        "TerminalEnergyValueInput",
     ]
