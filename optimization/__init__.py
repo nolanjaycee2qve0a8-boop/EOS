@@ -72,6 +72,12 @@ from optimization.economic_planning import (
     EconomicPlanningStepEvidence,
     EconomicShiftClassification,
 )
+from optimization.export_revenue import (
+    DeterministicExportRevenueCalculator,
+    ExportRevenueBoundary,
+    ExportRevenueEvidence,
+    ExportRevenueInput,
+)
 from optimization.extended_economic_outcome import (
     DeterministicExtendedEconomicOutcomeCalculator,
     ExtendedEconomicOutcomeBoundary,
@@ -231,6 +237,7 @@ __all__ = [
     "DeterministicEconomicOutcomeCalculator",
     "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
+    "DeterministicExportRevenueCalculator",
     "DeterministicExtendedEconomicOutcomeCalculator",
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
@@ -264,6 +271,9 @@ __all__ = [
     "EconomicShiftClassification",
     "ExplicitCandidatePhysicalRevisionBoundary",
     "ExplicitCandidatePhysicalRevisionInput",
+    "ExportRevenueBoundary",
+    "ExportRevenueEvidence",
+    "ExportRevenueInput",
     "ExtendedEconomicOutcomeBoundary",
     "ExtendedEconomicOutcomeEvidence",
     "ExtendedEconomicOutcomeInput",
