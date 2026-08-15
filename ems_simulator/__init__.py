@@ -1,6 +1,12 @@
 """Application contracts for the EOS EMS Simulator demo."""
 
 from ems_simulator.battery import SimpleBatteryPhysicsModel
+from ems_simulator.economic_multi_opportunity_explainable_mpc_daily import (
+    EconomicMultiOpportunityExplainableMPCDailySimulationBoundary,
+    EconomicMultiOpportunityExplainableMPCDailySimulationResult,
+    EconomicMultiOpportunityExplainableMPCDailySimulationRunner,
+    EconomicMultiOpportunityExplainableMPCDailySimulationStepTrace,
+)
 from ems_simulator.ems_integration import (
     EMSIntegrationResult,
     EMSIntegrationRunner,
@@ -57,6 +63,10 @@ __all__ = [
     "EMSIntegrationRunner",
     "EMSIntegrationScenarioInput",
     "EMSIntegrationStepTrace",
+    "EconomicMultiOpportunityExplainableMPCDailySimulationBoundary",
+    "EconomicMultiOpportunityExplainableMPCDailySimulationResult",
+    "EconomicMultiOpportunityExplainableMPCDailySimulationRunner",
+    "EconomicMultiOpportunityExplainableMPCDailySimulationStepTrace",
     "ExplainableMPCDailySimulationBoundary",
     "ExplainableMPCDailySimulationInput",
     "ExplainableMPCDailySimulationResult",
