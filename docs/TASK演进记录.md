@@ -5050,3 +5050,12 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 **架构收益：** TASK-136 full-horizon path 保持原样，仍可作为对照基线；新的 rolling path
 为后续 MPC/demo integration 提供正确的 selected-opportunity headroom seam。TASK-139 暂不接入，
 因此既有 Grid import 11.2 kWh、Grid export 23.736842 kWh 的行为结论不变。
+## TASK-157 Economic Schedule-Aware Candidate Planning
+
+- 新增并行的经济型 schedule-aware candidate planner，保持 TASK-149 冻结不变。
+- 仅当前候选为 `charge` 且 `PV <= Load` 时调用一次 TASK-148 reservation 与一次
+  TASK-156 economic value gating；PV-surplus charge、discharge、idle 原样保留。
+- `POSITIVE` 保留 headroom allowance；`NEGATIVE`、`BREAK_EVEN`、`UNAVAILABLE`
+  将当前候选收敛为 idle/0 kW。仅 index 0 可改，future candidate steps 保留 exact identity。
+- 输入强制 schedule/economic evidence 与 `OptimizationProblem` 使用 exact forecast 和
+  battery model provenance；不重算 TASK-147/TASK-155，不引入 physical/MPC/execution。
