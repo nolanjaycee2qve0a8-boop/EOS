@@ -5153,3 +5153,6 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
   和 decision，不产生第二条优化或执行路径。
 - 不读取价格/经济分类/schedule/reservation，不直接调用 TASK-147/155/157/135；未接入
   runner、Simulator、Feasibility 或 Actuation，TASK-151 对照路径保持不变。
+# TASK-166 — Terminal Valuation Price Sensitivity Evaluation
+
+在保持 TASK-165 两条实际控制轨迹完全固定的前提下，新增终端能量估值价格敏感性观察：每个价格点仅调用 TASK-162 终端价值与 TASK-163 经济结果会计证据，不重新运行 MPC、优化、可行性、执行交接或仿真。新增 `TerminalValuationBreakEvenEvidence`、`TerminalValuationSensitivityPoint`、`TerminalValuationSensitivityResult` 和确定性 CLI 输出。基于实际差值计算的终端估值 break-even 约为 `0.886427` currency/kWh；低于该阈值时 Economic 路径的有限净经济成本更低，高于该阈值时 Schedule-aware 路径更低。该阈值仅是 TASK-163 限定会计模型的观察结果，不是电池优化影子价格，也不足以单独授权把终端价值并入控制。
