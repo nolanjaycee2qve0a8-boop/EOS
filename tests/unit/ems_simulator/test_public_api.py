@@ -9,6 +9,10 @@ def test_public_imports() -> None:
         DailySimulationResult,
         DailySimulationRunner,
         DailySimulationScenarioInput,
+        EconomicMultiOpportunityExplainableMPCDailySimulationBoundary,
+        EconomicMultiOpportunityExplainableMPCDailySimulationResult,
+        EconomicMultiOpportunityExplainableMPCDailySimulationRunner,
+        EconomicMultiOpportunityExplainableMPCDailySimulationStepTrace,
         EMSIntegrationResult,
         EMSIntegrationRunner,
         EMSIntegrationScenarioInput,
@@ -50,6 +54,22 @@ def test_public_imports() -> None:
     assert EMSIntegrationRunner.__name__ == "EMSIntegrationRunner"
     assert EMSIntegrationScenarioInput.__name__ == "EMSIntegrationScenarioInput"
     assert EMSIntegrationStepTrace.__name__ == "EMSIntegrationStepTrace"
+    assert (
+        EconomicMultiOpportunityExplainableMPCDailySimulationBoundary.__name__
+        == "EconomicMultiOpportunityExplainableMPCDailySimulationBoundary"
+    )
+    assert (
+        EconomicMultiOpportunityExplainableMPCDailySimulationResult.__name__
+        == "EconomicMultiOpportunityExplainableMPCDailySimulationResult"
+    )
+    assert (
+        EconomicMultiOpportunityExplainableMPCDailySimulationRunner.__name__
+        == "EconomicMultiOpportunityExplainableMPCDailySimulationRunner"
+    )
+    assert (
+        EconomicMultiOpportunityExplainableMPCDailySimulationStepTrace.__name__
+        == "EconomicMultiOpportunityExplainableMPCDailySimulationStepTrace"
+    )
     assert (
         ExplainableMPCDailySimulationBoundary.__name__
         == "ExplainableMPCDailySimulationBoundary"

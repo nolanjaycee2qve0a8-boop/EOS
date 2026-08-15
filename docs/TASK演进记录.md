@@ -5070,6 +5070,14 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
   charge 重新创造出来。PV-surplus candidate 绕过经济 gating，但仍进入 physical revision。
 - 未引入 MPC、Feasibility、Actuation、Simulator 或 Runtime；TASK-150 对照路径不变。
 
+## TASK-160 Economic Schedule-Aware Explainable Daily Simulation Integration
+
+- 新增并行的有限 24h economic schedule-aware daily runner；复用 TASK-152 的 caller-owned input，并逐小时执行一次 TASK-159 outer cycle。
+- 每小时保留 outer economic cycle、exact `physical_cycle_view`、解释、journal、CSV row、provenance、feasible decision、handoff 与 Simulator trace。兼容 view 仅供既有 explanation/journal/CSV 链路消费，不产生第二次计算或执行。
+- 后续 planning SOC 仅来自上一小时实际 Simulator `next_state.soc`，后续 context grid power 仅来自实际 Simulator grid result；forecast horizon 保持 caller 的 exact identity。
+- CSV 在 24 小时全部成功后才序列化和写入一次；失败时 stop-first 且不写 partial CSV。完整价格、margin、classification、headroom/reservation 证据保留于 outer provenance，未改变既有 CSV schema。
+- 不修改 TASK-152 non-economic schedule-aware runner 或其他既有 runner；未新增 demo、runtime、scheduler、经济公式、Feasibility/Actuation/Simulator 语义。
+
 ## TASK-159 Economic Schedule-Aware MPC Cycle Integration
 
 - 新增单周期 MPC composition：TASK-158 physical final → ControlPlan → CurrentAction →
