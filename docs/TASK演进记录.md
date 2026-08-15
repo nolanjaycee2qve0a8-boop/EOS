@@ -5059,3 +5059,13 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
   将当前候选收敛为 idle/0 kW。仅 index 0 可改，future candidate steps 保留 exact identity。
 - 输入强制 schedule/economic evidence 与 `OptimizationProblem` 使用 exact forecast 和
   battery model provenance；不重算 TASK-147/TASK-155，不引入 physical/MPC/execution。
+
+## TASK-158 Economic Schedule-Aware Physical Optimization Composition
+
+- 新增 TASK-147 schedule → TASK-155 economic evidence → TASK-157 economic candidate
+  → TASK-135 explicit physical revision 的并行一次性组合路径。
+- 每个 injected boundary 各执行一次，且 exact forecast/model、computed schedule、economic
+  evidence 与 economic final candidate 均穿透到下一层；physical output 保留完整 provenance。
+- economics 可抑制 cheap-grid charge；physical revision 只能继续约束请求，不能把已抑制的
+  charge 重新创造出来。PV-surplus candidate 绕过经济 gating，但仍进入 physical revision。
+- 未引入 MPC、Feasibility、Actuation、Simulator 或 Runtime；TASK-150 对照路径不变。
