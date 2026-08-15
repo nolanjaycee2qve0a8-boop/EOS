@@ -1,5 +1,18 @@
 # EOS TASK 演进记录
 
+## TASK-162 Terminal Stored-Energy Value Evidence
+
+- TASK-161 measures realized grid-import cost but intentionally leaves end-of-horizon
+  stored energy unvalued. TASK-162 adds a pure caller-price terminal stored-energy
+  evidence contract without changing candidate planning, physical optimization, MPC,
+  daily runners, or Simulator execution.
+- Usable terminal energy is measured only above the established
+  `BatteryOptimizationModel.min_soc_fraction`, then discharge efficiency converts stored
+  energy to load-side deliverable energy before the supplied valuation import price is
+  applied. It is an assigned terminal state value, not realized profit or cost saving.
+- No realized-cost aggregation is added. A future score must explicitly define signs and
+  double-counting semantics before it combines realized cost with terminal value.
+
 ## TASK-161 Schedule-Aware vs Economic Schedule-Aware Behavioral Comparison
 
 - Adds a deterministic observation demo for the frozen TASK-152 and TASK-160 daily
