@@ -1,5 +1,17 @@
 # EOS TASK 演进记录
 
+## TASK-163 Economic Outcome / Net Cost Evidence
+
+- TASK-161 的 realized grid-import cost 不对 horizon 终点的 stored energy 估值；TASK-162 独立产生
+  caller-price terminal-energy evidence。TASK-163 只组合这两份既有事实：
+  `net_economic_cost = realized_import_cost - terminal_energy_value`。
+- 结果保留 exact input 与 exact TASK-162 evidence identity，不读取 grid trace、tariff、forecast、SOC 或
+  battery model，也不重新计算 realized cost 或 terminal value。负 net cost 合法，但仅表示终端 credit
+  高于已实现购电支出，不代表 cash profit。
+- 该有限 accounting basis 不含 export revenue、degradation、auxiliary consumption、fixed/demand charges、
+  taxes、uncertainty、forecast error、capital cost 或 terminal value 外的 opportunity cost；以后跨路径比较需
+  自行保证 terminal valuation-price semantics 一致。
+
 ## TASK-162 Terminal Stored-Energy Value Evidence
 
 - TASK-161 measures realized grid-import cost but intentionally leaves end-of-horizon
