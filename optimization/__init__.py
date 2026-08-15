@@ -178,6 +178,12 @@ from optimization.solution_control_plan import (
     OptimizationSolutionControlPlanConstructionBoundary,
     OptimizationSolutionControlPlanConstructionInput,
 )
+from optimization.terminal_energy_value import (
+    DeterministicTerminalEnergyValueCalculator,
+    TerminalEnergyValueBoundary,
+    TerminalEnergyValueEvidence,
+    TerminalEnergyValueInput,
+)
 
 __all__ = [
     "BatteryHorizonConstraintAggregateBoundary",
@@ -224,6 +230,7 @@ __all__ = [
     "DeterministicPVOpportunityWindowSelector",
     "DeterministicRollingHeadroomAwarePhysicalOptimizer",
     "DeterministicRollingPVHeadroomRequirementCalculator",
+    "DeterministicTerminalEnergyValueCalculator",
     "EconomicGridChargeValueBoundary",
     "EconomicGridChargeValueInput",
     "EconomicGridChargeValueResult",
@@ -306,4 +313,7 @@ __all__ = [
     "RollingPVHeadroomRequirement",
     "RollingPVHeadroomRequirementBoundary",
     "RollingPVHeadroomRequirementInput",
+    "TerminalEnergyValueBoundary",
+    "TerminalEnergyValueEvidence",
+    "TerminalEnergyValueInput",
 ]
