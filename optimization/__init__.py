@@ -1,5 +1,11 @@
 """Public solver-independent EOS optimization contracts."""
 
+from optimization.battery_degradation_cost import (
+    BatteryDegradationCostBoundary,
+    BatteryDegradationCostEvidence,
+    BatteryDegradationCostInput,
+    DeterministicBatteryDegradationCostCalculator,
+)
 from optimization.battery_horizon_constraint import (
     BatteryHorizonConstraintAggregateBoundary,
     BatteryHorizonConstraintEvaluation,
@@ -204,6 +210,9 @@ from optimization.terminal_energy_value import (
 )
 
 __all__ = [
+    "BatteryDegradationCostBoundary",
+    "BatteryDegradationCostEvidence",
+    "BatteryDegradationCostInput",
     "BatteryHorizonConstraintAggregateBoundary",
     "BatteryHorizonConstraintEvaluation",
     "BatteryHorizonConstraintInput",
@@ -227,6 +236,7 @@ __all__ = [
     "BatterySolutionRevision",
     "BatterySolutionRevisionReason",
     "BatterySolutionRevisionStep",
+    "DeterministicBatteryDegradationCostCalculator",
     "DeterministicBatteryHorizonConstraintAggregator",
     "DeterministicBatteryPowerHorizonConstraintEvaluator",
     "DeterministicBatterySOCHorizonConstraintEvaluator",
