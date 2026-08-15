@@ -279,6 +279,9 @@ def test_boundary_and_model_modules_have_no_solver_or_execution_dependencies() -
 
 def test_public_api_exports_optimization_contracts() -> None:
     assert optimization.__all__ == [
+        "BatteryDegradationCostBoundary",
+        "BatteryDegradationCostEvidence",
+        "BatteryDegradationCostInput",
         "BatteryHorizonConstraintAggregateBoundary",
         "BatteryHorizonConstraintEvaluation",
         "BatteryHorizonConstraintInput",
@@ -302,6 +305,7 @@ def test_public_api_exports_optimization_contracts() -> None:
         "BatterySolutionRevision",
         "BatterySolutionRevisionReason",
         "BatterySolutionRevisionStep",
+        "DeterministicBatteryDegradationCostCalculator",
         "DeterministicBatteryHorizonConstraintAggregator",
         "DeterministicBatteryPowerHorizonConstraintEvaluator",
         "DeterministicBatterySOCHorizonConstraintEvaluator",
