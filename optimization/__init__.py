@@ -72,6 +72,12 @@ from optimization.economic_planning import (
     EconomicPlanningStepEvidence,
     EconomicShiftClassification,
 )
+from optimization.extended_economic_outcome import (
+    DeterministicExtendedEconomicOutcomeCalculator,
+    ExtendedEconomicOutcomeBoundary,
+    ExtendedEconomicOutcomeEvidence,
+    ExtendedEconomicOutcomeInput,
+)
 from optimization.grid_charge_reservation import (
     DeterministicHeadroomAwareGridChargeReservationCalculator,
     HeadroomAwareGridChargeReservation,
@@ -225,6 +231,7 @@ __all__ = [
     "DeterministicEconomicOutcomeCalculator",
     "DeterministicEconomicPlanningCalculator",
     "DeterministicExplicitCandidatePhysicalReviser",
+    "DeterministicExtendedEconomicOutcomeCalculator",
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
     "DeterministicHeadroomAwarePhysicalOptimizer",
@@ -257,6 +264,9 @@ __all__ = [
     "EconomicShiftClassification",
     "ExplicitCandidatePhysicalRevisionBoundary",
     "ExplicitCandidatePhysicalRevisionInput",
+    "ExtendedEconomicOutcomeBoundary",
+    "ExtendedEconomicOutcomeEvidence",
+    "ExtendedEconomicOutcomeInput",
     "HeadroomAwareCandidatePlanningBoundary",
     "HeadroomAwareCandidatePlanningInput",
     "HeadroomAwareCandidatePlanningResult",

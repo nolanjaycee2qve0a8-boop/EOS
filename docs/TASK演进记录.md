@@ -5160,3 +5160,7 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-167 — Terminal Value Robustness Matrix
 
 在 TASK-165/TASK-166 单场景终端估值敏感性基础上，新增 R1/R2/R3 三个固定实际控制场景的稳健性矩阵。每个场景只运行一次既有 Schedule-aware / Economic Schedule-aware 路径，随后对各终端估值点仅构造 TASK-162/163 会计证据。R3 保留 TASK-165 原始基线并复现约 `0.886427` 的阈值；矩阵明确把阈值拆分为实际购电成本差与可交付终端能量差，避免把 SOC 差异本身误读为唯一驱动因素。所有阈值仍仅为 TASK-163 限定模型下的会计阈值，不代表优化影子价格，也不授权直接进入控制目标。
+
+# TASK-168 — Extended Economic Outcome Evidence
+
+新增与 TASK-163 并行的扩展经济结果证据边界：`ExtendedEconomicOutcomeInput`、`ExtendedEconomicOutcomeEvidence`、抽象 `ExtendedEconomicOutcomeBoundary` 和确定性计算器。冻结公式为 `adjusted_net_economic_cost = realized_import_cost - realized_export_revenue + battery_degradation_cost - terminal_energy_value`。四项输入/证据均为 caller 提供的既有会计事实；模块仅聚合，不重算关税、并网轨迹、终端价值、吞吐量、候选方案、MPC 或仿真。所有成本/收入标量必须是有限非负值，允许结果为负且不截断；负值不等于已实现现金利润。终端价值证据维持 exact identity。TASK-163 的原有契约和公式保持不变；当上网收入与退化成本均为零时，两条路径在共享 exact 证据下给出相同数值结果，但 TASK-168 不调用 TASK-163。
