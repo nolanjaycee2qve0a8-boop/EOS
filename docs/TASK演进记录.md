@@ -5176,3 +5176,7 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-171 — Deterministic Realized Import Cost Evidence
 
 新增纯会计证据边界 `ImportCostInput`、`ImportCostEvidence`、抽象 `ImportCostBoundary` 和确定性计算器。冻结公式为 `realized_import_cost = realized_import_energy_kwh * import_tariff_per_kwh`：已实现购电量与明确购电电价由 caller 提供，必须有限非负，允许零值，结果保留 exact source input identity。TASK-171 不读取或推导 grid power 符号，不引入 TOU/动态电价、需量/固定费用、税费或预测。它的成本证据可无转换地输入 TASK-163 或 TASK-168。完成 TASK-171 后，TASK-168 的购电成本、上网收入、电池退化成本和终端能量价值均已有显式 evidence boundary；这仍只是会计证据，不构成控制目标。
+
+# TASK-172 — Extended Economic Scenario Re-evaluation
+
+首次将 TASK-161 的 E0/E1/E2 和 TASK-165 终端 SOC 分叉的既有实际控制轨迹，置于完整会计链下做固定轨迹复评估：既有逐时已实现购电成本、TASK-169 上网收入、TASK-170 吞吐量退化成本、TASK-162 终端能量价值，最终仅由 TASK-168 聚合。控制路径各只运行一次；出口电价、退化率和终端估值只展开会计敏感度，绝不重新运行控制。对于既有时变购电价场景，保留原有逐时结算成本，避免把 TASK-171 的单标量费率边界误用于 TOU 结算；TASK-171 仍作为常量电价结算及 TASK-163/168 直接兼容的证据边界。该结果是有限会计模型的观察结论，不是现金利润、MPC shadow price 或新的控制目标。
