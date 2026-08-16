@@ -5172,3 +5172,7 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-170 — Deterministic Battery Degradation Cost Evidence
 
 新增纯会计证据边界 `BatteryDegradationCostInput`、`BatteryDegradationCostEvidence`、抽象 `BatteryDegradationCostBoundary` 和确定性计算器。冻结公式为 `battery_degradation_cost = battery_throughput_kwh * degradation_cost_per_throughput_kwh`：吞吐量和单位成本率均由 caller 提供，必须有限非负，允许零值，结果保留 exact source input identity。吞吐量的会计口径（充电、放电、两者之和、AC/DC/internal-cell）完全由 caller 决定；跨路径比较须使用一致口径，TASK-170 不做跨路径一致性判断。该成本可直接输入 TASK-168；不引入 EFC、循环计数、SoH、更换成本、日历/温度/DoD/C-rate 老化模型，也不读取 Simulator、SOC/功率轨迹、规划、MPC 或控制状态。
+
+# TASK-171 — Deterministic Realized Import Cost Evidence
+
+新增纯会计证据边界 `ImportCostInput`、`ImportCostEvidence`、抽象 `ImportCostBoundary` 和确定性计算器。冻结公式为 `realized_import_cost = realized_import_energy_kwh * import_tariff_per_kwh`：已实现购电量与明确购电电价由 caller 提供，必须有限非负，允许零值，结果保留 exact source input identity。TASK-171 不读取或推导 grid power 符号，不引入 TOU/动态电价、需量/固定费用、税费或预测。它的成本证据可无转换地输入 TASK-163 或 TASK-168。完成 TASK-171 后，TASK-168 的购电成本、上网收入、电池退化成本和终端能量价值均已有显式 evidence boundary；这仍只是会计证据，不构成控制目标。

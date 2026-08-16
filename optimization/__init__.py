@@ -107,6 +107,12 @@ from optimization.headroom_aware_physical_optimization import (
     HeadroomAwarePhysicalOptimizationBoundary,
     HeadroomAwarePhysicalOptimizationSolveOutput,
 )
+from optimization.import_cost import (
+    DeterministicImportCostCalculator,
+    ImportCostBoundary,
+    ImportCostEvidence,
+    ImportCostInput,
+)
 from optimization.model import (
     OptimizationObjective,
     OptimizationObjectiveCollection,
@@ -252,6 +258,7 @@ __all__ = [
     "DeterministicHeadroomAwareCandidatePlanner",
     "DeterministicHeadroomAwareGridChargeReservationCalculator",
     "DeterministicHeadroomAwarePhysicalOptimizer",
+    "DeterministicImportCostCalculator",
     "DeterministicMultiOpportunityCandidatePlanner",
     "DeterministicMultiOpportunityGridChargeReservationCalculator",
     "DeterministicMultiOpportunityHeadroomScheduleCalculator",
@@ -295,6 +302,9 @@ __all__ = [
     "HeadroomAwareGridChargeReservationInput",
     "HeadroomAwarePhysicalOptimizationBoundary",
     "HeadroomAwarePhysicalOptimizationSolveOutput",
+    "ImportCostBoundary",
+    "ImportCostEvidence",
+    "ImportCostInput",
     "MultiOpportunityCandidatePlanningBoundary",
     "MultiOpportunityCandidatePlanningInput",
     "MultiOpportunityCandidatePlanningResult",
