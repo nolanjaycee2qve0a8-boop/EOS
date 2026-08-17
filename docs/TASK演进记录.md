@@ -5223,3 +5223,26 @@ B1/B2/B3 execute the frozen Schedule-aware and Economic Schedule-aware paths onc
 # Residential Simulation Validation Campaign C — Deterministic Forecast Error
 
 Campaign C is post-freeze validation tooling, not a residential control-capability change. It evaluates 39 explicit scenarios (three fixed realized environments × 13 caller-owned forecast cases) through 78 freshly executed 24-hour Schedule/Economic trajectories. It preserves separate forecast planning facts and realized Simulator facts through the existing daily-runner boundary: forecast horizons drive the frozen planning path, while each Simulator step uses the matching realized PV/load/tariff facts. Perfect anchors are executed only once as members of that matrix and checked against the frozen Campaign A fingerprints; imperfect paths are compared with those same-environment anchors using authoritative actual executed battery power, never planning provenance alone. The matrix reports pointwise PV/load/tariff errors, daily bias/MAE/maximum error, hard acceptance, physical revisions, daily ledger/economic comparison evidence, and imperfect-minus-perfect regret. Forecast-error outcomes are characterization evidence for a future forecast/handoff hardening stage, not authorization to change Residential EMS 1.0 control logic.
+
+# Residential Simulation Validation Campaign D — Deterministic Multi-Day Continuity
+
+Campaign D is post-freeze validation/reporting composition only. It defines six
+explicit deterministic sequences: four seven-day cases (A01 repeat, A16 repeat,
+A10 repeat and a fixed mixed week) plus two 30-day cases (mixed-week repeat and
+three 10-day stress blocks). The fixed matrix is exactly 88 scenario-days, 12
+logical Schedule/Economic multi-day paths and 176 fresh daily executions; it
+does not reuse an existing trajectory or create accounting-only path records.
+
+Each strategy carries only its own completed Simulator `next_state.soc` into
+the next frozen daily input. Campaign-local evidence verifies zero SOC carry
+delta, a one-hour timestamp boundary, battery-model/strategy/export-policy
+continuity and full 24-hour daily traces. The existing daily perfect-forecast
+semantics remain unchanged; Campaign D is not a multi-day forecast-error,
+restart-recovery, runtime scheduling or global-optimality claim.
+
+Daily TASK-173 ledgers stay diagnostic. Campaign D aggregates their realized
+import, export and degradation components, calculates TASK-162 terminal value
+once from the final actual SOC and final caller-supplied valuation, then uses a
+single TASK-168 aggregate outcome. Daily terminal values are explicitly not
+summed as a terminal asset. Results, findings and SVGs are deterministic
+untracked evidence, not a change to Residential EMS 1.0 functionality.

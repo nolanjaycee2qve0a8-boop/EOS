@@ -52,6 +52,25 @@ from ems_simulator.demo import run_demo
 execution = run_demo(Path("simulation_output"))
 ```
 
+## Residential Simulation Validation Campaigns
+
+在包含相应 Campaign 模块的修订中，可运行下面两条 post-freeze validation/reporting 命令：
+
+```powershell
+python -m ems_simulator.residential_campaign_c --output-dir simulation_output_campaign_c
+python -m ems_simulator.residential_campaign_d --output-dir simulation_output_campaign_d
+```
+
+两者在终端打印 `PASS` 或 `FAIL`；输出目录均为 deterministic、untracked evidence，不应提交到仓库。
+Campaign C 优先查看 `campaign_c_summary.txt`、`campaign_c_forecast_errors.csv`、
+`campaign_c_anchor_regret.csv` 与 `executed_battery_power_divergence.svg`，重点是 forecast error 如何穿过
+冻结 planning path 并与 Simulator 的 realized execution 分离。Campaign D 优先查看 `campaign_d_summary.txt`、
+`campaign_d_continuity.csv`、`campaign_d_path_summaries.csv` 与 `carry_continuity.svg`，重点是多日 actual
+SOC carry、timestamp continuity 与 terminal value 只在 horizon end 计入一次。
+
+Campaign C 已作为合并后的 validation evidence；Campaign D 在本次文档同步时仍是当前已审查分支的本地实现，
+合并前不应当作 main 的能力。两者都不替代基础 Demo，也不验证真实 hardware、通信或 production runtime。
+
 ## 输出文件
 
 ### simulation_result.csv

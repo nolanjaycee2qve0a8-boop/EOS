@@ -2696,7 +2696,141 @@ forecast algorithm、solver state 或 optimization cache。这样支持 MPC 不�
 非负 kW magnitude，方向继续由 charge/discharge/idle action 表达。这样 semantic Intent 不会
 被设备功率符号污染，Simulator signed actuation 也不会提前进入 Strategy contract。
 
-## 9. 文档维护规则
+## 9. Residential EMS 1.0 验证学习：Campaign C 与 Campaign D
+
+Residential EMS 1.0 进入 functional freeze 后，Campaign 不增加控制能力，而是复用冻结的
+Strategy、MPC、Feasibility、Actuation、Simulator 与 accounting 链路验证两件不同的事：Campaign C
+描述一天内 forecast error 对实际执行的影响；Campaign D 验证连续多天的状态、时间与账务。
+本次同步中，Campaign C 已合并到 main；Campaign D 已实现并完成本地独立审查，但尚未推送或合并。二者
+都是 Simulator evidence，不是概率鲁棒性、硬件认证或生产 Runtime 的证明。
+
+### 9.1 Campaign C：forecast 不等于 realized facts
+
+Forecast PV/load/tariff 是 planning input，realized PV/load/tariff 是 Simulator execution facts；两者必须
+通过明确边界进入同一冻结链路：
+
+```text
+forecast facts -> ForecastHorizon -> frozen Schedule/Economic planning
+    -> planned / physically revised action
+    -> Simulator with realized facts -> actual execution trace -> ledger/KPI/acceptance
+```
+
+这不是第二条 control path。ForecastHorizon 只服务 planning，realized daily input 只服务 Simulator；
+上一时刻的 actual Simulator SOC 与 grid feedback 仍是下一步的权威事实。若用 forecast 覆盖 realized facts，
+trace 不再表示实际执行，forecast-error robustness evidence 即告失效。
+
+对每小时 `t`：
+
+```text
+error[t] = forecast[t] - realized[t]
+```
+
+PV/load 的 signed daily energy bias 为 `sum(error[t] * 1 h)`，单位 kWh；MAE 为
+`mean(abs(error[t]))`、maximum absolute error 为 `max(abs(error[t]))`，单位均为 kW。tariff 的
+signed mean price bias、MAE 与 maximum absolute price error 单位均为 CNY/kWh；它不是 energy bias。
+
+Campaign C 显式覆盖 PV/load `+25%/-25%` amplitude error、PV/load/tariff 两小时 earlier/later 的
+circular displacement，以及 optimistic（高 PV、低 load）与 pessimistic（低 PV、高 load）组合。举一个
+教学例：真实 PV 在 10:00 为 `2 kW`、12:00 为 `0 kW`，forecast 向前循环两小时会改变 10:00 看到的
+值；全天总量仍相同，但 surplus 与 tariff 的对齐时刻已经改变。此例仅用于解释，不是 Campaign evidence。
+
+每条 imperfect path 只能对比同 environment、同 Strategy 的 perfect anchor：
+
+```text
+adjusted_cost_regret =
+    imperfect_forecast_adjusted_cost - perfect_anchor_adjusted_cost
+```
+
+正 regret 表示 imperfect path 成本较高；负值表示该冻结控制器和 realized trajectory 在该场景下恰好成本
+较低，并不说明 inaccurate forecast 本身更好。错配 environment 或 Strategy 会使 anchor 不再有因果意义。
+
+还必须分清三种功率：planned journal 是 semantic action 加非负 requested magnitude；physical revision/
+Feasibility 后仍是语义 action 加非负 magnitude；Simulator actual power 才是 signed kW（charge 为正、
+discharge 为负、idle 为零）。所以 Campaign C divergence 使用权威字段
+`simulation_trace.state.battery_result.actual_power_kw`，而不是 planned journal magnitude；比较的是最终
+实际电池功率，非仅计划请求。
+
+Campaign C 的确定性结果为：3 environments × 13 forecast cases = 39 scenarios，Schedule/Economic
+各独立执行一次，共 78 independent actual executions；hard `PASS`，findings 为 `0/0/0/0`，39 个比较均
+`TIED`，没有 ranking flip。最大正 regret 是 `C_HIGH_PV_PV_EARLY_2H / Schedule = +1.485000`，说明
+PV 时序被错误前移可损害户储的充电机会；最大负 regret 是
+`C_HIGH_EVENING_LOAD_TARIFF_EARLY_2H / Schedule = -1.302750`，只是场景偶然结果。最大 actual-power
+divergence 是 `C_REFERENCE_LOAD_LATE_2H / Schedule`：10 小时、最大 `1.600000 kW`，说明 load timing
+error 已穿透 planning 并改变实际电池功率。最高 physical revisions 是
+`C_HIGH_EVENING_LOAD_PV_OVER_25 / Schedule = 9`，代表候选动作更频繁触及可审计的物理边界，并非自动故障。
+
+### 9.2 Campaign D：连续运行不等于 multi-day optimizer
+
+户储 SOC 不会在午夜重置。若每个 24 h simulation 都以同一固定 initial SOC 独立开始，会得到虚假的
+reserve、throughput 与经济证据。Campaign D 只顺序组合冻结的 daily runners，不增加 multi-day
+optimizer、scheduler 或新的 Strategy；唯一的跨日状态规则是：
+
+```text
+next_day_initial_soc = previous_day_final_actual_soc
+```
+
+Schedule 只携带 Schedule actual SOC，Economic 只携带 Economic actual SOC，两条链不得交叉；不能用
+planned terminal SOC 替换它，也不能 rounding、reset、average 或 clamp。教学例（非 Campaign evidence）：
+两条链都从 `0.50` 开始，第一天 Schedule/Economic 分别结束于 `0.31/0.71`，第二天分别结束于
+`0.42/0.62`；第三天输入必须为 `0.42/0.62`，不能都回到 `0.50`，更不能交换。
+
+每个 daily input 保留 local sequence `0..23`，但 timestamp 在全局保持连续：7 天为 168 小时，30 天为
+720 小时，下一日第一个 timestamp 必须比上一日最后一个 timestamp 晚 1 h。timezone-aware identity 对
+tariff、forecast、ledger 与 provenance 都是事实合同。Campaign D 保持 perfect forecast 等于当日 realized
+facts，不测试 multi-day forecast uncertainty；下一日 state 仍只来自完成的 Simulator trace。
+
+多日 accounting 中 import/export/degradation 是可加的 flow：
+
+```text
+aggregate_import_cost      = sum(daily_import_cost)
+aggregate_export_revenue   = sum(daily_export_revenue)
+aggregate_degradation_cost = sum(daily_degradation_cost)
+aggregate_operating_cost = import - export + degradation
+aggregate_adjusted_cost = aggregate_operating_cost - final_terminal_energy_value
+```
+
+terminal value 是 horizon end 的 stored-energy stock。daily ledgers 和 daily terminal values 保留作诊断，
+却不能相加；只能由最终 actual SOC 计算并应用一次。教学例：两日 operating cost 为 `9`、`8 CNY`，最终
+terminal value 为 `4 CNY`，正确 aggregate 是 `9 + 8 - 4 = 13 CNY`；若错误扣除每日 terminal values
+`3` 与 `4 CNY`，得到 `10 CNY`，就是对中间库存重复记账。此例非 Campaign D 账务。
+
+Campaign D 的固定矩阵有 6 cases（4 个 7-day、2 个 30-day）、88 scenario-days、12 logical multi-day
+paths、176 independent actual daily executions 与 164 day boundaries；maximum absolute SOC carry delta 为 0，
+timestamp discontinuities 为 0，hard `PASS`，findings `0/0/0/0`，六个比较全为 `TIED`：
+
+| Case | Schedule | Economic | Delta | Ranking |
+| --- | ---: | ---: | ---: | --- |
+| D01 | 41.737368 | 41.737368 | 0.000000 | TIED |
+| D02 | 87.097368 | 87.097368 | 0.000000 | TIED |
+| D03 | 30.992368 | 30.992368 | 0.000000 | TIED |
+| D04 | 51.627368 | 51.627368 | 0.000000 | TIED |
+| D05 | 221.028421 | 221.028421 | 0.000000 | TIED |
+| D06 | 230.918421 | 230.918421 | 0.000000 | TIED |
+
+D06 的最高累计 physical revisions 为 `181`；observed actual SOC 范围为 `20%..100%`；全部 12 条 path
+最终为 `20%`，且矩阵中每条 daily path 都在 minimum SOC 结束。最大 single-day import/export 分别为
+`23.480332/8.436842 kWh`。这描述冻结 daily policy 与确定性 profiles 的组合特征：minimum bound 得到
+遵守，因而不自动构成 physical failure；但不证明 global multi-day optimum。
+
+### 9.3 分开 Campaign 的工程原因与部署边界
+
+Campaign C 只改变单日 forecast accuracy；Campaign D 只在 perfect forecast 下验证跨日 state/time/accounting。
+保持分开能隔离预测、SOC carry、timestamp 与 ledger 的 failure cause；把两维合并需要单独批准的未来
+campaign，不能宣称整个 validation phase 已完成。
+
+面向户用 PV 变化、傍晚 load、reserve SOC、TOU、throughput、degradation 与 PCS power limit，未来链路可为：
+
+```text
+cloud optimization -> Linux / STM32 Edge EMS -> PCS / BMS / DSP
+```
+
+cloud 提供 caller-owned planning information；Edge EMS 未来负责真实 state persistence 与 time identity；
+PCS/BMS/DSP 才负责实时功率与保护闭环。Campaign C/D 仍未验证 hardware timing、PCS certification、
+CAN/Modbus、power-loop stability、restart persistence、field reliability 或 customer readiness。建议先学习
+forecast/realized 数据流及单位，再读 Campaign C anchor/divergence，最后读 Campaign D SOC carry 与 terminal
+stock accounting；不要把单张 SVG 或单一 ranking 当成部署结论。
+
+## 10. 文档维护规则
 
 以后每完成一个 TASK：
 
