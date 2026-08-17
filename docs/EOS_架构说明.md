@@ -1459,3 +1459,26 @@ TASK-090 首次实现 Phase 9 的三个 immutable artifacts：`EMSStrategyDescri
 exact active `CapabilityDescriptor`。`EMSDecision` 保存 exact context、strategy descriptor 和
 Phase 5 semantic `DecisionIntent`，并保存非负 raw kW requested magnitude。TASK-090 不实现
 `EMSStrategyBoundary`、Constraint、Actuation handoff 或任何 EMS algorithm。
+
+## 25. Residential Simulation Validation Orchestration
+
+Residential EMS 1.0 functional freeze 后，Campaign C/D 位于 application-level validation/reporting layer，
+不属于 production control layer。它们复用同一条冻结 daily chain：
+
+```text
+ForecastHorizon -> frozen Strategy / MPC -> EMSDecision
+    -> Feasibility -> Actuation -> Simulator actual trace
+```
+
+Campaign C 使 caller-owned `ForecastHorizon` 与 caller-owned realized daily facts 分离：前者只进入 planning，
+后者只进入 Simulator execution。actual Simulator SOC、grid feedback 与 signed battery power 仍是执行权威；
+forecast 不得覆盖 realized facts，也不产生第二条 controller。
+
+Campaign D 是冻结 daily runner 的外层有限 orchestration，而不是 production multi-day EMS runtime。它只用各自
+Strategy 上一日完成的 actual Simulator final SOC 作为下一日 initial SOC，故 Schedule/Economic state chains
+不交叉；它验证 timezone-aware timestamp 连续性，并在聚合 daily flow accounting 后，仅对整个 horizon 的
+final actual SOC 应用一次 terminal energy value。
+
+该层不拥有 Runtime lifecycle、background loop、Command、Device、PCS/BMS、通信、scheduler 或新的 control
+capability。它只保留 trace、ledger、KPI、acceptance 与 CSV/SVG/text evidence。Campaign C/D 均不构成
+hardware timing、restart persistence、field reliability、customer readiness 或 multi-day global optimization 的验证。
