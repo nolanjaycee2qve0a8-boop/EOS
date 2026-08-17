@@ -15,6 +15,7 @@ from dataclasses import dataclass, replace
 from io import StringIO
 from math import isclose
 from pathlib import Path
+from xml.sax.saxutils import escape
 
 from ems_simulator.economic_comparison_explanation import (
     DeterministicEconomicComparisonExplainer,
@@ -463,7 +464,10 @@ def _write_outputs(
             "pcs_power_vs_physical_revisions.svg",
             "B1 PCS power vs physical revisions",
             tuple(
-                item.schedule.kpi.physical_revision_count
+                (
+                    _pcs_label(item),
+                    float(item.schedule.kpi.physical_revision_count),
+                )
                 for item in results
                 if item.scenario.matrix_group == "B1_PCS"
             ),
@@ -472,7 +476,7 @@ def _write_outputs(
             "pcs_power_vs_adjusted_cost.svg",
             "B1 PCS power vs adjusted cost",
             tuple(
-                item.comparison.delta_adjusted_cost
+                (_pcs_label(item), item.comparison.delta_adjusted_cost)
                 for item in results
                 if item.scenario.matrix_group == "B1_PCS"
             ),
@@ -481,7 +485,7 @@ def _write_outputs(
             "initial_soc_vs_grid_import.svg",
             "B2 initial SOC vs grid import",
             tuple(
-                item.schedule.kpi.grid_import_energy_kwh
+                (_soc_label(item), item.schedule.kpi.grid_import_energy_kwh)
                 for item in results
                 if item.scenario.matrix_group == "B2_SOC"
             ),
@@ -490,7 +494,7 @@ def _write_outputs(
             "initial_soc_vs_final_soc.svg",
             "B2 initial SOC vs final SOC",
             tuple(
-                item.schedule.kpi.final_soc_fraction
+                (_soc_label(item), item.schedule.kpi.final_soc_fraction)
                 for item in results
                 if item.scenario.matrix_group == "B2_SOC"
             ),
@@ -499,7 +503,7 @@ def _write_outputs(
             "tariff_spread_vs_strategy_delta.svg",
             "B3 tariff spread vs strategy delta",
             tuple(
-                item.comparison.delta_adjusted_cost
+                (_tariff_label(item), item.comparison.delta_adjusted_cost)
                 for item in results
                 if item.scenario.matrix_group == "B3_TARIFF"
             ),
@@ -508,7 +512,10 @@ def _write_outputs(
             "degradation_vs_strategy_delta.svg",
             "B4 degradation vs strategy delta",
             tuple(
-                item.comparison.delta_adjusted_cost
+                (
+                    _accounting_label(item, "degradation"),
+                    item.comparison.delta_adjusted_cost,
+                )
                 for item in results
                 if item.scenario.matrix_group == "B4_ACCOUNTING"
             ),
@@ -517,7 +524,10 @@ def _write_outputs(
             "export_tariff_vs_strategy_delta.svg",
             "B4 export tariff vs strategy delta",
             tuple(
-                item.comparison.delta_adjusted_cost
+                (
+                    _accounting_label(item, "export_tariff"),
+                    item.comparison.delta_adjusted_cost,
+                )
                 for item in results
                 if item.scenario.matrix_group == "B4_ACCOUNTING"
             ),
@@ -526,7 +536,10 @@ def _write_outputs(
             "terminal_value_vs_strategy_delta.svg",
             "B4 terminal value vs strategy delta",
             tuple(
-                item.comparison.delta_adjusted_cost
+                (
+                    _accounting_label(item, "terminal_value"),
+                    item.comparison.delta_adjusted_cost,
+                )
                 for item in results
                 if item.scenario.matrix_group == "B4_ACCOUNTING"
             ),
@@ -885,17 +898,79 @@ def _path_passes_hard(path: ResidentialCampaignPathResult) -> bool:
     )
 
 
-def _bar_svg(title: str, values: tuple[float | int, ...]) -> str:
-    numeric = tuple(float(value) for value in values) or (0.0,)
+def _pcs_label(result: ResidentialCampaignBScenarioResult) -> str:
+    return (
+        f"PCS={result.scenario.campaign_scenario.battery_model.max_charge_power_kw:.2f}kW"
+        f" | {result.scenario.environment}"
+    )
+
+
+def _soc_label(result: ResidentialCampaignBScenarioResult) -> str:
+    return (
+        f"SOC={result.scenario.campaign_scenario.initial_soc_fraction:.2f}"
+        f" | {result.scenario.environment}"
+    )
+
+
+def _tariff_label(result: ResidentialCampaignBScenarioResult) -> str:
+    tariff = result.scenario.campaign_scenario.import_tariff_profile_per_kwh
+    return (
+        f"TOU={tariff[0]:.2f}/{tariff[6]:.2f}/{tariff[18]:.2f}"
+        f" | {result.scenario.environment}"
+    )
+
+
+def _accounting_label(
+    result: ResidentialCampaignBScenarioResult, dimension: str
+) -> str:
+    scenario = result.scenario.campaign_scenario
+    values = {
+        "export_tariff": f"export_tariff={scenario.export_tariff_per_kwh:.2f}",
+        "degradation": (
+            f"degradation_rate={scenario.degradation_cost_per_throughput_kwh:.2f}"
+        ),
+        "terminal_value": f"terminal_value={scenario.terminal_valuation_per_kwh:.2f}",
+    }
+    return f"{result.scenario.scenario_id} | {result.scenario.environment} | {values[dimension]}"
+
+
+def _bar_svg(title: str, points: tuple[tuple[str, float], ...]) -> str:
+    """Render labeled deterministic bars with an axis at the actual zero value."""
+
+    visible_points = points or (("no data", 0.0),)
+    numeric = tuple(value for _, value in visible_points)
     maximum, minimum = max(1.0, *numeric), min(0.0, *numeric)
     scale = max(maximum - minimum, 1.0)
     baseline = 250 - (0.0 - minimum) / scale * 190
     width = min(18.0, 900.0 / len(numeric))
     bars = "".join(
-        f'<rect x="{55 + index * width:.2f}" y="{min(baseline, 250 - (value - minimum) / scale * 190):.2f}" width="{max(width - 2, 1):.2f}" height="{abs(baseline - (250 - (value - minimum) / scale * 190)):.2f}" fill="{"#059669" if value <= 0 else "#2563eb"}"/>'
-        for index, value in enumerate(numeric)
+        f'<rect data-label="{escape(label, {'"': "&quot;"})}" '
+        f'x="{55 + index * width:.2f}" '
+        f'y="{min(baseline, 250 - (value - minimum) / scale * 190):.2f}" '
+        f'width="{max(width - 2, 1):.2f}" '
+        f'height="{abs(baseline - (250 - (value - minimum) / scale * 190)):.2f}" '
+        f'fill="{"#059669" if value <= 0 else "#2563eb"}"/>'
+        for index, (label, value) in enumerate(visible_points)
     )
-    return f'<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="340" viewBox="0 0 1024 340"><rect width="100%" height="100%" fill="white"/><text x="40" y="28" font-family="sans-serif" font-size="16">{title}</text><line x1="40" y1="250" x2="990" y2="250" stroke="#64748b"/>{bars}<text x="40" y="315" font-family="sans-serif" font-size="11">Deterministic Campaign B reporting evidence; bar order follows the explicit matrix.</text></svg>\n'
+    labels = "".join(
+        f'<text x="{55 + index * width + width / 2:.2f}" y="280" '
+        f'font-family="sans-serif" font-size="7" text-anchor="end" '
+        f'transform="rotate(-55 {55 + index * width + width / 2:.2f} 280)">'
+        f"{escape(label)}</text>"
+        for index, (label, _) in enumerate(visible_points)
+    )
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="420" '
+        'viewBox="0 0 1024 420">'
+        '<rect width="100%" height="100%" fill="white"/>'
+        f'<text x="40" y="28" font-family="sans-serif" font-size="16">{escape(title)}</text>'
+        f'<line id="zero-axis" x1="40" y1="{baseline:.2f}" '
+        f'x2="990" y2="{baseline:.2f}" stroke="#64748b"/>'
+        f"{bars}{labels}"
+        '<text x="40" y="400" font-family="sans-serif" font-size="11">'
+        "Deterministic Campaign B evidence; each rotated x label identifies the exact swept input and environment."
+        "</text></svg>\n"
+    )
 
 
 def main(argv: Sequence[str] | None = None) -> int:

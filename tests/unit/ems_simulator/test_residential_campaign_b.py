@@ -4,6 +4,7 @@ from collections import Counter
 from pathlib import Path
 
 from ems_simulator.residential_campaign_b import (
+    _bar_svg,
     campaign_b_scenarios,
     run_residential_campaign_b,
 )
@@ -100,3 +101,45 @@ def test_campaign_b_output_is_repeatable_and_contains_required_evidence(
         .read_text(encoding="utf-8")
         .splitlines()[0]
     )
+
+
+def test_campaign_b_svg_zero_axis_uses_the_computed_data_zero_baseline() -> None:
+    svg = _bar_svg("mixed values", (("negative", -1.0), ("positive", 1.0)))
+
+    assert 'id="zero-axis" x1="40" y1="155.00" x2="990" y2="155.00"' in svg
+    assert 'id="zero-axis" x1="40" y1="250.00"' not in svg
+
+
+def test_campaign_b_svg_reporting_labels_swept_dimensions_and_b4_provenance(
+    tmp_path: Path,
+) -> None:
+    campaign = run_residential_campaign_b(tmp_path)
+    outputs = {
+        path.name: path.read_text(encoding="utf-8") for path in campaign.output_paths
+    }
+
+    assert "PCS=0.50kW | reference" in outputs["pcs_power_vs_physical_revisions.svg"]
+    assert "SOC=0.20 | reference" in outputs["initial_soc_vs_grid_import.svg"]
+    assert (
+        "TOU=0.50/0.50/0.50 | reference"
+        in outputs["tariff_spread_vs_strategy_delta.svg"]
+    )
+
+    export = outputs["export_tariff_vs_strategy_delta.svg"]
+    degradation = outputs["degradation_vs_strategy_delta.svg"]
+    terminal = outputs["terminal_value_vs_strategy_delta.svg"]
+    for chart in (export, degradation, terminal):
+        assert "B4_01_E1_NEGATIVE_SHIFT | E1_NEGATIVE_SHIFT |" in chart
+    assert "export_tariff=" in export
+    assert "degradation_rate=" in degradation
+    assert "terminal_value=" in terminal
+    assert export != degradation
+    assert degradation != terminal
+
+
+def test_campaign_b_svg_escapes_data_derived_text() -> None:
+    svg = _bar_svg('title <& "', (('label <& "', -1.0),))
+
+    assert 'title &lt;&amp; "' in svg
+    assert 'label &lt;&amp; "' in svg
+    assert 'data-label="label &lt;&amp; &quot;"' in svg

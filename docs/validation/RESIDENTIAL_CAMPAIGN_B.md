@@ -31,6 +31,6 @@ The report deliberately omits a planned-vs-executed-power gap KPI: existing oute
 
 ## Outputs and handoff
 
-The campaign emits scenario, path-KPI, comparison and findings CSVs; one CSV per matrix group; a summary; and eight deterministic SVGs for PCS, SOC, tariff, and accounting relationships. The summary contains the hard status, severity counts, rankings, highest revisions, largest divergence and a human-review shortlist (failures, top revisions, top divergence, schedule wins, accounting ranking flips and final-SOC boundaries).
+The campaign emits scenario, path-KPI, comparison and findings CSVs; one CSV per matrix group; a summary; and eight deterministic SVGs for PCS, SOC, tariff, and accounting relationships. Each SVG draws the horizontal zero axis at its computed data zero baseline and renders deterministic rotated x labels that identify the swept input and environment. The B4 export-tariff, degradation-rate, and terminal-value charts each label their own accounting input together with scenario/environment traceability. The summary contains the hard status, severity counts, rankings, highest revisions, largest divergence and a human-review shortlist (failures, top revisions, top divergence, schedule wins, accounting ranking flips and final-SOC boundaries).
 
 Campaign B is a physical/economic boundary sweep under perfect forecast. The next validation campaign should introduce caller-supplied forecast-error cases while retaining functional freeze and the same actual-Simulator/ledger/comparison reconciliation.
