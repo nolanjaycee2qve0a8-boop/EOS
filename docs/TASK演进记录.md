@@ -5180,3 +5180,9 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 # TASK-172 — Extended Economic Scenario Re-evaluation
 
 首次将 TASK-161 的 E0/E1/E2 和 TASK-165 终端 SOC 分叉的既有实际控制轨迹，置于完整会计链下做固定轨迹复评估：既有逐时已实现购电成本、TASK-169 上网收入、TASK-170 吞吐量退化成本、TASK-162 终端能量价值，最终仅由 TASK-168 聚合。控制路径各只运行一次；出口电价、退化率和终端估值只展开会计敏感度，绝不重新运行控制。对于既有时变购电价场景，保留原有逐时结算成本，避免把 TASK-171 的单标量费率边界误用于 TOU 结算；TASK-171 仍作为常量电价结算及 TASK-163/168 直接兼容的证据边界。该结果是有限会计模型的观察结论，不是现金利润、MPC shadow price 或新的控制目标。
+
+# TASK-173 — Daily / Interval Economic Ledger
+
+TASK-173 增加仅面向已完成实际轨迹的逐时经济账本，不改变候选、优化、MPC、可行性、交接或 Simulator。每个区间从实际 trace 读取 Grid、Battery、PV、Load、SOC、duration 与实际 import tariff；正的 grid power 明确计入 import，负的 grid power 明确计入 export，throughput 固定为 `abs(actual battery power) * duration`。TASK-171、TASK-169 与 TASK-170 分别产生每小时 import cost、export revenue 和 degradation evidence；区间净成本为 `import - export + degradation`。全天只在结尾一次调用 TASK-162，并由 TASK-168 汇总 `import - export + degradation - terminal value`；终端价值不会被错误分摊进普通区间。
+
+`EconomicLedgerInput` 保留 exact completed daily trajectory 与 exact battery model identity，`DailyEconomicLedger` 对所有 interval totals、一次 terminal evidence 与一次 TASK-168 outcome 进行对账。参考 CLI 复用 TASK-165 固定轨迹输出 interval CSV、daily summary CSV 和文本摘要；它是审计/会计 read model，不会重新运行控制路径，也不构成新的经济控制目标或现金利润声明。
