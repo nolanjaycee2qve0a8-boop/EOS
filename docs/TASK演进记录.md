@@ -5192,3 +5192,9 @@ TASK-173 增加仅面向已完成实际轨迹的逐时经济账本，不改变�
 TASK-174 新增严格消费两份已完成 TASK-168 `ExtendedEconomicOutcomeEvidence` 的经济比较解释层：固定以 candidate minus reference 计算 adjusted-cost delta，并将其分解为 import cost、export revenue、degradation cost 与 terminal value 四项 signed cost contribution。负 contribution 帮助 candidate，正 contribution 对 candidate 不利；收入与终端价值 delta 会显式取反后进入成本贡献，从而不会把“较少上网收入”或“较低终端价值”错误表述为好处。组件贡献以 `1e-12` 绝对容差与最终 adjusted-cost delta 对账，并只把近零浮点残差显示为零。
 
 输出保留 exact input/reference/candidate evidence identity，提供 candidate/reference/tied 排名、主导 component 以及不会隐藏的 exact dominant ties。TASK-172 回答给定敏感度下哪条路径更好，TASK-173 回答每日结果来自哪里，TASK-174 则回答为什么存在该差异。核心 explainer 不调用 TASK-162/168/169/170/171 calculators，不读取 raw ledger intervals，也不运行控制、MPC、物理优化、Feasibility、Actuation 或 Simulator；CSV/文本只序列化已经完成的 explanation。
+
+# TASK-175 — Residential EMS 1.0 Reference Demo
+
+TASK-175 将 TASK-151 的 Schedule-aware daily path、TASK-159 的 Economic Schedule-aware daily path、TASK-173 的可审计日账本和 TASK-174 的最终经济差异解释组合为一个确定性的 24 小时住宅参考演示。两条路径共享同一组 caller-owned PV/Load/TOU/forecast、初始 SOC、BatteryOptimizationModel、export tariff、degradation rate 和 terminal valuation；唯一不同是既有的 economic cheap-grid-charge gate。演示不复制或重算 opportunity schedule、headroom、physical revision、MPC、Feasibility、Actuation 或 Simulator。
+
+该 reference 使用 perfect caller-supplied forecast，以便稳定复现工程行为；每一小时仍只从实际上一条 Simulator trace 取得后续 SOC 与 grid feedback。输出的 timeseries、summary、账本结果、TASK-174 comparison、文本说明和 SVG 图共同回答住宅场景的充电、PV 吸收、放电、SOC、Grid import/export、吞吐量和 limited adjusted economic cost。导出的 export tariff、degradation 与 terminal value 都是明确的演示会计假设；本例允许 export，未激活 Zero Export。TASK-175 是 Residential EMS 1.0 reference demo，不是实天气鲁棒性、真实设备、实际电池老化、真实 tariff 或工业/多设备验证的结论。
