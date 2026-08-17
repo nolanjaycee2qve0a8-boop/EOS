@@ -94,11 +94,9 @@ class EconomicLedgerInput:
     def __post_init__(self) -> None:
         if not isinstance(
             self.source_trajectory,
-            (
-                DailySimulationResult,
-                MultiOpportunityExplainableMPCDailySimulationResult,
-                EconomicMultiOpportunityExplainableMPCDailySimulationResult,
-            ),
+            DailySimulationResult
+            | MultiOpportunityExplainableMPCDailySimulationResult
+            | EconomicMultiOpportunityExplainableMPCDailySimulationResult,
         ):
             raise TypeError("source_trajectory must be a completed daily trajectory")
         if not isinstance(self.export_tariff_per_kwh, tuple):
