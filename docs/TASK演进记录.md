@@ -5201,6 +5201,15 @@ TASK-175 将 TASK-151 的 Schedule-aware daily path、TASK-159 的 Economic Sche
 
 # TASK-176 — Residential EMS Validation / Acceptance Suite
 
+## Residential EMS 1.0 Functional Freeze — Campaign A
+
+TASK-176 合并后 Residential EMS 1.0 进入 functional freeze。Campaign A 只增加 24 个
+固定场景的确定性验证、结果聚合、验收复用、报告和测试工具；不会新增或变更
+Strategy、MPC、headroom、economic planning、physical revision、Feasibility、Actuation
+或 Simulator 语义。它以 24 个场景 × 两条既有主路径建立 simulation-campaign 的
+最小高信息量基线，并明确将该 readiness 与 hardware、PCS、field deployment 和
+customer readiness 分开。
+
 TASK-176 建立 Residential EMS 1.0 的确定性功能冻结门。它把已完成的 TASK-175 reference trajectory、TASK-173 daily ledger、TASK-172 fixed-control accounting reference 和 TASK-174 comparison explanation 读为统一的 scenario/KPI/finding evidence；不新增任何 Strategy、optimization、MPC objective、physical revision、Feasibility、Actuation 或 Simulator 行为。核心类别明确分开 physical safety、control semantics、accounting reconciliation、economic behavior、explainability 与 quality metric；BLOCKER/MAJOR failure 阻止 `READY_FOR_SIMULATION_CAMPAIGN`，MINOR/INFORMATIONAL 则保留为可见诊断而非隐式失败。
 
 该套件冻结 A1 TASK-175 指纹（含 Schedule/Economic TIED）、A2 negative-economic suppression、A3 terminal-SOC-divergence terminal contribution，以及 A4–A10 的 PV charge、deficit discharge、SOC/power bounds 和 idle 证据。Simulator 符号、`PV + Grid - Battery = Load`、actual feedback、ledger/outcome reconciliation、TASK-174 contribution reconciliation 和必需 provenance/explanation 都进入集中 `1e-12` tolerance 的验收规则。通过结果只表示 Residential EMS 1.0 可以进入 planned large-scale Simulation Validation Campaign，绝不代表 hardware、PCS、field deployment 或 customer readiness。TASK-176 merge 后进入 functional freeze；后续只允许 bug/validation/campaign/reporting 类变更，除非显式批准新的控制能力。
