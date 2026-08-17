@@ -5186,3 +5186,9 @@ energy/efficiency/power-cap/SOC-window 公式均未复制或重算。
 TASK-173 增加仅面向已完成实际轨迹的逐时经济账本，不改变候选、优化、MPC、可行性、交接或 Simulator。每个区间从实际 trace 读取 Grid、Battery、PV、Load、SOC、duration 与实际 import tariff；正的 grid power 明确计入 import，负的 grid power 明确计入 export，throughput 固定为 `abs(actual battery power) * duration`。TASK-171、TASK-169 与 TASK-170 分别产生每小时 import cost、export revenue 和 degradation evidence；区间净成本为 `import - export + degradation`。全天只在结尾一次调用 TASK-162，并由 TASK-168 汇总 `import - export + degradation - terminal value`；终端价值不会被错误分摊进普通区间。
 
 `EconomicLedgerInput` 保留 exact completed daily trajectory 与 exact battery model identity，`DailyEconomicLedger` 对所有 interval totals、一次 terminal evidence 与一次 TASK-168 outcome 进行对账。参考 CLI 复用 TASK-165 固定轨迹输出 interval CSV、daily summary CSV 和文本摘要；它是审计/会计 read model，不会重新运行控制路径，也不构成新的经济控制目标或现金利润声明。
+
+# TASK-174 — Economic Comparison Explainability
+
+TASK-174 新增严格消费两份已完成 TASK-168 `ExtendedEconomicOutcomeEvidence` 的经济比较解释层：固定以 candidate minus reference 计算 adjusted-cost delta，并将其分解为 import cost、export revenue、degradation cost 与 terminal value 四项 signed cost contribution。负 contribution 帮助 candidate，正 contribution 对 candidate 不利；收入与终端价值 delta 会显式取反后进入成本贡献，从而不会把“较少上网收入”或“较低终端价值”错误表述为好处。组件贡献以 `1e-12` 绝对容差与最终 adjusted-cost delta 对账，并只把近零浮点残差显示为零。
+
+输出保留 exact input/reference/candidate evidence identity，提供 candidate/reference/tied 排名、主导 component 以及不会隐藏的 exact dominant ties。TASK-172 回答给定敏感度下哪条路径更好，TASK-173 回答每日结果来自哪里，TASK-174 则回答为什么存在该差异。核心 explainer 不调用 TASK-162/168/169/170/171 calculators，不读取 raw ledger intervals，也不运行控制、MPC、物理优化、Feasibility、Actuation 或 Simulator；CSV/文本只序列化已经完成的 explanation。
