@@ -59,7 +59,22 @@ execution = run_demo(Path("simulation_output"))
 ```powershell
 python -m ems_simulator.residential_campaign_c --output-dir simulation_output_campaign_c
 python -m ems_simulator.residential_campaign_d --output-dir simulation_output_campaign_d
+python -m ems_simulator.residential_campaign_e --output-dir simulation_output_campaign_e
 ```
+
+Campaign E 使用固定 seed `20260817` 对三个 realized environments 各构造 64 个 caller-owned 合成 forecast
+samples，并分别运行冻结的 Schedule/Economic daily paths。它不改变 demo 或控制逻辑；输出应优先审查
+`campaign_e_summary.txt`、`campaign_e_sample_manifest.csv`、`campaign_e_regret_evidence.csv` 和每环境的 ECDF。
+
+`campaign_e_sample_manifest.csv` 同时保存 realized source fingerprint、keyed transformation 参数、实际生成的
+forecast PV/load/tariff SHA-256 fingerprint 和 labelled combined fingerprint。profile fingerprint 是 caller-order、
+逗号分隔、固定六位小数的 evidence representation；signed zero 统一为 `0.000000`，不承诺识别六位以后差异，
+也不参与控制或优化。hourly evidence 分为 9,216 行的
+sampled trace 与 144 行的 retained perfect-anchor trace；后者只读取已完成的 Simulator trace，不会重跑 anchor，
+也不会进入 sampled ECDF。
+其中 regret 是 sampled path 相对同环境同策略 perfect anchor 的差，battery-power divergence 来自 Simulator
+`actual_power_kw`，不是 planning request。该样本集是可复现的工程刻画，不是现场概率、weather forecast 或生产
+可靠性认证。
 
 两者在终端打印 `PASS` 或 `FAIL`；输出目录均为 deterministic、untracked evidence，不应提交到仓库。
 Campaign C 优先查看 `campaign_c_summary.txt`、`campaign_c_forecast_errors.csv`、

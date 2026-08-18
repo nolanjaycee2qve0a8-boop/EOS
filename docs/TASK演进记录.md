@@ -5246,3 +5246,26 @@ once from the final actual SOC and final caller-supplied valuation, then uses a
 single TASK-168 aggregate outcome. Daily terminal values are explicitly not
 summed as a terminal asset. Results, findings and SVGs are deterministic
 untracked evidence, not a change to Residential EMS 1.0 functionality.
+
+# Residential Simulation Validation Campaign E — Seeded Synthetic Forecast Robustness (local)
+
+Campaign D was merged to main at `7469d8b`. Campaign E remains local validation/reporting work on top of the frozen
+Residential EMS 1.0 chain. It owns a deterministic keyed synthetic forecast sampler (`seed=20260817`) for Reference,
+High PV and High evening-load realized environments: 64 samples per environment, 192 sampled scenarios, 384 fresh
+sampled Schedule/Economic trajectories, six independently executed perfect anchors, and exactly 390 actual 24-hour
+runner/Simulator executions. Every sample pair shares exact caller-owned forecast facts; realized PV/load/tariff
+continues to enter only Simulator execution.
+
+Campaign E records source realized PV/load/tariff fingerprints, keyed forecast transformation parameters and the
+resulting SHA-256 forecast PV/load/tariff evidence fingerprints plus labelled combined fingerprints for
+collision/mapping audit. Each profile payload is a stable caller-order comma-separated sequence of fixed-six-decimal
+values; signed zero is canonicalized to `0.000000`. It intentionally identifies the reporting-precision evidence
+representation rather than raw Python binary floats, so two values with the same six-decimal representation share a
+fingerprint. These hashes never affect planning, control, optimization or numeric calculations. It also
+records frozen Campaign A anchor fingerprints, same-environment/strategy adjusted-cost regret, actual executed power divergence from
+`simulation_trace.state.battery_result.actual_power_kw`, acceptance facts and grouped descriptive statistics. Its
+CSV/SVG/text evidence is deterministic and untracked: the explicit sampled hourly trace has 9,216 rows and its
+separate retained-anchor hourly trace has 144 rows, so all 390 existing executions remain traceable without another
+runner invocation or ECDF contamination. This is a transparent fixed-seed synthetic characterization, not
+a stochastic optimizer, field probability claim, hardware certification or production readiness result; no Strategy,
+MPC, physical revision, Feasibility, Actuation, Simulator, ledger or acceptance semantics change.

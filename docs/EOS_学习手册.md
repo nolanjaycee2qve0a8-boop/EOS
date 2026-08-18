@@ -2830,6 +2830,31 @@ CAN/Modbus、power-loop stability、restart persistence、field reliability 或 
 forecast/realized 数据流及单位，再读 Campaign C anchor/divergence，最后读 Campaign D SOC carry 与 terminal
 stock accounting；不要把单张 SVG 或单一 ranking 当成部署结论。
 
+### 9.4 Campaign E：固定种子的合成概率刻画不是概率优化
+
+Campaign E 的 manifest 不是只保存抽样参数：它同时保留 realized source PV/load/tariff fingerprint、keyed
+amplitude/shift 参数、实际生成的 forecast PV/load/tariff SHA-256 fingerprint，以及带 `pv/load/tariff` 标签的
+combined fingerprint。每个 fingerprint payload 按 caller order、逗号分隔并固定到六位小数；signed zero 统一为
+`0.000000`。因此它证明的是报告精度下的 evidence identity，而不是原始 Python binary float：六位表示相同的值
+有意得到相同 fingerprint，且该 fingerprint 从不参与 planning、control 或数值计算。前者表明从哪条冻结事实出发，
+后者表明实际交给 planning 的 profile；两者不能混称。
+
+hourly evidence 也按 execution scope 分离：384 条 sampled paths 的 `campaign_e_hourly_trace.csv` 有 9,216 行，
+只用于 sample evidence；六条已经执行的 perfect-anchor Simulator trace 单独导出 144 行，不重跑 runner，且不进入
+64-sample ECDF 或分布统计。
+
+Campaign E 在 Campaign C 的 forecast/realized 分离边界外增加固定种子的外层采样与统计，不向 Strategy、MPC
+或任何物理/执行合同传入概率对象。每个 variate 都由 `seed + environment + sample index + variable` 的 key 独立
+导出，因此样本可复现且不依赖遍历顺序；PV/load/tariff 的 amplitude 和 timing shift 是透明的合成工程假设，不能
+解释为现场频率、天气模型或客户可靠性结论。
+
+同一个 sample 的 Schedule/Economic 使用 exact 同一组 caller-owned forecast facts，才可以把差异解释为冻结策略
+路径的差异。每个环境/策略另有 fresh perfect anchor；sample regret 是 `sampled adjusted cost - same
+environment / same strategy perfect cost`。executed-power divergence 必须从
+`simulation_trace.state.battery_result.actual_power_kw` 逐小时读取，不能把 planned request 当成执行事实。64 个
+样本的 population standard deviation 和 nearest-rank percentiles 只描述这 64 个合成样本；Campaign E 不改变
+control，也不认证生产鲁棒性。Campaign F 才应经单独批准后研究相关误差、极端组合和跨日不确定性。
+
 ## 10. 文档维护规则
 
 以后每完成一个 TASK：
