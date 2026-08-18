@@ -5269,3 +5269,52 @@ separate retained-anchor hourly trace has 144 rows, so all 390 existing executio
 runner invocation or ECDF contamination. This is a transparent fixed-seed synthetic characterization, not
 a stochastic optimizer, field probability claim, hardware certification or production readiness result; no Strategy,
 MPC, physical revision, Feasibility, Actuation, Simulator, ledger or acceptance semantics change.
+
+# Residential Simulation Validation Campaign F — Correlated and Tail Multi-Day Robustness (local)
+
+Campaign E merged at `bec48ce`. Campaign F is local post-freeze validation/reporting work: it adds no robust
+optimizer or production multi-day controller. It selects the existing D01 reference, D03 high-PV and D02
+high-evening-load seven-day source sequences, then composes 48 SHA-256-keyed correlated core forecasts and 12
+deterministic unweighted tail scenarios. The correlation/AR(1) assumptions are synthetic validation assumptions, not
+field-calibrated probabilities.
+
+All 420 immutable scenario-days retain latent/error/clip/shift and forecast/realized fingerprint evidence. Forecast
+facts enter `ForecastHorizon`; exact D source facts enter Simulator execution. The matrix is 120 sampled/tail plus six
+perfect-anchor paths, 882 fresh daily executions, 756 same-Strategy actual-SOC boundaries and 21,168 trace hours.
+Daily flows are summed and terminal value is applied once at the final actual SOC. Core distributions use only the 48
+core scenarios; tail remains separate deterministic stress evidence. The untracked CLI produces 16 root CSV/TXT,
+10 SVG and 882 nested daily decision artifacts (908 files). No Strategy, MPC, optimizer, physical revision,
+Feasibility, Actuation, Simulator, ledger or acceptance semantics changed.
+
+Campaign F remains local-only on `campaign/residential-phase-f-correlated-tail-robustness` over merged Campaign E
+base `bec48ce`: it has not been pushed, has no PR and is not merged. The final publication-evidence remediation
+strengthens validation rather than control: semantic, non-final artifact, finalization and final-artifact phases must
+all pass. Final summary/findings are revalidated before PASS; the summary has one frozen ordered schema, validates all
+counts/metrics/gate states and carries max-regret/max-actual-power/max-revision references. A final contract error
+writes self-validating diagnostic FAIL evidence with its actual artifact counts, and a writer exception produces CLI
+FAIL/nonzero rather than PASS.
+
+All 882 nested daily CSVs are now parsed in full: exact public schema, 24 records, timezone-aware one-hour sequence,
+finite numeric and semantic fields, and row-by-row equality to the retained completed trajectory are mandatory. This
+rejects first/middle/last missing or duplicated records, reordering, non-first strategy/power/timestamp alteration,
+`NaN`/positive/negative infinity, header changes and same-cardinality path/content swaps without rerunning the frozen
+matrix. A non-first-row corruption is also staged after final writing through the real orchestration and must end in
+diagnostic FAIL/nonzero CLI. A separate retained runner-input boundary validates every core/tail/reversal/anchor
+forecast and realized input against its immutable scenario facts, so pairwise CRN equality cannot mask a shared bad
+input. D signatures include terminal value; CRN and core/tail gates use independently constructed exact key
+sets/multiplicity rather than counts alone. SVG legends include visible ECDF sorted rank→case mappings. The output gate
+uses 12-decimal CSV accounting evidence with `1e-9` reconciliation tolerance. The three maximum evidence fields are
+now complete argmax sets, not one `max()` representative: each frozen summary records scalar value, reference count and
+deterministically ordered JSON references (`scenario_id`, `strategy`, `value`). Float membership uses absolute `1e-9`,
+relative zero tolerance; integer revisions use exact equality. The final validator independently recomputes each set and
+rejects omissions, extras, duplicates, non-maxima and malformed/legacy singular reference fields. The final validator
+uses `json.loads` and raw retained regret/path evidence, sharing only frozen constants with summary generation; it does
+not reuse generation maximum, tie/order or JSON-serialization helpers. Focused mutation tests validate a supplied
+summary or one supplied nested CSV, while the production gate still scans all 882 files. All three normal maxima remain
+Schedule/Economic ties; only publication evidence validation changed.
+
+Generator-side common-mode regression now covers omitted Schedule/Economic, reversed canonical order, wrong scenario,
+extra non-maximum reference, wrong count and malformed JSON. All seven targeted cases only prove independent validator
+rejection with zero nested scans. Omit Schedule, wrong scenario, extra non-maximum reference, wrong count and malformed
+JSON each additionally prove the real production path: the final gate scans 882 files and produces
+`OUTPUT_CONTRACT_FAILURE`/hard-publication diagnostic `FAIL` without test-side construction of the finding or status.

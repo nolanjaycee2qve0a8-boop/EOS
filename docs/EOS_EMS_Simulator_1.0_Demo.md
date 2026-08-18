@@ -86,6 +86,47 @@ SOC carry、timestamp continuity 与 terminal value 只在 horizon end 计入一
 Campaign C 已作为合并后的 validation evidence；Campaign D 在本次文档同步时仍是当前已审查分支的本地实现，
 合并前不应当作 main 的能力。两者都不替代基础 Demo，也不验证真实 hardware、通信或 production runtime。
 
+## Campaign F multi-day robustness CLI
+
+运行 `python -m ems_simulator.residential_campaign_f --output-dir simulation_output_campaign_f` 可生成约一分钟的
+七日 correlated/tail validation evidence。它运行 48 core、12 deterministic tail 与 6 perfect anchors，共 882
+frozen daily executions。建议按 `campaign_f_summary.txt`、`campaign_f_regime_manifest.csv`、
+`campaign_f_scenario_day_manifest.csv`、`campaign_f_regret_evidence.csv`、
+`campaign_f_strategy_comparisons.csv` 和 SVG 的顺序审查。
+
+拓扑为 16 个 root CSV/TXT、10 个 root SVG，以及 882 个
+`executions/<regime>/<scenario>/day_<index>/<strategy>/mpc_decisions.csv`：共 908 个 deterministic、untracked files。
+core 统计仅描述合成 sample；tail 不含概率权重。Campaign F 先执行 semantic validation，再验证 non-final artifacts，
+写入 final summary/findings 后再验证最终 908-file topology、summary 的 frozen ordered schema、所有 root CSV 和每一
+份 nested CSV 的完整内容及 SVG XML/visible mapping。每份 nested CSV 必须是 24 行、带 timezone 的一小时时序、有限
+数值/合法 action 与 boolean，并逐字段对应 retained completed trajectory；删行、复制、改写 strategy/timestamp/power 或
+NaN/Infinity 都会使发布失败。final contract 失败会留下包含实际 artifact counts 的 self-validating diagnostic FAIL；writer
+异常也会令 CLI 非零退出，绝不会打印 PASS。D signature 含 terminal value，runner-input boundary 逐日验证 immutable
+core/tail/reversal/anchor forecast 与 realized facts，CRN/core-tail 使用 exact key set 和 multiplicity。所有会计 CSV 字段为
+12-decimal evidence，建议用 `1e-9` 绝对容差和解。SVG 图内以 `R/HP/HEL`、`C/T`、`S/E` 的可见短标签/legend 追溯
+series；ECDF 还逐 strategy 显示排序 rank→case。它不意味着现场
+概率、鲁棒优化、硬件或客户部署就绪。
+
+Campaign F maximum summary evidence is plural: every maximum contains its value,
+deterministically ordered `scenario_id`/`strategy`/`value` references and a
+reference count. The normal Campaign F result has Schedule/Economic ties for all
+three maxima. Float tie membership is reporting-only absolute `1e-9` (relative
+zero); revision counts use exact equality. Final validation parses JSON and
+recomputes the complete argmax sets directly from retained raw evidence rather
+than reusing generation's maximum/tie/order/serializer helpers. Focused
+mutations validate one supplied summary or nested CSV; the production gate still
+scans all 882 nested files. Nested-output regression covers record
+position/order, non-finite values, schema and path traceability; a non-first-row
+corruption must reach final diagnostic FAIL and a nonzero CLI exit.
+
+Generator-side common-mode regression separately covers omitted Schedule/Economic
+references, reversed order, wrong scenario, extra non-maximum reference, wrong
+count and malformed JSON. All seven have targeted independent-validator coverage
+with zero nested scans. Omit Schedule, wrong scenario, extra non-maximum, wrong
+count and malformed JSON additionally reach the real production publication
+orchestration, each scanning all 882 nested files and producing diagnostic FAIL;
+the tests do not synthesize the final finding or status.
+
 ## 输出文件
 
 ### simulation_result.csv
