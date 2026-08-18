@@ -1480,5 +1480,21 @@ Strategy 上一日完成的 actual Simulator final SOC 作为下一日 initial S
 final actual SOC 应用一次 terminal energy value。
 
 该层不拥有 Runtime lifecycle、background loop、Command、Device、PCS/BMS、通信、scheduler 或新的 control
-capability。它只保留 trace、ledger、KPI、acceptance 与 CSV/SVG/text evidence。Campaign C/D 均不构成
+capability。它只保留 trace、ledger、KPI、acceptance 与 CSV/SVG/text evidence。Campaign C/D/E 均不构成
 hardware timing、restart persistence、field reliability、customer readiness 或 multi-day global optimization 的验证。
+
+### Campaign E keyed synthetic validation layer
+
+Campaign E is a reporting-only outer layer above the frozen Campaign C daily composition. Its keyed sampler creates
+immutable caller-owned forecast profiles; realized daily input remains unchanged and continues to feed only Simulator
+execution. A sample's Schedule/Economic paths share the exact sampled profile objects, while both are freshly run.
+Perfect anchors are separate fresh runs used solely as read-only comparison references. The layer owns sample manifests,
+actual-power regret evidence, descriptive statistics and escaped deterministic CSV/SVG reporting; it owns no optimizer,
+MPC, physical revision, Feasibility, Actuation, Simulator or runtime behavior.
+
+Its manifest keeps source realized-profile fingerprints, keyed transformation parameters, resulting forecast-profile
+SHA-256 fingerprints and a labelled combined forecast fingerprint. Component payloads use caller order, comma
+delimiters, fixed-six-decimal normalized evidence values, and canonical `0.000000` for signed zero; they are not raw
+Python binary-float hashes and do not enter control or optimization calculations. Reporting deliberately separates the 9,216 sampled
+hourly records from 144 hourly records read from the six retained perfect-anchor traces; neither artifact causes a
+second execution and anchors never enter sampled ECDF/statistical populations.
