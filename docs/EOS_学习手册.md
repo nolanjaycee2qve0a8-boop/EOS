@@ -3033,4 +3033,4 @@ state 才是执行和结算事实。候选动作、物理修正后的 final acti
 TOU 行为也不能只由 tariff 推断：必须同时查看净负荷、SOC、功率限制、物理修正与实际 trace。A-F 是冻结控制
 链的可复现仿真证据，不等同于 HIL、PCS/BMS/DSP 通信、实机闭环、现场安全认证、客户部署就绪或真实概率分布校准。
 
-领导报告采用双层发布策略：生成和验证入口保留可审计来源，PPTX/PDF 发布快照则让非开发读者可直接使用。只保留二进制不便复核；只保留脚本也不便直接沟通。两者同步校验，但不会把报告编排变为控制能力。
+领导报告采用 **checked-in snapshot + validation/export** 策略：四个 PPTX/PDF 发布快照让非开发读者可直接使用；`verify_residential_a_f_leadership_snapshots.py` 只验证并导出这些快照；曲线 CSV/SVG 则由独立 Campaign A 生成器重建。当前没有独立、完整的 PPT 页面 authoring source，validator 不会重新排版 PPT、重跑曲线生成器或生成新 PDF。该边界让发布事实可审计，但不会把报告编排变为控制能力。
