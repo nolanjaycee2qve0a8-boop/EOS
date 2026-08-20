@@ -5332,3 +5332,19 @@ physical/economic boundary sweep, deterministic single-day forecast error, multi
 fixed-seed independent samples, and correlated/tail multi-day stress. Future productization should prioritize device
 interfaces, HIL and PCS/BMS communication/safety boundaries, then real forecast/tariff/load/PV calibration and
 operational resilience; it is not a claim that those hardware or field capabilities already exist.
+
+# Residential EMS 1.0 A–F 领导汇报典型日曲线（本地报告工件）
+
+在 `ac08a66` 合并基线之上，本地报告工具复跑了已冻结 Campaign A 的
+`A01_REFERENCE_TASK175`、`A10_HIGH_PV` 与 `A16_EVENING_PEAK`，并分别独立执行 Schedule 和 Economic
+路径。报告只读取 Simulator actual PV/load、actual battery power、actual grid power 与区间末端
+`next_state.soc`；它不改变 A–F 数值、控制链、Acceptance 或任何 production/runtime 契约。生成的 CSV、SVG、
+PPTX 与 PDF 均放在未跟踪的 `report_output_residential_a_f_leadership/`，仅供审阅与管理层沟通；本条不涉及
+提交、push、PR、Ready 或 merge。
+
+### 领导汇报材料最终收口
+
+在不新增 Campaign、也不修改 Residential EMS 控制能力的前提下，A-F 领导汇报技术完整版完成第 18-21 页事实复核：
+Campaign C 的 forecast/realized 与逐小时 MPC 重规划、Campaign A 的 Candidate→physical revision→actual execution、
+A-F 验证阶梯及其产品化边界，以及 caller-supplied TOU 仿真。技术完整版同步生成 21 页 PDF，并新增 12 页领导精简版
+PPT/PDF。报告工件保持本地未跟踪；本项不宣称 HIL、硬件闭环或现场认证已经完成。
