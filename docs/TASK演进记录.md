@@ -5247,9 +5247,10 @@ single TASK-168 aggregate outcome. Daily terminal values are explicitly not
 summed as a terminal asset. Results, findings and SVGs are deterministic
 untracked evidence, not a change to Residential EMS 1.0 functionality.
 
-# Residential Simulation Validation Campaign E — Seeded Synthetic Forecast Robustness (local)
+# Residential Simulation Validation Campaign E — Seeded Synthetic Forecast Robustness
 
-Campaign D was merged to main at `7469d8b`. Campaign E remains local validation/reporting work on top of the frozen
+Campaign D was merged to main at `7469d8b`. Campaign E was subsequently merged to main through PR #185 at `bec48ce`;
+the following description records its post-freeze validation/reporting work on top of the frozen
 Residential EMS 1.0 chain. It owns a deterministic keyed synthetic forecast sampler (`seed=20260817`) for Reference,
 High PV and High evening-load realized environments: 64 samples per environment, 192 sampled scenarios, 384 fresh
 sampled Schedule/Economic trajectories, six independently executed perfect anchors, and exactly 390 actual 24-hour
@@ -5270,9 +5271,10 @@ runner invocation or ECDF contamination. This is a transparent fixed-seed synthe
 a stochastic optimizer, field probability claim, hardware certification or production readiness result; no Strategy,
 MPC, physical revision, Feasibility, Actuation, Simulator, ledger or acceptance semantics change.
 
-# Residential Simulation Validation Campaign F — Correlated and Tail Multi-Day Robustness (local)
+# Residential Simulation Validation Campaign F — Correlated and Tail Multi-Day Robustness
 
-Campaign E merged at `bec48ce`. Campaign F is local post-freeze validation/reporting work: it adds no robust
+Campaign E merged at `bec48ce`. Campaign F was subsequently merged through PR #186 at `ac08a66` with successful CI;
+it is post-freeze validation/reporting work and adds no robust
 optimizer or production multi-day controller. It selects the existing D01 reference, D03 high-PV and D02
 high-evening-load seven-day source sequences, then composes 48 SHA-256-keyed correlated core forecasts and 12
 deterministic unweighted tail scenarios. The correlation/AR(1) assumptions are synthetic validation assumptions, not
@@ -5286,8 +5288,7 @@ core scenarios; tail remains separate deterministic stress evidence. The untrack
 10 SVG and 882 nested daily decision artifacts (908 files). No Strategy, MPC, optimizer, physical revision,
 Feasibility, Actuation, Simulator, ledger or acceptance semantics changed.
 
-Campaign F remains local-only on `campaign/residential-phase-f-correlated-tail-robustness` over merged Campaign E
-base `bec48ce`: it has not been pushed, has no PR and is not merged. The final publication-evidence remediation
+The following publication-evidence remediation was completed on the Campaign F branch before merge. It
 strengthens validation rather than control: semantic, non-final artifact, finalization and final-artifact phases must
 all pass. Final summary/findings are revalidated before PASS; the summary has one frozen ordered schema, validates all
 counts/metrics/gate states and carries max-regret/max-actual-power/max-revision references. A final contract error
@@ -5318,3 +5319,16 @@ extra non-maximum reference, wrong count and malformed JSON. All seven targeted 
 rejection with zero nested scans. Omit Schedule, wrong scenario, extra non-maximum reference, wrong count and malformed
 JSON each additionally prove the real production path: the final gate scans 882 files and produces
 `OUTPUT_CONTRACT_FAILURE`/hard-publication diagnostic `FAIL` without test-side construction of the finding or status.
+
+# Residential EMS 1.0 A–F Validation Consolidation
+
+Campaign E has merged through PR #185 at `bec48ce`; Campaign F has merged through PR #186 at
+`ac08a66`, and the merged CI completed successfully. Residential EMS 1.0 remains in functional freeze. The
+A–F system now enters documentation and leadership-reporting consolidation: it does **not** start Campaign G or
+expand the synthetic scenario matrix.
+
+The next work is a unified, auditable statement of the already-merged A–F evidence: frozen baseline and acceptance,
+physical/economic boundary sweep, deterministic single-day forecast error, multi-day SOC/accounting continuity,
+fixed-seed independent samples, and correlated/tail multi-day stress. Future productization should prioritize device
+interfaces, HIL and PCS/BMS communication/safety boundaries, then real forecast/tariff/load/PV calibration and
+operational resilience; it is not a claim that those hardware or field capabilities already exist.

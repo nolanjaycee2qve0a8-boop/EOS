@@ -2701,8 +2701,8 @@ forecast algorithm、solver state 或 optimization cache。这样支持 MPC 不�
 Residential EMS 1.0 进入 functional freeze 后，Campaign 不增加控制能力，而是复用冻结的
 Strategy、MPC、Feasibility、Actuation、Simulator 与 accounting 链路验证两件不同的事：Campaign C
 描述一天内 forecast error 对实际执行的影响；Campaign D 验证连续多天的状态、时间与账务。
-本次同步中，Campaign C 已合并到 main；Campaign D 已实现并完成本地独立审查，但尚未推送或合并。二者
-都是 Simulator evidence，不是概率鲁棒性、硬件认证或生产 Runtime 的证明。
+Campaign C/D 现均已合并到 main，并已被后续 Campaign E/F 的验证层复用。二者仍然
+都是 Simulator evidence，不是概率鲁棒性、硬件认证或 production Runtime 的证明。
 
 ### 9.1 Campaign C：forecast 不等于 realized facts
 
@@ -2940,3 +2940,72 @@ extra non-maximum, wrong count and malformed JSON additionally cross the real
 3. 在 `TASK演进记录.md` 中追加目标、实现、意义、文件、验证和关键决策；
 4. 不用文档“宣布”尚未落地的能力；
 5. 不为解释方便而改变已经 review 通过的代码契约。
+
+## 11. Residential EMS 1.0 A–F 验证学习收口
+
+Campaign A–F 已以 `ac08a66`（PR #186）为合并基线完成收口。它们是冻结控制链的
+validation/reporting orchestration，不是新的控制器、production Runtime 或硬件实现。推荐先读
+`docs/validation/RESIDENTIAL_VALIDATION_A_F_SUMMARY.md` 的口径表，再进入各 Campaign 的逐项
+矩阵；不要把逻辑路径、实际日执行、scenario-day、hourly trace、anchor、comparison 和 regret 混为
+同一个“样本数”。
+
+### 11.1 Forecast 只影响 planning，realized facts 决定执行与结算
+
+云端或边缘预测给 MPC 的是“当前可见信息下的 planning input”；它可错、可被验证，也可被
+caller-owned forecast horizon 复现。realized PV、load、tariff 则是 Simulator execution 和 ledger 的
+事实来源。把 forecast 当 actual 会掩盖预测误差；把 actual 倒灌给 planning 则会制造一个并不存在的
+全知控制器。Campaign C/E/F 用这个分离边界观察误差，而不改变控制。
+
+### 11.2 Planned power 与 actual power 不是同一个工程信号
+
+MPC/Strategy 的 planned request 描述“希望请求什么”。它经由 physical revision、Feasibility、Actuation
+再进入 Simulator 后，`simulation_trace.state.battery_result.actual_power_kw` 才是“实际执行了什么”的
+权威。做 DSP/PCS 联调时同样需要保留这两个通道：一个用于决策可解释性，一个用于执行和结算。
+Campaign C/E/F 的 divergence 只能由 actual power 计算，不能用计划功率替代。
+
+### 11.3 Perfect anchor、regret 与 CRN：公平比较的最小工具
+
+perfect anchor 是同一环境、同一 Strategy 下的独立完美-forecast 基准；regret 是实验路径相对它的
+成本变化。它回答“预测扰动带来了什么变化”，不是“哪个 Strategy 永远更好”。CRN（common random
+numbers）让 Schedule 与 Economic 在同一个 sampled forecast 下比较，减少抽样噪声；两条路径仍各自
+执行，不能共享 SOC 或 Simulator state。`TIED` 只表示既定比较语义下相等，可能恰好说明 Economic gate
+正确保留了已经济支持的 Schedule 动作，而非策略无价值。
+
+### 11.4 相关性、Cholesky、AR(1) 与 core/tail 的工程含义
+
+相关矩阵描述 PV/load/tariff 误差可能一起变化的**实验假设**；Cholesky lower factor 是把独立创新
+变成这一声明相关结构的数值工具。AR(1) 让当天 latent 与前一天相连，用来表达跨日误差记忆；它不是
+对真实天气或客户行为的概率认证。Campaign F 的 fixed-seed core 用于描述性统计；unweighted deterministic
+tail 用于压力观察，必须与 core 统计隔离，不能混入 mean、percentile 或 ECDF。
+
+### 11.5 日流量可相加，终端储能存量只能末端计一次
+
+import cost、export revenue、degradation 是每日 flow，可在多日 horizon 上相加；terminal energy value
+是末端 actual SOC 所代表的 stock，只能在 horizon 结束时计一次。每个 Strategy 还必须携带**自己的**
+actual Simulator SOC 到下一日：共享或交叉 carry 会把比较实验污染成互相借电。
+
+### 11.6 测试通过与发布证据完整是两层门槛
+
+单元/集成测试说明计算与不变量在被测条件下成立；publication evidence 还要求最终 CSV/SVG/summary、
+引用、数量、排序和 retained trace 能一致对上。Campaign F 的 fail-closed gate 因此只在最终工件合同通过后
+发出 PASS。它控制 evidence release，而不控制电池、PCS 或任何设备动作。
+
+### 11.7 面向未来产品链路的学习地图
+
+```text
+云端 forecast / planning
+        ↓
+Linux / Edge EMS
+        ↓
+STM32 / DSP real-time control
+        ↓
+PCS / BMS actual execution
+        ↓
+telemetry / ledger
+        ↓
+validation / evidence
+```
+
+这是一张未来产品化的接口与证据地图，不表示以上硬件链已经实现。A–F 当前只在 Simulator 中证明
+forecast、actual execution、ledger 和 evidence 的边界可被表达和审计；真实接口、HIL、通信安全与故障
+恢复仍属于下一阶段范围。
