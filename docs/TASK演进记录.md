@@ -5348,3 +5348,5 @@ PPTX 与 PDF 均放在未跟踪的 `report_output_residential_a_f_leadership/`�
 Campaign C 的 forecast/realized 与逐小时 MPC 重规划、Campaign A 的 Candidate→physical revision→actual execution、
 A-F 验证阶梯及其产品化边界，以及 caller-supplied TOU 仿真。技术完整版同步生成 21 页 PDF，并新增 12 页领导精简版
 PPT/PDF。报告工件保持本地未跟踪；本项不宣称 HIL、硬件闭环或现场认证已经完成。
+
+后续 publication 修正将四个报告快照置于 `docs/reports/residential_a_f/`，并提供正式构建/页数验证入口；第 20 页补齐 D/E/F 的 SOC boundaries、comparisons、regrets、hourly records 与 artifacts 计数。此状态仍是本地提交，未 push、无 PR、未合并。
