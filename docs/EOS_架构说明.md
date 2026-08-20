@@ -1498,3 +1498,44 @@ delimiters, fixed-six-decimal normalized evidence values, and canonical `0.00000
 Python binary-float hashes and do not enter control or optimization calculations. Reporting deliberately separates the 9,216 sampled
 hourly records from 144 hourly records read from the six retained perfect-anchor traces; neither artifact causes a
 second execution and anchors never enter sampled ECDF/statistical populations.
+
+Campaign F extends this reporting boundary with keyed correlated core samples, deterministic tail stress cases, and
+multi-day evidence aggregation. It does not add control capability: Forecast remains planning input, realized
+Simulator facts remain authoritative, and each Strategy path owns its actual SOC carry.
+
+Campaign F selects D01/D03/D02 by exact case ID and fails if a required source is absent; it never falls back to a
+generic reference day. Immutable transformed forecast tuples enter the frozen `ForecastHorizon`; separate exact
+source realized tuples enter `DailySimulationScenarioInput` and Simulator. The outer layer records keyed correlated
+innovations, Cholesky/AR(1) state, clipping and timing shifts, and reads retained daily traces/ledgers for SOC carry,
+terminal-once accounting, anchor regret and reporting. Core statistics exclude tails and anchors. This is still only
+validation/reporting composition: it adds no Strategy, MPC, optimizer, feasibility, actuation, simulator or runtime
+behavior.
+
+Campaign F publication is a four-stage boundary: semantic validation, non-final artifact validation, finalization and
+final-artifact validation. Semantic gates verify complete frozen-D signatures including terminal value, exact CRN
+scenario/path key multiplicity, exact core/tail membership, and that every retained core/tail/reversal/anchor runner
+input still equals its immutable forecast and realized facts. Final artifact validation checks one frozen ordered final
+summary schema (including count/metric/gate values and max-evidence references), the actual artifact counts, and every
+one of the 882 nested daily CSVs against its completed retained trajectory: 24 rows, timezone-aware hourly sequence,
+finite numeric values, semantic action/boolean values and exact row content. It rejects missing, duplicated, reordered
+or altered evidence rather than only checking the first record. A final writer exception is a CLI failure; a final
+contract failure emits a self-validating FAIL diagnostic with actual rather than normal-topology counts. Final
+validation also checks findings content/status, the actual 16 CSV/TXT + 10 SVG + 882 nested decision-file topology,
+and every SVG before CLI PASS is emitted. Its maximum metrics are retained argmax sets: value, deterministic plural
+references and reference count. Float ties use only reporting tolerance (absolute `1e-9`, relative zero); revision ties
+use exact integer equality. The validator parses JSON and recomputes the complete set from raw retained regret/path
+evidence with independent maximum/tie/order logic; it shares only frozen constants with generation, so a shared
+generator defect cannot certify itself. A single `max()` representative therefore cannot hide a Schedule/Economic tie.
+Focused mutation validators inspect one supplied summary or nested CSV, while the production gate retains its complete
+882-file scan. Nested regression covers first/middle/last row,
+sequence, non-finite, schema and path-traceability failures, including a non-first mutation through real final
+orchestration. A final-contract error never leaves PENDING or PASS. CSV accounting evidence
+uses fixed 12-decimal fields and a documented `1e-9` reconciliation tolerance. SVGs retain tooltips but also expose
+visible short-label mappings and legends: `R/HP/HEL` regimes, `C/T` case classes and `S/E` strategies; ECDFs map
+sorted ranks to their actual cases per strategy.
+
+The generator/validator separation is regression-proven with generator-side omission of either strategy, wrong order,
+wrong scenario, extra non-maximum reference, wrong count and malformed JSON. All seven targeted validator cases do not
+invoke the nested tree validator. Omit Schedule, wrong scenario, extra non-maximum reference, wrong count and malformed
+JSON additionally each reach the real final 882-file gate and diagnostic FAIL through production publication orchestration;
+the test suite does not synthesize a final finding or publication status.

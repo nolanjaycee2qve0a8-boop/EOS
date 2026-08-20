@@ -2855,6 +2855,82 @@ environment / same strategy perfect cost`。executed-power divergence 必须从
 样本的 population standard deviation 和 nearest-rank percentiles 只描述这 64 个合成样本；Campaign E 不改变
 control，也不认证生产鲁棒性。Campaign F 才应经单独批准后研究相关误差、极端组合和跨日不确定性。
 
+### 9.5 Campaign F：相关误差记忆与尾部压力不是鲁棒优化
+
+Campaign F 从 Campaign D 的真实 D01 reference、D03 high-PV 与 D02 high-evening-load 七日序列取得
+realized facts，而不是复制 A01 或重画曲线。核心样本的 PV、Load、Tariff innovation 先经过固定相关矩阵的
+Cholesky lower factor，再按 `x_t = 0.70*x_(t-1)+sqrt(1-0.70^2)*epsilon_t` 跨日递推；timing 另有
+`rho=0.65` latent。SHA-256 keyed Box--Muller 使样本不依赖外层遍历顺序，也不会使用全局随机数。
+
+“相关”在这里是合成验证假设，并不是现场天气或住户行为概率模型。core 的 clip 只约束 core 输入；四种 tail
+（乐观、悲观、时序错位、day-3 reversal）无概率权重，绝不混入均值、标准差、分位数或 ECDF。关键证据纪律是：
+scenario-day 的 forecast tuple 必须真正进入 `ForecastHorizon`，而 realized tuple 必须真正进入
+`DailySimulationScenarioInput`/Simulator；只有正确计数或 manifest 而没有进入运行边界，不是有效验证。
+
+Schedule 与 Economic 各自只从上一日实际 Simulator final SOC 获得下一日初值。流量账务按日相加，terminal stock
+仅在第七日实际 SOC 计价一次；regret 仅相对同 regime、同 Strategy 的 perfect anchor，actual-power divergence
+读取 `simulation_trace.state.battery_result.actual_power_kw` 而非计划功率。Campaign F 是 validation model，
+并不把冻结的控制链改造成 stochastic/robust optimizer、production runtime 或现场可靠性证明。
+
+一个重要的工程教训是：**实验数值正确**与**发布门禁完整**是两个层次。独立复算可以证明 882 次执行、AR(1)、tail、
+SOC carry 和 regret 当前正确，但若 hard acceptance 没有验证 D anchor reproduction、CRN pairing、core/tail
+statistics isolation 与实际 output contract，未来回归仍可能被错误标为 PASS。数量相等不代表身份集合相等；dict 会
+覆盖重复 key，从而掩盖 multiplicity 错误。validation system 必须可失败、可注入故障、可回归：PENDING 文件通过
+不等于最终发布文件通过，expected evidence 必须独立于 actual evidence，且状态机既要验证 PASS 终态，也要保留
+可诊断的 FAIL 终态。manifest 正确不代表 runner 输入正确，文件数量正确也不代表证据语义正确。ECDF 的排序改变
+case 顺序，所以图中必须保留每个 strategy 的 rank→case 映射。对未来 STM32/DSP/PCS 验证同样如此：planning 输入、
+actual execution、state carry、账务与报告要闭环可追溯，且 PASS 只能在最终证据合同完成验证后产生。
+
+### 9.6 Campaign F 发布证据完整性：结果正确不等于证据可发布
+
+Campaign F 的 882 次冻结 daily execution 不因发布检查而重跑；发布门禁只读取已完成的 retained
+trajectory 与已经写出的 evidence。它要求两条独立链同时闭合：其一，runner input 必须仍与 immutable
+scenario-day 的 forecast 和 realized facts 一致，覆盖 core、四类 tail（含 reversal）与 perfect anchor；其二，
+每个嵌套 `mpc_decisions.csv` 必须完整且可追溯到该 retained trajectory。后者不只检查文件存在或首行：要检查
+24 个 data rows、timezone-aware 一小时时间序列、有限 numeric fields、合法 action/boolean fields，并与内存中
+已完成 CSV rows 逐行逐字段相同。
+
+同样，`campaign_f_summary.txt` 是有顺序的冻结 schema，而不是可自由增减的日志；所有 counts、metrics、gate
+states、max-evidence references、publication/hard status 和 failure context 都必须与最终结果相符。若 final
+contract 失败，系统写入自己的 diagnostic `FAIL` summary/findings，并报告实际 artifact count；绝不会用正常
+`26/882/908` 假装失败目录仍完整。若 final writer 抛异常，CLI 必须非零退出且不得打印 `PASS`。这类检查只增强
+验证可信度，不增加任何 Strategy、optimizer、MPC、physical revision、Feasibility、Actuation 或 Simulator 能力。
+
+### 9.7 Argmax evidence is a set, not a representative
+
+`max()` answers the greatest scalar but returns only one selected representative;
+it does not establish the complete set of cases attaining that scalar. Campaign F
+therefore reports every tied maximum reference, its count and deterministic
+scenario/strategy order. Float reporting ties use absolute `1e-9`, relative zero
+tolerance; integer revision counts require exact equality. This avoids evidence-
+selection bias when Schedule and Economic—or future PCS/DSP diagnostic channels—
+reach the same extreme.
+
+Publication regression must also be end-to-end: helper-level rejection alone is
+insufficient. A non-first nested CSV corruption must pass through final
+orchestration and block CLI PASS, while retained normal execution remains
+unchanged.
+
+Argmax validation must not share the generator's selection logic: otherwise a
+shared omission, sort or serialization defect can make generation and checking
+agree on the same wrong evidence. Campaign F therefore parses the emitted JSON
+and independently scans raw retained regrets/path summaries using its own
+maximum and tie loops; it shares only frozen schema, strategy-order and
+tolerance constants. Unit mutations target one summary or one nested CSV for
+fast diagnosis, whereas the production publication gate still scans every one
+of the 882 nested files.
+
+That separation must also be proven from the generator side: omitting either
+strategy, reversing order, forging a scenario, adding a non-maximum reference,
+writing a wrong count or emitting malformed JSON must all be rejected before
+publication. Directly editing final text only proves format validation; it does
+not prove generator and validator avoid a common-mode failure. All seven faults
+have zero-scan targeted validator regressions; omit Schedule, wrong scenario,
+extra non-maximum, wrong count and malformed JSON additionally cross the real
+882-file final gate to diagnostic `FAIL`.
+
+**验证器能返回错误，只证明局部检测能力；只有错误经过真实发布编排并改变最终退出码，才能证明发布门禁真正生效。**
+
 ## 10. 文档维护规则
 
 以后每完成一个 TASK：
