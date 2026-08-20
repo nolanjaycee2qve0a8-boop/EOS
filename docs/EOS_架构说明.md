@@ -1539,3 +1539,35 @@ wrong scenario, extra non-maximum reference, wrong count and malformed JSON. All
 invoke the nested tree validator. Omit Schedule, wrong scenario, extra non-maximum reference, wrong count and malformed
 JSON additionally each reach the real final 882-file gate and diagnostic FAIL through production publication orchestration;
 the test suite does not synthesize a final finding or publication status.
+
+## 26. Residential EMS 1.0 A–F Unified Validation Layer
+
+Campaign A–F 的统一视角是“冻结控制链之外的验证层”。它将 caller-owned scenario/forecast facts、
+已完成的 Simulator actual trace、ledger/comparison/acceptance evidence 和 untracked publication artifacts
+组织起来，但不属于 production Runtime：没有 scheduler、device command、后台循环、PCS/BMS 通信或新的
+控制决策。
+
+```text
+validation orchestration
+  ├─ caller-owned forecast facts ──→ frozen planning
+  ├─ caller-owned realized facts ──→ frozen Simulator execution
+  ├─ retained actual trace ──→ ledger / comparison / acceptance
+  └─ retained evidence ──→ publication gate / CSV / SVG / report
+```
+
+Simulator actual state（包含完成 step 后的 SOC、grid/battery execution result）是执行事实权威；forecast、
+planned request、Campaign evidence 都不能替代它。Campaign E/F 的 synthetic/fixed-seed sampling、CRN、
+correlation/Cholesky、AR(1) 与 deterministic tail 都仅属于 validation model：它们不反向改变 Strategy、
+MPC、physical revision、Feasibility、Actuation 或 Simulator。
+
+多日 Campaign D/F 也不是新的多日 Runtime：Schedule/Economic 分别携带自己的上一日 actual Simulator SOC，
+daily flow 可聚合，而 terminal stock 只以 horizon 最终 actual SOC 计一次。perfect anchor 仅作同环境/同
+Strategy 的只读 comparison reference；regret、ranking 和 TIED 都是审查证据，不能被回写为控制目标。
+
+Campaign F 的 fail-closed publication gate 控制的是**证据能否发布**，不是设备使能或安全控制。其四阶段
+合同验证 final summary、CSV/SVG topology 和 retained trace 的一致性；失败只产生 diagnostic evidence，绝不
+重跑或修改已冻结控制路径。
+
+未来 Edge/PCS/BMS/DSP 集成应在此边界之外建立：云端/Edge planning、嵌入式实时控制、设备通信、telemetry
+和 HIL 需要各自的运行与安全合同，再把 actual telemetry 接入同类 ledger/evidence 链。A–F 没有实现或认证
+这些硬件层能力。

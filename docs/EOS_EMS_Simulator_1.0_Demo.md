@@ -83,8 +83,8 @@ Campaign C 优先查看 `campaign_c_summary.txt`、`campaign_c_forecast_errors.c
 `campaign_d_continuity.csv`、`campaign_d_path_summaries.csv` 与 `carry_continuity.svg`，重点是多日 actual
 SOC carry、timestamp continuity 与 terminal value 只在 horizon end 计入一次。
 
-Campaign C 已作为合并后的 validation evidence；Campaign D 在本次文档同步时仍是当前已审查分支的本地实现，
-合并前不应当作 main 的能力。两者都不替代基础 Demo，也不验证真实 hardware、通信或 production runtime。
+Campaign C/D 均已作为合并后的 validation evidence，并由后续 E/F 复用；它们都不替代基础 Demo，也不验证
+真实 hardware、通信或 production runtime。
 
 ## Campaign F multi-day robustness CLI
 
@@ -171,3 +171,33 @@ export artifact 之间使用 exact identity 连接，不通过 copy、serializat
 Demo 不包含 MPC、Optimization、AI、Forecast、Runtime、Scheduler、Device、Cloud、PCS/BMS
 control、Command 或 real-time monitoring。它验证 Simulator 1.0 的应用链路，不代表生产 EMS
 控制器。
+
+## Residential Validation Campaign A–F CLI 索引
+
+Campaign A–F 是冻结 Residential EMS 1.0 的验证/报告工具，不改变基础 Demo 或生产控制。所有输出目录
+均为 deterministic generated evidence，必须保持未跟踪；不要把 `simulation_output_campaign_*` 提交到仓库。
+
+| Campaign | CLI | 主要输出目录 | 推荐首先阅读 |
+| --- | --- | --- | --- |
+| A | `python -m ems_simulator.residential_campaign_a --output-dir simulation_output_campaign_a` | `simulation_output_campaign_a/` | `campaign_summary.txt`、findings、KPI/comparison CSV |
+| B | `python -m ems_simulator.residential_campaign_b --output-dir simulation_output_campaign_b` | `simulation_output_campaign_b/` | B1–B4 summary、swept-input SVG、findings |
+| C | `python -m ems_simulator.residential_campaign_c --output-dir simulation_output_campaign_c` | `simulation_output_campaign_c/` | anchor-regret CSV、actual-power divergence evidence |
+| D | `python -m ems_simulator.residential_campaign_d --output-dir simulation_output_campaign_d` | `simulation_output_campaign_d/` | carry continuity、aggregate accounting、multi-day summary |
+| E | `python -m ems_simulator.residential_campaign_e --output-dir simulation_output_campaign_e` | `simulation_output_campaign_e/` | summary、sample manifest、regret evidence、ECDF |
+| F | `python -m ems_simulator.residential_campaign_f --output-dir simulation_output_campaign_f` | `simulation_output_campaign_f/` | final summary/findings、manifest、regret/comparison CSV、publication gate evidence |
+
+推荐阅读顺序是 A（冻结基准）→ B（边界）→ C（forecast/realized 分离）→ D（多日 SOC 与
+terminal-once accounting）→ E（independent fixed-seed samples）→ F（correlated multi-day core/tail 与
+publication contract）。统一口径见
+`docs/validation/RESIDENTIAL_VALIDATION_A_F_SUMMARY.md`。
+
+### PASS / FAIL 的真实含义与证据受众
+
+`PASS` 表示对应 Campaign 的既定 hard acceptance 或最终 publication evidence contract 已通过；它不表示
+真实天气准确、HIL 完成、硬件安全、生产可靠性或客户部署就绪。`FAIL` 表示该 Campaign 的既定合同不满足，
+应保留 diagnostic evidence 并进行审查，而不是由报告层修改控制。
+
+- **开发调试**：scenario/sample manifest、hourly trace、nested `mpc_decisions.csv`、局部 SVG。
+- **审计复核**：summary/findings、ledger/comparison/anchor-regret CSV、F 的 final publication contract。
+- **管理层展示**：每 Campaign summary、核心 KPI/比较 SVG、统一 A–F 收口报告；不可用单一图或
+  ranking 取代范围和限制说明。

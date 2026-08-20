@@ -3,10 +3,8 @@
 Campaign F is post-freeze validation/reporting orchestration for correlated and
 tail multi-day robustness. It changes no residential control capability.
 
-Campaign E is merged on base `bec48ce`. Campaign F is currently a local-only,
-pre-publication validation commit on
-`campaign/residential-phase-f-correlated-tail-robustness`: it has not been
-pushed, has no PR and is not merged. Its result is not production robustness,
+Campaign E is merged on base `bec48ce`. Campaign F was merged through PR #186
+at `ac08a66` after successful CI. Its result is not production robustness,
 hardware, PCS, BMS, DSP, HIL, field or customer-readiness certification.
 
 ## Real execution chain
