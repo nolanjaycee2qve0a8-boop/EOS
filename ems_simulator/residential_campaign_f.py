@@ -2147,7 +2147,7 @@ def _maximum_evidence_contract_failures(
         references_key = f"{reference_prefix}_references"
         if not candidates or any(
             isinstance(candidate[2], bool)
-            or not isinstance(candidate[2], (int, float))
+            or not isinstance(candidate[2], int | float)
             or not math.isfinite(candidate[2])
             for candidate in candidates
         ):
@@ -2209,7 +2209,7 @@ def _maximum_evidence_contract_failures(
             or not isinstance(item["strategy"], str)
             or item["strategy"] not in _STRATEGIES
             or isinstance(item["value"], bool)
-            or not isinstance(item["value"], (int, float))
+            or not isinstance(item["value"], int | float)
             or not math.isfinite(item["value"])
             for item in parsed
         ):
