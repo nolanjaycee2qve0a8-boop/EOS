@@ -1,5 +1,25 @@
 # EOS TASK 演进记录
 
+## P0.1 — Residential Edge Runtime Interface and Safety Contracts（local only）
+
+在 Residential EMS 1.0 A-F 仿真验证与领导报告合并后，P0.1 新增独立
+`edge_runtime` transport-neutral 合同层，而不修改冻结的 Strategy、MPC、优化、
+physical revision、Feasibility、Actuation、Simulator 或 Campaign 数值。内部电池功率
+沿用 Simulator 权威符号：正值充电、负值放电、零值空闲；未来 PCS 协议若相反只能由
+adapter 显式转换。`PowerCommand`、ACK、`TelemetrySnapshot`、BMS/PCS capability、
+SafetyDecision、FaultEvent、RuntimeHealth、freshness policy 与 immutable lifecycle
+book 明确区分请求、回执与 actual telemetry。Effective capability 只能由 evaluator 对
+exact BMS/PCS facts 派生；只有 `READY` health、完整 recovery 条件与无 `CRITICAL`
+blocking fault 才能接受新主动功率。ACK 后必须经过 retained `execution_started_at` 的
+executing，并由该时刻之后观测、命令 expiry 前到达的 actual telemetry 在容差内证明最终
+命令，才可 completed；`completion_at == expires_at` 同样过期。record 反序列化只是 audit
+evidence，不能恢复权威 book；没有 completion evidence 的 `COMPLETED` record 非法。supersede
+必须原子登记完整、且高于 book 全局最高 sequence 的 successor，不能记录任意 ID；失败不留下
+部分写入。P0.1 仅保留有真实 producer 的 lifecycle 状态，并由专用方法经过内部 transition
+guard，不能通过公共通用跳转绕过校验。stale/replay/rollback/unknown/expired 均有 fail-closed 行为；SAFE_IDLE 仅为
+软件零功率请求，不是硬件安全、HIL、PCS/BMS/DSP 通信或现场认证。
+P0.1 为本地合同工作，未 push、未创建 PR、未合并。
+
 ## TASK-165 Terminal-SOC-Divergence Economic Observation
 
 - TASK-164 的 E0/E1/E2 均在终点 SOC 收敛，终端价值没有改变 realized import-cost 的路径结论。TASK-165

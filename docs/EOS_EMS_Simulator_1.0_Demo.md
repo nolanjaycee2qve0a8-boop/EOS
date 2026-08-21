@@ -1,5 +1,29 @@
 # EOS EMS Simulator 1.0 Demo
 
+> **P0.1 Edge contracts test:** the following is a contract-only test command,
+> not a real-device CLI. It does not create a loop, poll telemetry or transmit
+> a command:
+>
+> ```powershell
+> pytest tests/unit/edge_runtime/test_edge_runtime_contracts.py
+> ```
+>
+> `PowerCommand`, ACK and `TelemetrySnapshot` are future adapter-facing facts;
+> Simulator output remains a simulation fact and no PCS/BMS/CAN/RS485/Modbus
+> protocol is implemented by this repository entry.
+>
+> P0.1 test observes contracts only: BMS/PCS capability is derived inside the
+> safety evaluator, `READY` plus complete recovery facts are required for a new
+> active request, and lifecycle completion requires authoritative actual-power
+> telemetry observed after execution starts and before command expiry. Parsed
+> lifecycle records are audit evidence only, not durable command restoration.
+> A `COMPLETED` record without that actual completion evidence is invalid; a
+> supersede successor must be above the book-global sequence maximum and failed
+> replacement leaves no partial lifecycle write. The transition matrix is
+> enforced internally through specialized methods, not a generic transition API.
+> It neither polls nor controls a device; `SAFE_IDLE` is a software request,
+> not a hardware-safe confirmation.
+
 ## 概览
 
 该 Demo 是 EOS 第一个可直接运行的 24 小时家庭光储仿真示例。它复用已冻结的

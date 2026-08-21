@@ -1,5 +1,18 @@
 # EOS 架构说明
 
+> **P0.1 边界补充：** Residential EMS 1.0 的 A-F 控制与仿真验证已冻结。后续
+> `edge_runtime` 是独立、transport-neutral 的设备边界合同层：它不属于现有生产
+> Runtime，不反向改变策略或 Simulator。PCS/BMS actual telemetry 才是执行事实；
+> 命令与 ACK 仅是请求/回执证据。P0.1 的 publication gate 管理证据发布，不控制设备。
+> 详见 `architecture/specification/RESIDENTIAL_EDGE_RUNTIME_BOUNDARY.md` 与 ADR-088。
+> P0.1 的 Effective capability 只能从 BMS/PCS facts 在安全层内派生；只有 `READY`
+> health、完整 recovery checks 与无 P0.1-blocking `CRITICAL` fault 才可接受新主动功率。
+> lifecycle 的 completed 需要在 `execution_started_at` 后、命令 expiry 前的实际遥测证明，
+> 绝非 ACK 或软件 SAFE_IDLE 的替代。反序列化 record 仅为审计 evidence，不能恢复权威 book；
+> supersede 必须原子登记完整、且高于 book 全局最高 sequence 的 successor；失败不能留下
+> predecessor 或索引的部分写入。P0.1 只保留有真实 producer 的 lifecycle 状态，并由专用
+> 方法实际调用内部 transition guard；没有公共通用状态跳转入口。
+
 ## 1. 文档定位
 
 本文是 EOS Reference Implementation 的软件架构设计说明书。它记录稳定的架构原则、
