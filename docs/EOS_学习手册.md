@@ -3009,3 +3009,28 @@ validation / evidence
 这是一张未来产品化的接口与证据地图，不表示以上硬件链已经实现。A–F 当前只在 Simulator 中证明
 forecast、actual execution、ledger 和 evidence 的边界可被表达和审计；真实接口、HIL、通信安全与故障
 恢复仍属于下一阶段范围。
+
+### 11.8 如何阅读住宅 EMS 典型日运行曲线
+
+阅读典型日时，先看 realized PV/load：它们说明当天外生事实；再看 `actual_power_kw`，其中电池正值为
+充电、负值为放电，电网正值为购电、负值为上网。不要把 planned request 当成执行结果，也不要由功率
+曲线反推 SOC。曲线中的 SOC 采用每个一小时区间结束时的 `Simulator next_state.soc`，因此最后一个点才是
+当天 final SOC。累计 import、export、battery charge/discharge 是 flow，可按时间相加；terminal energy
+value 则是末端 stock，只能在路径结束时单独结算一次。
+
+同一场景下 Schedule 与 Economic 若实际曲线重叠，表示两条独立执行的冻结路径在该组外生事实下得到了
+`TIED`，不是策略没有价值，也不能外推为所有现场条件都相同。领导汇报使用的 A01、A10、A16 曲线仅是
+已合并 Campaign A 的三个可复现典型切片；它们用于解释 Simulator 事实和比较口径，不构成真实概率、HIL
+或产品化认证。
+
+### 11.9 A-F 领导汇报曲线的阅读边界
+
+PV、Load、Grid 与 Battery 曲线应优先读取 Simulator actual 字段：功率是 kW，按一小时积分后的 flow 才是
+kWh。SOC 点为区间结束时的 `next_state.soc`，不可当作区间开始值；daily flow 可以累计，terminal stock 仅在
+路径末端计一次。forecast 是 planning 的 caller-supplied 输入；realized PV、Load、Tariff 与 Simulator actual
+state 才是执行和结算事实。候选动作、物理修正后的 final action、以及 actual power 是三个不同层级。
+
+TOU 行为也不能只由 tariff 推断：必须同时查看净负荷、SOC、功率限制、物理修正与实际 trace。A-F 是冻结控制
+链的可复现仿真证据，不等同于 HIL、PCS/BMS/DSP 通信、实机闭环、现场安全认证、客户部署就绪或真实概率分布校准。
+
+领导报告采用 **checked-in snapshot + validation/export** 策略：四个 PPTX/PDF 发布快照让非开发读者可直接使用；`verify_residential_a_f_leadership_snapshots.py` 只验证并导出这些快照；曲线 CSV/SVG 则由独立 Campaign A 生成器重建。当前没有独立、完整的 PPT 页面 authoring source，validator 不会重新排版 PPT、重跑曲线生成器或生成新 PDF。该边界让发布事实可审计，但不会把报告编排变为控制能力。
