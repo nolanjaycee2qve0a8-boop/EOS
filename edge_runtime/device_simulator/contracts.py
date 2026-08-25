@@ -16,6 +16,7 @@ from edge_runtime import (
     TimingPolicy,
 )
 from edge_runtime.validation import (
+    SerializableContract,
     parse_utc_datetime,
     require_aware_datetime,
     require_exact_fields,
@@ -377,7 +378,7 @@ class DeviceSimulatorConfiguration:
 
 
 @dataclass(frozen=True, slots=True)
-class DeviceSimulatorStep:
+class DeviceSimulatorStep(SerializableContract):
     """Auditable facts from exactly one caller-driven P0.2 virtual interval."""
 
     started_at: datetime
@@ -397,6 +398,8 @@ class DeviceSimulatorStep:
     ending_soc_fraction: float
     boundary_evidence: tuple[str, ...]
     fault_events: tuple[FaultEvent, ...]
+
+    SCHEMA_VERSION: ClassVar[str] = "edge-device-simulator-step/v1"
 
     def __post_init__(self) -> None:
         for name in ("started_at", "ended_at"):

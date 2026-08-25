@@ -77,6 +77,23 @@ Clearing a fault only permits a later caller-supplied new command to be
 evaluated. P0.2 never automatically replays, resends, revives or restores an
 old command; P0.1 terminal and transition guards remain authoritative.
 
+## Prepared-step authority boundary
+
+`prepare_step()` samples the complete start snapshot without advancing virtual
+clock, SOC, previous actual power, or plant state. Its returned prepared session
+is bound to that exact immutable simulator snapshot; it has no public ordinary
+constructor, hydration API, copy/deepcopy, or pickle path, and `execute()` is
+one-shot. A validation failure before execution does not consume it. These
+rules ensure readiness facts and later execution facts come from one sample.
+
+The immutable simulator itself remains branchable by explicitly retaining a
+base snapshot and creating independent scenario next snapshots. That is a
+P0.2 test-scenario capability, not runtime authority. P0.3 consumes one
+prepared session per tick and retains only one authoritative next simulator.
+P0.3 may serialize the resulting immutable `DeviceSimulatorStep` only as audit
+evidence: its final actual telemetry is an input to reconciliation, not a way to
+recreate prepared-session authority or a simulator snapshot.
+
 ## Exclusions
 
 No production Runtime loop, real adapter, protocol, hardware/device I/O, HIL,

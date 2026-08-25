@@ -18,6 +18,7 @@ from edge_runtime.device_simulator.simulator import (
     DeterministicDeviceScenarioHarness,
     DeterministicDeviceSimulator,
     DeviceScenarioTrace,
+    PreparedDeviceSimulatorStep,
 )
 
 __all__ = [
@@ -30,5 +31,6 @@ __all__ = [
     "FaultSpecification",
     "FaultTarget",
     "FaultType",
+    "PreparedDeviceSimulatorStep",
     "VirtualClock",
 ]

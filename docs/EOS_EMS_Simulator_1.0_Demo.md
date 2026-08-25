@@ -1,5 +1,17 @@
 # EOS EMS Simulator 1.0 Demo
 
+## Edge P0.3 focused runtime prototype
+
+`python -m pytest tests/unit/edge_runtime/test_controlled_runtime.py -q` 验证 caller-driven
+启动/恢复 observation、READY-start admission、state matrix、readiness 输入、命令 identity/
+sequence、ACK/actual 最小 fail-closed 行为与 fault-clear no-replay；不连接 PCS/BMS、STM32/DSP
+或 HIL。P0.3 每 tick 准备一个 P0.2 snapshot 并 execute 一次；本命令不证明真实设备协议时序。
+每个 admitted command 只能来自当前 caller；`tick(None)` 不会从 trace、lifecycle、ACK、actual
+或 READY recovery 自动重放、重试、重新编号或恢复上一条功率。
+Stage 2B 同时验证 request/safety-final/ACK/expected-actual/actual-telemetry 五层事实、
+compound reconciliation 以及严格 audit-trace JSON；trace 不能 hydration 为 Runtime 或设备
+authority，也不实现 restart recovery。
+
 > **P0.2 device-simulator contract test:**
 >
 > ```powershell

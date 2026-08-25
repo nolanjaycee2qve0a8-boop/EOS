@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass
 from datetime import timedelta
+from typing import NoReturn, SupportsIndex
 
 from edge_runtime import (
     AcknowledgementStatus,
@@ -381,13 +382,8 @@ class DeterministicDeviceSimulator:
             ),
         )
 
-    def step(
-        self, command: PowerCommand | None, *, duration: timedelta
-    ) -> tuple["DeterministicDeviceSimulator", DeviceSimulatorStep]:
-        """Advance one positive interval without retries or implicit replay."""
-        interval = require_positive_timedelta(duration, "duration")
-        if command is not None and not isinstance(command, PowerCommand):
-            raise TypeError("command must be a PowerCommand or None")
+    def prepare_step(self) -> "PreparedDeviceSimulatorStep":
+        """Sample one authoritative start snapshot without advancing plant state."""
         faults = self._active_faults()
         bms = self._capability(DeviceCapabilitySource.BMS, faults)
         pcs = self._capability(DeviceCapabilitySource.PCS, faults)
@@ -396,6 +392,30 @@ class DeterministicDeviceSimulator:
         raw = self._telemetry(
             faults, at_end=False, actual_power_kw=self.previous_actual_power_kw
         )
+        return PreparedDeviceSimulatorStep._create(
+            self, faults, bms, pcs, events, health, raw
+        )
+
+    def step(
+        self, command: PowerCommand | None, *, duration: timedelta
+    ) -> tuple["DeterministicDeviceSimulator", DeviceSimulatorStep]:
+        """Backward-compatible prepare-once/execute-once wrapper."""
+        return self.prepare_step().execute(command, duration=duration)
+
+    def _execute_prepared(
+        self,
+        command: PowerCommand | None,
+        duration: timedelta,
+        faults: tuple[FaultSpecification, ...],
+        bms: DeviceCapability,
+        pcs: DeviceCapability,
+        events: tuple[FaultEvent, ...],
+        health: RuntimeHealth,
+        raw: TelemetrySnapshot,
+    ) -> tuple["DeterministicDeviceSimulator", DeviceSimulatorStep]:
+        interval = require_positive_timedelta(duration, "duration")
+        if command is not None and not isinstance(command, PowerCommand):
+            raise TypeError("command must be a PowerCommand or None")
         decision: SafetyDecision | None = None
         acknowledgement: CommandAcknowledgement | None = None
         requested = 0.0
@@ -460,6 +480,78 @@ class DeterministicDeviceSimulator:
             evidence,
             events,
         )
+
+
+@dataclass(frozen=True, slots=True, init=False)
+class PreparedDeviceSimulatorStep:
+    """One-shot authority; observation facts cannot be used to forge a session."""
+
+    simulator: DeterministicDeviceSimulator
+    active_faults: tuple[FaultSpecification, ...]
+    bms_capability: DeviceCapability
+    pcs_capability: DeviceCapability
+    fault_events: tuple[FaultEvent, ...]
+    runtime_health: RuntimeHealth
+    raw_telemetry: TelemetrySnapshot
+    _used: bool
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        raise TypeError("PreparedDeviceSimulatorStep is created only by simulator")
+
+    def __copy__(self) -> "PreparedDeviceSimulatorStep":
+        raise TypeError("PreparedDeviceSimulatorStep cannot be copied")
+
+    def __deepcopy__(self, memo: object) -> "PreparedDeviceSimulatorStep":
+        raise TypeError("PreparedDeviceSimulatorStep cannot be copied")
+
+    def __reduce__(self) -> NoReturn:
+        raise TypeError("PreparedDeviceSimulatorStep cannot be serialized")
+
+    def __reduce_ex__(self, protocol: SupportsIndex) -> NoReturn:
+        raise TypeError("PreparedDeviceSimulatorStep cannot be serialized")
+
+    @classmethod
+    def _create(
+        cls,
+        simulator: DeterministicDeviceSimulator,
+        faults: tuple[FaultSpecification, ...],
+        bms: DeviceCapability,
+        pcs: DeviceCapability,
+        events: tuple[FaultEvent, ...],
+        health: RuntimeHealth,
+        raw: TelemetrySnapshot,
+    ) -> "PreparedDeviceSimulatorStep":
+        item = object.__new__(cls)
+        for name, value in {
+            "simulator": simulator,
+            "active_faults": faults,
+            "bms_capability": bms,
+            "pcs_capability": pcs,
+            "fault_events": events,
+            "runtime_health": health,
+            "raw_telemetry": raw,
+            "_used": False,
+        }.items():
+            object.__setattr__(item, name, value)
+        return item
+
+    def execute(
+        self, command: PowerCommand | None, *, duration: timedelta
+    ) -> tuple[DeterministicDeviceSimulator, DeviceSimulatorStep]:
+        if self._used:
+            raise ValueError("prepared step has already executed")
+        result = self.simulator._execute_prepared(
+            command,
+            duration,
+            self.active_faults,
+            self.bms_capability,
+            self.pcs_capability,
+            self.fault_events,
+            self.runtime_health,
+            self.raw_telemetry,
+        )
+        object.__setattr__(self, "_used", True)
+        return result
 
 
 @dataclass(frozen=True, slots=True)

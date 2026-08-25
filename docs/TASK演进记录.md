@@ -1,5 +1,9 @@
 # EOS TASK 演进记录
 
+## Edge P0.3 — Controlled Residential Runtime Prototype
+
+P0.3 在 P0.1 safety/lifecycle 和 P0.2 deterministic logical plant 之上增加 caller-driven tick evidence；不改变冻结 Residential EMS 控制链或 Campaign A–F，不实现真实协议、持久恢复、HIL 或部署。阶段 2A 仅本地 hardening：以 state-before READY 与完整 readiness 为新主动功率 admission 前提；startup/waiting/fault recovery observation 不重放 command；陈旧事实、链路退化、软件安全空闲、critical/E-stop/意外 actual 与 shutdown 分别进入有 guard 的 runtime state。ACK drop 的 in-flight lifecycle 阻止后续 admission，过期后仍须一轮 recovery observation；不提供 P0.3 公共 supersede。P0.2 scenario branching 与 P0.3 单一 authoritative next simulator 明确分离。阶段 2B 本地补齐 actual reconciliation：request、safety-final request、ACK accepted、expected actual 与 actual telemetry 五层证据分开；actual telemetry 是执行事实，ACK 不等于 completed。对账保留固定风险排序的 primary/secondary reasons，unknown actual fail-closed；versioned trace 仅可严格审计序列化，不能恢复 Runtime、Simulator、lifecycle authority 或重启状态。no-replay closure 进一步冻结 caller-origin：admitted command 只能是当前 tick caller 的原对象；`tick(None)`、READY recovery、trace/lifecycle/ACK/actual/safety evidence 都不能创建、重编号、重试或恢复 command。trace 显式记录 caller/admitted command、封闭 origin 与 automatic=false，但只是审计 evidence。本项仍仅限本地提交；未 push、未创建 PR、未合并。
+
 ## P0.2 — Deterministic Virtual PCS/BMS and Fault Injection（local only）
 
 在 P0.1 Edge 安全合同之后，P0.2 新增 `edge_runtime.device_simulator`：以 immutable
@@ -5380,7 +5384,7 @@ operational resilience; it is not a claim that those hardware or field capabilit
 PPTX 与 PDF 均放在未跟踪的 `report_output_residential_a_f_leadership/`，仅供审阅与管理层沟通；本条不涉及
 提交、push、PR、Ready 或 merge。
 
-### 领导汇报材料最终收口
+## 领导汇报材料最终收口
 
 在不新增 Campaign、也不修改 Residential EMS 控制能力的前提下，A-F 领导汇报技术完整版完成第 18-21 页事实复核：
 Campaign C 的 forecast/realized 与逐小时 MPC 重规划、Campaign A 的 Candidate→physical revision→actual execution、
