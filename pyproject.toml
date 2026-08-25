@@ -35,6 +35,7 @@ packages = [
   "simulator",
   "ems_simulator",
   "ems_strategy",
+  "edge_runtime",
   "forecast",
   "optimization",
 ]

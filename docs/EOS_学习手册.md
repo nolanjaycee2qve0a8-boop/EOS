@@ -1,5 +1,48 @@
 # EOS 学习手册
 
+## P0.1 — 从规划到 Edge 执行事实的边界
+
+规划（plan）说的是 EMS 希望下一时段做什么；`PowerCommand` 是 Edge 未来准备交给
+adapter 的明确请求；ACK 仅说明设备一侧接受、拒绝或识别了这个请求。三者都不是电池
+实际功率。只有 PCS/BMS telemetry 的 `actual_battery_power_kw` 是执行事实，因此结算、
+下一轮状态和事故追溯都必须回到 actual telemetry。
+
+`observed_at` 是事实发生/测量的时间，`received_at` 是 Edge 收到它的时间。网络延迟可让
+旧的 `observed_at` 刚刚到达；所以只看 `received_at` 会错误地把陈旧 SOC 当成新鲜状态。
+P0.1 因此按 observation age 判断 freshness，未知值保留为 `None`，绝不写成 0。
+
+BMS 允许状态和功率限制、PCS 能力/降额、Edge 通信和新鲜度安全都高于经济目标与 EMS
+计划。无从证明主动功率仍安全时，软件请求 `SAFE_IDLE`（零主动功率）。这不等于 PCS/BMS
+已经安全，也不清除急停或本地保护。
+
+P0.1 不接受由调用方手写的“有效能力”：它只能把 exact BMS 与 PCS capability 做最严格
+交集后得到。只有 Edge health 为 `READY` 才允许新的主动功率；`CRITICAL` active fault 是
+P0.1 明确阻断规则，非 critical fault 仍被保留为 evidence 而不被静默升级。恢复同样不是
+“新鲜就行”：还要链路健康、能力可用、急停解除、无阻断 fault 且 lifecycle 已静止。
+
+生命周期把“设备收到”与“设备实际做到”分开：ACK 后才可进入 executing，并记录
+`execution_started_at`；只有该时刻之后观测、在命令过期前收到且在容差内匹配最终命令的
+Simulator/设备权威 telemetry，才可标记 completed。例如，03:04:04 开始执行时，03:04:02
+即使功率吻合的 telemetry 也不能证明本次命令成功。ACK 只证明接受，不能代替执行开始。
+因此 SAFE_IDLE 是软件零功率请求，不能作为硬件已经归零的证明。所有不可变 Edge data
+contracts 都有严格版本化 UTC 序列化；book/evaluator 是服务语义，不是持久化方案。
+
+稳定 `command_id` 与递增 sequence 让重复传输可幂等，同时拒绝同 sequence 不同命令、
+回放和乱序。合法 supersede 是一个完整的新命令原子替换旧命令，其 sequence 必须高于
+**book 当前全局最高** sequence：例如已有 sequence 10 时，不能用 sequence 6 替换旧的
+sequence 5，即使 `6 > 5`。失败不写入 successor，也不改变 predecessor。反序列化
+lifecycle record 仅用于审计，不能恢复 book。重启不能恢复旧命令；只有重新获得 fresh
+telemetry 与 capability 后，未来 Runtime 才能发出新命令。
+
+同样，状态名称写成 `COMPLETED` 不等于完成。该 record 必须同时携带可核验、匹配 command
+identity 的 actual telemetry completion evidence；没有 evidence 的 `COMPLETED` 是非法审计
+事实。P0.1 只保留由专用方法实际产生的状态，且专用方法在完成时间、identity 和 evidence
+校验后统一经过内部状态迁移 guard；没有可绕过这些校验的通用 `transition()` API。
+
+未来分层为：云端预测/规划 → Linux/Edge EMS → STM32/DSP 实时控制 → PCS/BMS 实际执行
+→ telemetry/ledger → validation/evidence。P0.1 仅定义此链的合同，不表示 STM32/DSP、
+PCS/BMS 通信或现场设备链已实现。
+
 ## 1. 手册定位
 
 本手册面向希望学习 EMS（Energy Management System，能源管理系统）算法、
