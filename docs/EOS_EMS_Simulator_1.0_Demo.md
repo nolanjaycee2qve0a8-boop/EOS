@@ -1,5 +1,19 @@
 # EOS EMS Simulator 1.0 Demo
 
+> **P0.2 device-simulator contract test:**
+>
+> ```powershell
+> pytest tests/unit/edge_runtime/test_device_simulator.py
+> ```
+>
+> 该测试显式推进 virtual clock，覆盖虚拟 PCS/BMS 故障、P0.1 safety、ACK、actual telemetry
+> 与 lifecycle refusal/completion。它不连接真实设备，不生成 Runtime loop，也不应被解释为
+> HIL 或硬件认证。
+> P0.2 只应用即时 accepted、未过期 ACK；reject/drop/delay 均不会在该 step 产生 command
+> actual power 或 SOC 变化。其 fault schedule 在 step 起点采样，并非连续时间设备模型。
+> 这是保守 simulator policy，不表示真实 PCS 在 ACK 丢失或迟到时必然未执行；未来 Runtime 仍须
+> 以 actual telemetry 为执行事实并进行 production-grade reconciliation，P0.2 未实现该能力。
+
 > **P0.1 Edge contracts test:** the following is a contract-only test command,
 > not a real-device CLI. It does not create a loop, poll telemetry or transmit
 > a command:

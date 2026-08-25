@@ -1,5 +1,15 @@
 # EOS 架构说明
 
+> **P0.2 边界补充：** `edge_runtime.device_simulator` 位于 P0.1 合同之上的确定性虚拟
+> PCS/BMS 与故障注入层。它显式推进虚拟时间，输出 P0.1 safety request、ACK 和 later actual
+> telemetry 的独立证据，不反向修改冻结控制链。它不是 P0.3 Runtime loop，也不包含协议、
+> HIL、硬件或现场能力。
+> P0.2 仅把“即时 accepted、未过期 ACK”应用为当前 step 的 virtual actual response；其余
+> ACK 情况均 fail-closed 为零功率。fault target/parameter 由白名单约束，warning retained
+> 而 critical fail-closed；step 仅在起点采样 `[activation_at, clear_at)`。
+> 这是 simulator policy，不能推断真实 PCS 无 ACK 时必然未执行：未来 Runtime 必须仍以 actual
+> telemetry 为执行事实并处理 ACK 丢失/迟到的不确定性；P0.2 不实现该 production reconciliation。
+
 > **P0.1 边界补充：** Residential EMS 1.0 的 A-F 控制与仿真验证已冻结。后续
 > `edge_runtime` 是独立、transport-neutral 的设备边界合同层：它不属于现有生产
 > Runtime，不反向改变策略或 Simulator。PCS/BMS actual telemetry 才是执行事实；

@@ -1,5 +1,34 @@
 # EOS 学习手册
 
+## P0.2 — 确定性虚拟设备与故障注入
+
+P0.1 问“在当前证据下能否发出一个安全的软件功率请求”；P0.2 问“当虚拟 PCS/BMS
+出现断连、拒绝、迟到、降额或功率不跟随时，这个合同是否仍然 fail-closed”；P0.3 才会负责
+受控轮询、传输、ACK 等待和恢复编排。P0.2 不是 production Runtime。
+
+要分清三层事实：command 是意图，ACK 是设备侧回执，actual telemetry 才是实际功率与实际
+SOC 的事实。安全 evaluator 的 final request 也只是软件请求；它不能替代后一时刻 PCS/BMS
+遥测，更不能证明硬件已归零。
+
+虚拟时间比 `sleep()` 好：每个测试指定 UTC 起点和正时间步，因此陈旧 `observed_at`、迟到
+ACK、严格 expiry 边界和 fault clear 都可在任何机器上重复。fault activation 开始改变虚拟
+事实，clear 只影响未来的重新评估；恢复健康绝不自动重放旧 command，因为旧意图可能已经
+过期、不再安全或不再符合用户目标。
+
+P0.2 对 ACK 采取 fail-closed 的模拟政策：只有在 step 起点即时到达、accepted 且未过期的
+ACK 才能驱动这一 step 的 actual power；reject、drop、迟到或过期 ACK 都是 `0.0 kW` 与不变
+SOC。该授权结果作为 immutable step evidence 只计算一次，同时约束 actual、SOC 和 lifecycle。
+它是测试台的可审计政策，不是对所有真实 PCS 通信时序的泛化：真实设备可能已经接收并执行，
+但 ACK 在通信链路中迟到或丢失。因此未来 Runtime 仍必须以 actual telemetry 为执行事实权威，
+并处理这一不确定性；P0.2 不实现 production reconciliation。每种 fault 都有 target/
+parameter 白名单；warning 留作可见但不阻断的事实，critical 才会强制安全归零。每个 step 只在
+起点采样 `[activation_at, clear_at)`，中途变化从下一 caller-driven step 生效。
+
+P0.2 是 test double 和逻辑 plant simulator：它能表达接口级功率/SOC 响应；digital twin
+需要经过校准的更完整物理模型；HIL 则需要真实硬件/实时接口。通过 P0.2 不能证明 PCS/BMS
+实机安全。功率单位为 kW，能量为 `kW × 小时 = kWh`；充电时存入能量乘充电效率，放电时需
+除以放电效率，SOC 是存储能量除以容量后的 `[0,1]` fraction。
+
 ## P0.1 — 从规划到 Edge 执行事实的边界
 
 规划（plan）说的是 EMS 希望下一时段做什么；`PowerCommand` 是 Edge 未来准备交给

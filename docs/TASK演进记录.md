@@ -1,5 +1,23 @@
 # EOS TASK 演进记录
 
+## P0.2 — Deterministic Virtual PCS/BMS and Fault Injection（local only）
+
+在 P0.1 Edge 安全合同之后，P0.2 新增 `edge_runtime.device_simulator`：以 immutable
+fault schedule、caller-controlled virtual clock 和显式 step 组合虚拟 PCS/BMS 原始事实，真正
+送入 P0.1 capability、telemetry、health、safety 和 lifecycle 边界。它区分 command、safe
+request、ACK 与 actual telemetry；SOC 只按 actual signed power、容量和效率积分，并在 SOC
+边界留下 evidence。PCS/BMS 断连、unavailable、stale、derating、direction prohibition、critical
+fault、E-stop、ACK reject/drop/delay、stuck actual power、SOC unknown、fault overlap 与 clear/no
+replay 都有 focused regression。P0.2 不修改冻结的 Strategy、MPC、optimizer、physical revision、
+Feasibility、Actuation、Simulator、ledger、acceptance 或 Campaign A-F 数值；不实现 P0.3 loop、
+协议、HIL、实机通信、硬件安全认证或部署。本项仅本地提交，未 push、未创建 PR、未合并。
+其 command-application policy 明确为：仅即时 accepted 且未过期 ACK 可驱动当前 virtual
+actual；reject/drop/delay/expiry 均归零且不改变 SOC。fault type/target/parameter 采用 fail-closed
+白名单，warning retained、critical 阻断；step 在起点按 `[activation_at, clear_at)` 采样，clear
+一个 overlap fault 不会清除其他 active fault。这是 P0.2 保守 simulator policy，不主张真实 PCS
+无 ACK 时一定未执行；未来 Runtime 仍须根据 actual telemetry 处理 ACK 丢失/迟到的不确定性，
+而 P0.2 不实现 production-grade reconciliation。
+
 ## P0.1 — Residential Edge Runtime Interface and Safety Contracts（local only）
 
 在 Residential EMS 1.0 A-F 仿真验证与领导报告合并后，P0.1 新增独立
