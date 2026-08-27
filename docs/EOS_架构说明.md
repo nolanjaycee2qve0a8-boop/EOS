@@ -1,5 +1,9 @@
 # EOS 架构说明
 
+## P0.4 Transport-Neutral Device Adapter Boundary
+
+P0.4 在 P0.3 语义与未来 PCS/BMS I/O 之间增加事实边界，不是 controller 或真实设备接线。它保留 P0.1 observation/capability/health 类型，P0.1 仍拥有 freshness 和 safety，P0.3 仍拥有 command authority、reconciliation 与 lifecycle。adapter 只接受从当前 caller/admitted identity 和 safety-final request 产生的一次性 transmission request；zero 是明确消息，ACK 和 actual telemetry 独立到达。无协议、网络、线程、HIL、持久化、硬件控制或自动重试。
+
 ## P0.3 Controlled Edge Runtime
 
 P0.3 是 transport-neutral、caller-driven 的 runtime composition，不是 production Runtime。每个明确 tick 复用 P0.2 起点 fault snapshot，并保留 P0.1 safety、ACK、actual telemetry、SOC 与 lifecycle reconciliation。软件 SAFE_IDLE 不能证明硬件已经归零。
