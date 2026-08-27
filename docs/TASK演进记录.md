@@ -5396,3 +5396,14 @@ A-F 验证阶梯及其产品化边界，以及 caller-supplied TOU 仿真。技�
 PPT/PDF。报告工件保持本地未跟踪；本项不宣称 HIL、硬件闭环或现场认证已经完成。
 
 后续 publication 修正将四个报告快照置于 `docs/reports/residential_a_f/`，并以 `tools/verify_residential_a_f_leadership_snapshots.py` 提供 snapshot validation/export：它验证四个 tracked snapshot 的解析、页数、敏感标记、标题和第 20 页计数合同，再按字节导出；不重新排版 PPT、不重跑曲线生成器，也不生成新 PDF。第 20 页实际 PPT/PDF 已补齐 D/E/F 的 SOC boundaries、comparisons、regrets、hourly records 与 artifacts 计数。完整 authoring source 尚未实现。此状态仍是本地提交，未 push、无 PR、未合并。
+
+## Edge P0.5 — FeasibleDecision → PowerCommand handoff（本地实现）
+
+在 P0.4 Device Adapter merge 基线 `e418774` 上，P0.5 新增纯、无状态、transport-neutral 的
+`FeasibleDecision -> caller-owned metadata -> PowerCommand` handoff。它只使用审批后的 action/power：
+charge 为正、discharge 为负、idle 为零且 `safe_idle`；不会从原始 `EMSDecision`、MPC action 或
+Simulator actuation 取功率。P0.5 不调用 P0.3 tick、P0.2 Simulator、P0.4 Device Adapter、安全、
+lifecycle、ACK 或实际执行；后续 P0.6 才可设计显式单周期 composition。P0.4 继续保留 current caller
+`PowerCommand -> P0.3 admission/safety/runtime -> DeviceTransmissionRequest` 与 adapter evidence 的
+独立职责。阶段顺序为 P0.3 Controlled Runtime、P0.4 Device Adapter Boundary、P0.5 Command
+Handoff，之后才是未来 P0.6 composition。Residential EMS 1.0 冻结算法及 Campaign A–F 数值不变。

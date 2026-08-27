@@ -251,3 +251,16 @@ publication contract）。统一口径见
 - **审计复核**：summary/findings、ledger/comparison/anchor-regret CSV、F 的 final publication contract。
 - **管理层展示**：每 Campaign summary、核心 KPI/比较 SVG、统一 A–F 收口报告；不可用单一图或
   ranking 取代范围和限制说明。
+
+## Edge P0.5 command handoff
+
+P0.5 is a pure `FeasibleDecision -> PowerCommand` boundary, separate from this
+Simulator demo's `ActuationHandoffResult`. Approved charge/discharge/idle maps
+to positive/negative/zero kW; command identity and timing come explicitly from
+the caller. It neither calls Runtime nor executes a device command. P0.4 remains
+the separate transport-neutral Device Adapter boundary: a current caller
+`PowerCommand` enters P0.3 admission/safety/runtime before P0.4 forms a
+`DeviceTransmissionRequest` and adapter evidence. A future P0.6 may explicitly
+compose these one-cycle boundaries; it is not implemented. The phase order is
+P0.3 Controlled Runtime, P0.4 Device Adapter Boundary, P0.5 Command Handoff,
+then future P0.6 composition.
