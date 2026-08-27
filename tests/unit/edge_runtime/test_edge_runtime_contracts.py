@@ -639,6 +639,7 @@ def test_book_has_no_record_hydration_or_caller_collection_injection() -> None:
     )
     assert record.state is CommandLifecycleState.EXECUTING
     assert not hasattr(CommandLifecycleBook, "_from_records")
+    assert not hasattr(CommandLifecycleBook, "from_dict")
     with pytest.raises(TypeError):
         CommandLifecycleBook(records=(record,))  # type: ignore[call-arg]
     book = CommandLifecycleBook()

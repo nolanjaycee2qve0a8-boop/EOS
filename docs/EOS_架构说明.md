@@ -1,5 +1,27 @@
 # EOS 架构说明
 
+## P0.3 Controlled Edge Runtime
+
+P0.3 是 transport-neutral、caller-driven 的 runtime composition，不是 production Runtime。每个明确 tick 复用 P0.2 起点 fault snapshot，并保留 P0.1 safety、ACK、actual telemetry、SOC 与 lifecycle reconciliation。软件 SAFE_IDLE 不能证明硬件已经归零。
+
+> **P0.3 Stage 2B 边界补充：** 每 tick 的 serializable audit evidence 明确分开 caller
+> request、safety-final request、ACK accepted power、expected actual 和 Simulator actual
+> telemetry；actual telemetry 是执行事实权威，ACK 不是完成。对账用单一稳定风险顺序保留
+> primary 与全部 secondary reasons。trace 的严格 schema、UTC/finite-number 与
+> tick/time/state/SOC linkage 只用于审计；它不能恢复 Runtime、Simulator、lifecycle book
+> 或 P0.2 authority，也没有数据库、重启恢复、协议、线程、HIL 或硬件控制能力。
+
+P0.3 stage 2A 的 runtime state 是 admission evidence，不是 PCS/BMS hardware state。统一 guard
+记录每个 tick 的 state-before、state-after 与 reason：陈旧/未知事实等待；链路、可用性或未结
+lifecycle 退化；软件安全空闲保持零请求；critical/E-stop/意外非零 actual 故障；显式 shutdown
+终结。只有 READY-start 与完整 P0.1 readiness 才会交付一个新非零 command。validation
+orchestration 不反向改变控制，也不属于 production Runtime。
+
+P0.3 command-origin guard 只允许当前 caller 的原始 command 被 admission；`tick(None)`
+产生 `none` origin，不能从 trace、lifecycle、ACK、actual、safety-final request 或恢复状态制造
+替代 command。每个 audit step 保留 caller/admitted command、封闭 origin 和自动生成=false，
+但这些序列化事实不构成 retry、resume、persistent recovery 或 command authority。
+
 > **P0.2 边界补充：** `edge_runtime.device_simulator` 位于 P0.1 合同之上的确定性虚拟
 > PCS/BMS 与故障注入层。它显式推进虚拟时间，输出 P0.1 safety request、ACK 和 later actual
 > telemetry 的独立证据，不反向修改冻结控制链。它不是 P0.3 Runtime loop，也不包含协议、

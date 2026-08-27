@@ -1,5 +1,44 @@
 # EOS 学习手册
 
+## Edge P0.3 受控 tick
+
+P0.3 将 P0.1 safety/lifecycle 与 P0.2 逻辑 PCS/BMS 组合为 caller-driven tick：command 是意图，safe request 是软件约束结果，ACK 是回执，actual telemetry 才是执行事实。ACK 丢失或迟到不证明真实设备未执行；本原型仅使用保守模拟规则，未来 Runtime 仍须 reconciliation。它没有协议、实时调度、HIL 或硬件控制。
+
+阶段 2A 把“何时可准入新主动功率”固定为一个简单规则：只要 tick **起点**不是
+`READY`，就算本 tick 刚好观察到事实恢复完整，也只能形成 observation evidence，不能执行
+携带的 caller command。因此 `STARTING → READY`、`WAITING → READY`、`FAULTED → READY`
+都需要下一次 READY-start tick 才可能准入。这样不会因 startup/fault clear 自动重放旧意图。
+
+更严格地说，P0.3 的 admitted command 只能是**当前** `tick` 调用者传入的同一个
+`PowerCommand` 对象；`tick(None)` 必须保持无 command。trace、lifecycle、旧的
+safety-final request、ACK 和 actual 都是审计或对账事实，绝不能据此生成新 ID、新 sequence
+或新时间窗来恢复上一次功率。READY 只是“可以等待下一条 caller command”，不是“自动恢复
+上次功率”；unexpected actual 也必须作为 actual 异常处理，不能被解释为 command replay。
+
+状态不是硬件状态：陈旧或未知事实进入 `WAITING_FOR_FRESH_TELEMETRY`；连接、可用性、命令
+通道和未结 lifecycle 问题进入 `DEGRADED`；软件 fallback、拒绝/过期请求和普通方向安全阻断
+进入 `SAFE_IDLE`；critical、E-stop 与意外非零 actual 才进入 `FAULTED`。`SHUTTING_DOWN`
+只能显式请求，普通 tick 不能将它复活。正常 SOC reserve/direction safety block 是软件约束，
+不应被误报为设备故障。
+
+P0.2 immutable simulator 可以从同一基础事实显式派生多个测试 scenario branches；每个
+prepared session 却不可复制、不可序列化且只能 execute 一次。P0.3 每 tick 只准备、执行一个
+authority session，并且不返回它。这是 Python 原型的 authority 边界，不是进程安全、协议安全、
+硬件权限或 production Runtime。
+
+### P0.3 Stage 2B：不要把五种功率事实混为一谈
+
+一次 Edge tick 依次保留五层事实：caller command 的 **requested power**、安全层收敛后的
+**final safe request**、PCS 的 **ACK accepted power**、由准入与安全事实得到的
+**expected actual power**，以及 Simulator 的 **actual telemetry power**。前四层是请求、
+回执或期望；最后一层才是本原型的执行事实。ACK accepted 不能直接写成 completed，安全层
+归零也不能证明硬件归零。
+
+对账会保留所有同时出现的原因，并按固定风险顺序选择 primary reason；unknown actual 不是
+`0 kW`，而是 fail-closed 的未知事实。tick trace 可以严格版本化为审计 JSON，并验证时序、
+状态和 SOC 链接；它不能反序列化为 Runtime、lifecycle book、Simulator 或 prepared authority，
+也不提供重启恢复。
+
 ## P0.2 — 确定性虚拟设备与故障注入
 
 P0.1 问“在当前证据下能否发出一个安全的软件功率请求”；P0.2 问“当虚拟 PCS/BMS

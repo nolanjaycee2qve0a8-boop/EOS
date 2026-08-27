@@ -37,6 +37,10 @@ safety and lifecycle contracts rather than creating parallel types.
   resent or treated as continuing intent.
 - Steps sample faults at their explicit start time using `[activation, clear)`;
   no step is retroactively split by an intra-step fault transition.
+- `prepare_step()` exposes one immutable start observation and a non-serializable,
+  one-shot prepared authority. It has no plant side effect; execute consumes the
+  same snapshot once. Explicit immutable simulator branches remain test scenarios,
+  not a production authority model.
 
 ## Consequences
 
@@ -45,3 +49,6 @@ safety and lifecycle contracts rather than creating parallel types.
   adapter, thread, sleep or wall clock.
 - P0.3 remains the separately approved owner of polling, bounded orchestration,
   transmission, ACK waiting and recovery ownership.
+- P0.3 may retain a completed immutable `DeviceSimulatorStep` as serializable
+  audit evidence, including final actual telemetry. That does not serialize or
+  restore this simulator, its virtual clock, a prepared session or authority.

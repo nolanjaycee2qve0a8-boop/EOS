@@ -42,6 +42,12 @@ raw-fact, safety and actual-response constraints intact.
 - Every scenario uses its own immutable simulator/trace and explicit UTC time.
 - A step samples faults only at `started_at`, with active interval
   `[activation_at, clear_at)`; intra-step changes apply at the next step.
+- `prepare_step()` is side-effect-free and produces a one-shot, non-copyable,
+  non-serializable authority session bound to its source simulator snapshot.
+  Explicit immutable simulator branches remain isolated test scenarios.
+- The serializable completed `DeviceSimulatorStep` is immutable evidence only.
+  P0.3 reconciliation reads its retained actual telemetry once; evidence
+  deserialization cannot recover a simulator or prepared authority.
 
 ## Deferred scope
 
