@@ -1,5 +1,9 @@
 # EOS 学习手册
 
+## Edge P0.4 设备适配边界
+
+P0.4 只定义“未来设备适配器可提供或消费哪些事实”，不定义 Modbus/CAN/网络字节。它把 observation、一次 safety-final transmission、ACK 和 actual telemetry 分开：ACK 不是实际执行，actual 仍是执行事实。P0.4 不生成/复制/重试 `PowerCommand`；一次 transmission request 只能由当前 P0.3 caller/admitted command 与 safety decision 构造，失败、轮询或重建 adapter 都不能重放它。时间戳由设备事实提供，fresh/stale 仍由 P0.1 判定。可序列化的 adapter evidence 只能审计，不能恢复 Runtime、lifecycle 或执行 authority。
+
 ## Edge P0.3 受控 tick
 
 P0.3 将 P0.1 safety/lifecycle 与 P0.2 逻辑 PCS/BMS 组合为 caller-driven tick：command 是意图，safe request 是软件约束结果，ACK 是回执，actual telemetry 才是执行事实。ACK 丢失或迟到不证明真实设备未执行；本原型仅使用保守模拟规则，未来 Runtime 仍须 reconciliation。它没有协议、实时调度、HIL 或硬件控制。
