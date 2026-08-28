@@ -13,6 +13,12 @@ from ems_strategy.coordinator import (
 )
 from ems_strategy.decision import EMSDecision
 from ems_strategy.descriptor import EMSStrategyDescriptor
+from ems_strategy.edge_command_handoff import (
+    DeterministicEdgeCommandHandoff,
+    EdgeCommandHandoffBoundary,
+    EdgeCommandHandoffResult,
+    EdgeCommandMetadata,
+)
 from ems_strategy.feasibility import FeasibilityBoundary, FeasibleDecision
 from ems_strategy.handoff import ActuationHandoffBoundary, ActuationHandoffResult
 from ems_strategy.mpc import MPCConfiguration, MPCStrategyBoundary, MPCStrategyInput
@@ -109,6 +115,7 @@ __all__ = [
     "BatteryOperatingEnvelopeBoundary",
     "BatteryOperatingEnvelopeFeasibility",
     "DecisionProvenance",
+    "DeterministicEdgeCommandHandoff",
     "DeterministicExplainableMPCDecisionCSVFileExporter",
     "DeterministicExplainableMPCDecisionCSVRowMapper",
     "DeterministicExplainableMPCDecisionCSVSerializer",
@@ -123,6 +130,9 @@ __all__ = [
     "EconomicMultiOpportunityMPCCycleInput",
     "EconomicMultiOpportunityMPCCycleResult",
     "EconomicMultiOpportunitySingleMPCCycleOrchestrator",
+    "EdgeCommandHandoffBoundary",
+    "EdgeCommandHandoffResult",
+    "EdgeCommandMetadata",
     "ExplainableMPCDecisionCSVFileExportInput",
     "ExplainableMPCDecisionCSVFileExportResult",
     "ExplainableMPCDecisionCSVFileExporterBoundary",

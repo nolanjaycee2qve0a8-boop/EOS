@@ -3149,3 +3149,17 @@ TOU 行为也不能只由 tariff 推断：必须同时查看净负荷、SOC、�
 链的可复现仿真证据，不等同于 HIL、PCS/BMS/DSP 通信、实机闭环、现场安全认证、客户部署就绪或真实概率分布校准。
 
 领导报告采用 **checked-in snapshot + validation/export** 策略：四个 PPTX/PDF 发布快照让非开发读者可直接使用；`verify_residential_a_f_leadership_snapshots.py` 只验证并导出这些快照；曲线 CSV/SVG 则由独立 Campaign A 生成器重建。当前没有独立、完整的 PPT 页面 authoring source，validator 不会重新排版 PPT、重跑曲线生成器或生成新 PDF。该边界让发布事实可审计，但不会把报告编排变为控制能力。
+
+## P0.5: approved power becomes an unexecuted Edge request
+
+`EMSDecision` is the original strategy request; it is not a device command.
+Only `FeasibleDecision` may enter P0.5, so a 5 kW request limited to 2 kW
+produces a 2 kW command, and a feasibility downgrade to idle produces zero
+`safe_idle`. Caller-owned metadata supplies ID, sequence and time facts; P0.5
+does not invent a UUID, wall clock or TTL. The resulting command still needs a
+future caller to pass it explicitly to P0.3, where safety, admission and actual
+telemetry remain distinct authorities. P0.4 is deliberately different: it
+adapts the current caller PowerCommand after P0.3 admission/safety/runtime into
+one DeviceTransmissionRequest and adapter evidence. P0.5 does not call P0.3 or
+P0.4; P0.6 composition remains future work. The phase order is P0.3 Controlled
+Runtime, P0.4 Device Adapter Boundary, P0.5 Command Handoff, then P0.6.

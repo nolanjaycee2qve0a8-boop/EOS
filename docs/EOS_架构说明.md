@@ -1620,3 +1620,23 @@ Campaign F 的 fail-closed publication gate 控制的是**证据能否发布**�
 未来 Edge/PCS/BMS/DSP 集成应在此边界之外建立：云端/Edge planning、嵌入式实时控制、设备通信、telemetry
 和 HIL 需要各自的运行与安全合同，再把 actual telemetry 接入同类 ledger/evidence 链。A–F 没有实现或认证
 这些硬件层能力。
+
+## 27. Edge P0.5 Feasibility-to-command boundary
+
+P0.5 adds a one-way, stateless adapter at the EMS/Edge boundary:
+
+```text
+EMSDecision -> Feasibility -> FeasibleDecision
+                              + caller metadata
+                                      -> P0.5 PowerCommand
+                                      -> future explicit P0.6 composition
+```
+
+The adapter reads approved action/power only; `ActuationHandoffResult` remains
+Simulator-only. It creates no admission, ACK, lifecycle mutation, SOC/actual
+fact, clock, transport or execution. `edge_runtime` has no reverse dependency
+on `ems_strategy`; P0.5 does not change frozen algorithms or Campaign A–F.
+It remains separate from P0.4's current-caller `PowerCommand -> P0.3
+admission/safety/runtime -> DeviceTransmissionRequest` adapter-evidence path.
+The phase order is P0.3 Controlled Runtime, P0.4 Device Adapter Boundary, P0.5
+Command Handoff, then future P0.6 composition.
