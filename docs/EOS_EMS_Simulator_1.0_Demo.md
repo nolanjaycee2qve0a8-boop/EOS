@@ -260,7 +260,12 @@ to positive/negative/zero kW; command identity and timing come explicitly from
 the caller. It neither calls Runtime nor executes a device command. P0.4 remains
 the separate transport-neutral Device Adapter boundary: a current caller
 `PowerCommand` enters P0.3 admission/safety/runtime before P0.4 forms a
-`DeviceTransmissionRequest` and adapter evidence. A future P0.6 may explicitly
-compose these one-cycle boundaries; it is not implemented. The phase order is
+`DeviceTransmissionRequest` and adapter evidence. P0.6 now provides a one-cycle
+caller-driven composition of these existing boundaries. Its audit evidence and
+current-caller continuation are separate: evidence cannot restore command or
+adapter authority, while continuation contains only the exact P0.3 next runtime.
+P0.4 is post-tick audit: ACK/actual facts do not replace P0.3 reconciliation,
+and unavailable facts do not claim zero power or physical completion. This is
+not a real protocol, network, HIL, or hardware-control demo. The phase order is
 P0.3 Controlled Runtime, P0.4 Device Adapter Boundary, P0.5 Command Handoff,
-then future P0.6 composition.
+then P0.6 controlled composition.

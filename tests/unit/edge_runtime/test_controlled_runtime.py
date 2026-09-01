@@ -255,6 +255,23 @@ def test_prepared_authority_cannot_be_constructed_copied_or_serialized() -> None
         assert not hasattr(prepared, name)
 
 
+def test_runtime_authority_cannot_be_copied_or_serialized() -> None:
+    runtime = _runtime().tick(None, duration=timedelta(seconds=1))
+
+    with pytest.raises(TypeError, match="ControlledEdgeRuntime cannot be copied"):
+        copy.copy(runtime)
+    with pytest.raises(TypeError, match="ControlledEdgeRuntime cannot be copied"):
+        copy.deepcopy(runtime)
+    with pytest.raises(TypeError, match="ControlledEdgeRuntime cannot be serialized"):
+        pickle.dumps(runtime)
+    with pytest.raises(TypeError, match="ControlledEdgeRuntime cannot be serialized"):
+        runtime.__reduce__()
+    with pytest.raises(TypeError, match="ControlledEdgeRuntime cannot be serialized"):
+        runtime.__reduce_ex__(4)
+    for name in ("to_dict", "from_dict", "serialize", "deserialize", "hydrate"):
+        assert not hasattr(runtime, name)
+
+
 def test_prepare_is_side_effect_free_and_validation_failure_does_not_consume() -> None:
     simulator = _runtime().simulator
     prepared = simulator.prepare_step()

@@ -1629,7 +1629,7 @@ P0.5 adds a one-way, stateless adapter at the EMS/Edge boundary:
 EMSDecision -> Feasibility -> FeasibleDecision
                               + caller metadata
                                       -> P0.5 PowerCommand
-                                      -> future explicit P0.6 composition
+                                      -> P0.6 controlled composition
 ```
 
 The adapter reads approved action/power only; `ActuationHandoffResult` remains
@@ -1639,4 +1639,19 @@ on `ems_strategy`; P0.5 does not change frozen algorithms or Campaign A–F.
 It remains separate from P0.4's current-caller `PowerCommand -> P0.3
 admission/safety/runtime -> DeviceTransmissionRequest` adapter-evidence path.
 The phase order is P0.3 Controlled Runtime, P0.4 Device Adapter Boundary, P0.5
-Command Handoff, then future P0.6 composition.
+Command Handoff, then P0.6 controlled composition.
+
+## 28. Edge P0.6 controlled composition evidence boundary
+
+P0.6 composes one caller-owned `FeasibleDecision + EdgeCommandMetadata` through
+the frozen P0.5 handoff, one P0.3 controlled-runtime tick, and P0.4 post-tick
+adapter audit facts. It returns separate immutable audit evidence, which retains
+no live input/runtime/adapter/handoff/request, and a non-serializable current
+caller continuation containing only the exact P0.3 next runtime. Historical
+evidence cannot recreate a command or resume a cycle.
+
+P0.3 logical execution and reconciliation occur before P0.4 audit facts. An
+ACK or adapter actual value cannot replace P0.3 reconciliation or prove physical
+completion; `MISSING`/`UNAVAILABLE` facts are explicit audit evidence, not zero
+power or success. P0.6 adds no network, protocol, HIL, hardware authority,
+scheduler, persistent Runtime, or field control.

@@ -78,6 +78,12 @@ contiguous tick/time/state/SOC links but cannot hydrate a Runtime, Simulator,
 lifecycle book or prepared session. It supplies no restart recovery, database,
 transport, scheduler, thread, HIL or hardware authority.
 
+`ControlledEdgeRuntime` is execution authority, not audit evidence. It rejects
+copy, deepcopy, pickle/reduce, and hydration APIs. The rule does not change
+caller-driven `tick` behavior or the P0.2 immutable scenario-branching contract;
+it prevents serialization of a runtime snapshot from becoming a restoration or
+replay path.
+
 Each step separately serializes the caller command, the admitted command,
 `CommandOrigin` (`current_caller` or `none`) and an always-false
 automatic-generation flag. These are audit facts, not a command-restoration

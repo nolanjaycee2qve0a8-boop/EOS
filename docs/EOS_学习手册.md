@@ -3161,5 +3161,20 @@ future caller to pass it explicitly to P0.3, where safety, admission and actual
 telemetry remain distinct authorities. P0.4 is deliberately different: it
 adapts the current caller PowerCommand after P0.3 admission/safety/runtime into
 one DeviceTransmissionRequest and adapter evidence. P0.5 does not call P0.3 or
-P0.4; P0.6 composition remains future work. The phase order is P0.3 Controlled
-Runtime, P0.4 Device Adapter Boundary, P0.5 Command Handoff, then P0.6.
+P0.4. The phase order is P0.3 Controlled Runtime, P0.4 Device Adapter Boundary,
+P0.5 Command Handoff, then P0.6 controlled composition.
+
+## P0.6: one composition, two different kinds of returned fact
+
+P0.6 lets a caller explicitly compose one approved decision through P0.5, P0.3,
+and P0.4. The result separates **audit evidence** from **caller continuation**.
+Evidence records existing P0.5/P0.3/P0.4 facts but does not keep a live runtime,
+adapter, handoff object, request, or command factory. Continuation is not
+history: it holds only P0.3's exact next runtime for a new explicit caller cycle
+and cannot be copied or serialized to recover command power.
+
+Read P0.4 facts as post-tick observations. P0.3 has already made its logical
+execution/reconciliation decision; an ACK is not proof that a PCS acted, and an
+adapter actual value does not replace P0.3's retained actual fact. Unavailable
+adapter data does not mean zero power or success. P0.6 remains deterministic and
+transport-neutral, not networking, field hardware, or HIL control.

@@ -5406,4 +5406,14 @@ Simulator actuation 取功率。P0.5 不调用 P0.3 tick、P0.2 Simulator、P0.4
 lifecycle、ACK 或实际执行；后续 P0.6 才可设计显式单周期 composition。P0.4 继续保留 current caller
 `PowerCommand -> P0.3 admission/safety/runtime -> DeviceTransmissionRequest` 与 adapter evidence 的
 独立职责。阶段顺序为 P0.3 Controlled Runtime、P0.4 Device Adapter Boundary、P0.5 Command
-Handoff，之后才是未来 P0.6 composition。Residential EMS 1.0 冻结算法及 Campaign A–F 数值不变。
+Handoff，之后是 P0.6 controlled composition。Residential EMS 1.0 冻结算法及 Campaign A–F 数值不变。
+
+## Edge P0.6 — controlled composition（本地治理修订中）
+
+P0.6 仅把 caller-owned 的 approved `FeasibleDecision + EdgeCommandMetadata`
+经 P0.5、一次 P0.3 tick 和 P0.4 post-tick audit 组合为单周期、transport-neutral 的事实链。
+返回结构明确拆分为不可执行 audit evidence 与只含 exact P0.3 next runtime 的当前 caller
+continuation；历史 evidence 不保留 live runtime、adapter、handoff、input 或 request，不能恢复
+command authority。P0.4 的 ACK/actual/unavailable 都是审计事实，不反向改写已完成的 P0.3
+reconciliation，也不声称真实物理完成。本条目仍为本地治理修订中，未提交、未 push、无 PR、未合并；
+不增加协议、网络、HIL、硬件或现场控制能力。
