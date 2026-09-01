@@ -63,6 +63,8 @@ the command-provenance boundary is auditable. This post-execution trace contract
 is a second, audit-layer defense; it neither creates execution authority nor
 substitutes for the pre-execution current-caller guard.
 It cannot hydrate a runtime, lifecycle book, Simulator or P0.2 prepared
-authority; no persistent recovery is provided. This remains deterministic
-prototype evidence, not process security, protocol security, hardware authority
-or a production Runtime.
+authority; no persistent recovery is provided. `ControlledEdgeRuntime` itself
+also rejects copy, deepcopy, pickle, reduce, and hydration APIs, so an immutable
+runtime snapshot cannot be serialized into a new execution authority. This
+remains deterministic prototype evidence, not process security, protocol
+security, hardware authority, or a production Runtime.

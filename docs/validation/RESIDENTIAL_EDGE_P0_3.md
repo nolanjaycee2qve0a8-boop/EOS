@@ -40,8 +40,10 @@ strict evidence round-trips, forged-schema rejection, immutable trace linkage
 and absence of runtime-authority hydration. ACK is never asserted as actual
 execution; Simulator actual telemetry remains the execution fact. The matrix is
 prototype evidence, not a hardware safety certification: evidence serialization
-is audit-only and supplies no persistent recovery. Final publication gates still
-require broader suites.
+is audit-only and supplies no persistent recovery. `ControlledEdgeRuntime`
+itself rejects copy, deepcopy, pickle/reduce, and hydration, while its trace
+remains serializable audit evidence. Final publication gates still require
+broader suites.
 
 ## Phase 3 final mutation ledger
 

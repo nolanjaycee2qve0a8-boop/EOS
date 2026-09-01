@@ -2,6 +2,7 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
+from typing import NoReturn, SupportsIndex
 
 from edge_runtime.contracts import (
     AcknowledgementStatus,
@@ -159,6 +160,18 @@ class ControlledEdgeRuntime:
         if not isinstance(simulator, DeterministicDeviceSimulator):
             raise TypeError("simulator must be a DeterministicDeviceSimulator")
         return cls(simulator, CommandLifecycleBook())
+
+    def __copy__(self) -> NoReturn:
+        raise TypeError("ControlledEdgeRuntime cannot be copied")
+
+    def __deepcopy__(self, memo: object) -> NoReturn:
+        raise TypeError("ControlledEdgeRuntime cannot be copied")
+
+    def __reduce__(self) -> NoReturn:
+        raise TypeError("ControlledEdgeRuntime cannot be serialized")
+
+    def __reduce_ex__(self, protocol: SupportsIndex) -> NoReturn:
+        raise TypeError("ControlledEdgeRuntime cannot be serialized")
 
     def request_shutdown(self) -> "ControlledEdgeRuntime":
         """Latch a caller-requested shutdown; ordinary ticks never revive it."""
