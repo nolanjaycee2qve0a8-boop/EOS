@@ -3178,3 +3178,19 @@ execution/reconciliation decision; an ACK is not proof that a PCS acted, and an
 adapter actual value does not replace P0.3's retained actual fact. Unavailable
 adapter data does not mean zero power or success. P0.6 remains deterministic and
 transport-neutral, not networking, field hardware, or HIL control.
+
+## P0.6–P0.7：从单周期组合到 caller 显式会话（本地候选）
+
+P0.6 把 approved `FeasibleDecision + EdgeCommandMetadata` 经 P0.5、一次 P0.3 runtime tick 和 P0.4
+post-tick audit 组合为单周期事实链；audit evidence 与 current-caller continuation 是不同对象。P0.3
+reconciliation retained actual 是 logical execution fact；P0.4 actual telemetry 是独立 observation，ACK 也
+不能单独证明物理完成。
+
+P0.7 在此基础上提供同步、one-shot 的 caller session：caller 每 cycle 只提供新的 exact decision、fresh
+metadata、duration 和 tolerance，**不提供 `PowerCommand`**；command 仍由 P0.6 内部 P0.5 生成。success 后
+caller 获得下一 continuation；fault、non-admission、unavailable fact、ACK/identity mismatch 或 misuse 都会
+fail closed 并终止旧 session。recovery 必须显式创建新 session，不能 replay 历史功率。
+
+P0.7 是已本地验证、待最终独立复审和发布的候选，不是已合并 production Runtime。API 导航、测试阅读、
+mutation 解释及未来 Edge/PCS/BMS 映射见 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`；它不实现
+network、protocol、thread、persistence、HIL 或 hardware control。
