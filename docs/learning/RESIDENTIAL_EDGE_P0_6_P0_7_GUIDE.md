@@ -128,7 +128,7 @@ pytest tests/unit/edge_runtime/test_controlled_composition.py
 pytest tests/unit/edge_runtime/test_controlled_composition_session.py
 ```
 
-P0.7 focused module 有 10 个 test function，其中一个两案例参数化，故当前收集结构为 11 cases。它覆盖 creation
+P0.7 focused module 有 11 个 test functions，其中一个两案例参数化，故当前收集结构为 12 cases。它覆盖 creation
 无副作用、两 cycle 的一次调用、fresh inputs、post-P0.6 lineage corruption、continuation isolation、
 copy/pickle rejection、termination、unavailable fact 与 fresh-session recovery。此数字是候选测试文件的结构，
 不是 CI 或发布结论。
