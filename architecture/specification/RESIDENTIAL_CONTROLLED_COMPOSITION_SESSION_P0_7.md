@@ -6,6 +6,10 @@ P0.7 是一个同步、caller-owned、transport-neutral 的 session facade。它
 
 ADR-094 的 PROVISIONAL/CANDIDATE 记录保留为历史候选。本 specification 是本阶段的正式合同；它不授权 P0.8 或任何 network/hardware 扩展。
 
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。该发布状态不扩展本 specification 的 transport-neutral 边界，
+也不表示 real transport、PCS/BMS、HIL、hardware control、field deployment 或硬件安全认证。
+
 ## 2. Minimal public API contract
 
 实现必须只导出下列冻结 Python 名称与调用形状；不得在 implementation 前重命名、增加 transport abstraction 或改变 P0.6 composition 参数语义：

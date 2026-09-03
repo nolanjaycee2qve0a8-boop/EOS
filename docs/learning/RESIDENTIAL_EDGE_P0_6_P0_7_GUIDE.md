@@ -3,8 +3,8 @@
 ## 状态与用途
 
 本指南把 P0.3、P0.4、P0.5 与 P0.6 串成可阅读的单周期链路，并说明 P0.7 如何以 one-shot continuation
-串接多个显式 cycle。P0.7 是**已本地验证、待最终独立复审和发布的候选**；本指南不表示它已合并、已发布或
-已进入 production Runtime。
+串接多个显式 cycle。P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`；该事实不表示它已成为 production Runtime 或现场设备能力。
 
 新指南是必要的：既有学习手册、架构说明、Demo 与 TASK 记录分别承担全局知识、架构、演示与历史台账职责，
 不能在不重复改写历史内容的前提下容纳一份可复现的 P0.6→P0.7 组合周期教程。本文件集中该教程，其余四份
@@ -168,4 +168,4 @@ continuation、terminal recovery 和 evidence/authority separation。
    observation；三者不应混为同一事实。
 2. P0.6 用一次 composition 表达跨边界 lineage；P0.7 只管理 caller 显式接续，不把它扩展成 loop。
 3. fail closed 的价值在于缺少可信事实时不创建 authority；它不是对已发生 physical action 的逆转承诺。
-4. P0.7 当前仍是本地候选，下一步是独立复审和用户批准的发布流程，而不是把教程当作产品发布证明。
+4. P0.7 已合并 main；该教程仍不能作为产品发布、设备执行或硬件安全证明。

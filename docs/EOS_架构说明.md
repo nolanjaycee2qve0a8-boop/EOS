@@ -1656,7 +1656,7 @@ completion; `MISSING`/`UNAVAILABLE` facts are explicit audit evidence, not zero
 power or success. P0.6 adds no network, protocol, HIL, hardware authority,
 scheduler, persistent Runtime, or field control.
 
-## 29. P0.7 controlled composition session（本地候选）
+## 29. P0.7 controlled composition session（已合并 main）
 
 P0.7 在不改变 P0.1–P0.6 的前提下，为 caller 提供同步 session facade。session creation 不执行 cycle；每个
 `run_cycle(cycle_input, continuation)` 只调用一次 P0.6 composition。caller 提供 exact approved
@@ -1668,6 +1668,7 @@ live runtime/adapter/handoff/input/request，continuation 不持有 adapter/hand
 任何 non-admission、fault、unavailable/malformed adapter fact、ACK/identity mismatch 或 continuation misuse
 均 terminal fail-closed；recovery 只能以新 session 和新的 caller facts 开始，绝不 auto-retry/replay。P0.3
 reconciliation 与 P0.4 actual telemetry 仍为独立事实层，adapter evidence 不会反向改写 logical execution 或
-自证设备完成。此能力是已本地验证、待最终独立复审和发布的候选；不包含 protocol、network、thread、scheduler、
-persistence、HIL、PCS/BMS、hardware 或 field control。教学导航见
+自证设备完成。P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`；该合并不包含 protocol、network、thread、scheduler、persistence、
+HIL、PCS/BMS、hardware 或 field control。教学导航见
 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`。

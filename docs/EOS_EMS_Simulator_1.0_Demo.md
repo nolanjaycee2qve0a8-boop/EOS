@@ -270,7 +270,7 @@ not a real protocol, network, HIL, or hardware-control demo. The phase order is
 P0.3 Controlled Runtime, P0.4 Device Adapter Boundary, P0.5 Command Handoff,
 then P0.6 controlled composition.
 
-## Edge P0.6–P0.7 组合周期阅读入口（本地候选）
+## Edge P0.6–P0.7 组合周期阅读入口（P0.7 已合并 main）
 
 P0.6 是一次 caller-driven composition：approved `FeasibleDecision + EdgeCommandMetadata` 经 P0.5 生成
 `PowerCommand`，进入一次 P0.3 admission/tick，再保留 P0.4 observation/transmission/ACK/actual audit。
@@ -278,6 +278,7 @@ P0.7 只让 caller 以 one-shot continuation 显式接续下一个 cycle；calle
 receipt、ACK、trace 或 previous actual 恢复 command authority。successful cycle 有一次 handoff、一次 tick 和
 一次 admitted transmission；任何 failure 或 non-admission 都会终止当前 session，recovery 要新 session。
 
-这是 transport-neutral、同步的本地候选教学入口，已本地验证、待最终独立复审和发布；它不是本 Simulator
-demo 的设备控制功能，也不含真实 transport、PCS/BMS、HIL 或 hardware。准确 public API 和 focused test
-阅读命令见 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`。
+这是 transport-neutral、同步的教学入口。P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`；它仍不是本 Simulator demo 的设备控制功能，也不含真实 transport、
+PCS/BMS、HIL 或 hardware。准确 public API 和 focused test 阅读命令见
+`docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`。

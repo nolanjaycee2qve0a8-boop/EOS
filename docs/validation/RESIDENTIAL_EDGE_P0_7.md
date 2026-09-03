@@ -2,7 +2,9 @@
 
 ## 1. Contract status
 
-本文是 P0.7 实施前的正式 validation contract，不是测试已通过的主张。实现完成前不得报告 focused、full pytest、mutation、CI 或 publication PASS。
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。本文记录其 validation contract；该发布状态不自行增加新的
+focused、full pytest、mutation 或 CI 数字主张，也不表示硬件、HIL、PCS/BMS 通信或 field deployment 已验证。
 
 ADR-094 的 PROVISIONAL validation candidate 保留为历史候选；本文取代其对 P0.7 的验证合同地位，而不删除该文件。
 
@@ -55,4 +57,4 @@ P0.7 focused
 → user-approved PR / CI / merge
 ```
 
-P0.7 候选生产路径：`edge_runtime/controlled_composition_session/`；候选 focused test：`tests/unit/edge_runtime/test_controlled_composition_session.py`。在实现前这些路径不应被创建为伪证据。任何网络、协议、线程、scheduler、clock service、persistence、auto-retry、HIL、PCS/BMS、hardware、embedded mapping、real transport 或 field-control 变化均超出本 validation contract。
+P0.7 已合并生产路径：`edge_runtime/controlled_composition_session/`；focused test：`tests/unit/edge_runtime/test_controlled_composition_session.py`。任何网络、协议、线程、scheduler、clock service、persistence、auto-retry、HIL、PCS/BMS、hardware、embedded mapping、real transport 或 field-control 变化均超出本 validation contract。
