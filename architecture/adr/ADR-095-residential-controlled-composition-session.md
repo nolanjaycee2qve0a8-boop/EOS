@@ -6,9 +6,15 @@ P0.7 定义一个同步、caller-owned、transport-neutral 的 multi-cycle sessi
 
 已合并的 ADR-094 和同名 PROVISIONAL/CANDIDATE 文档保留为历史候选记录；本 ADR、P0.7 specification 与 validation contract 正式取代其“候选合同”地位，但不删除或重写历史记录。
 
+## Publication status
+
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。这只确认本文所述软件合同已合并；不表示真实 transport、
+PCS/BMS 通信、HIL、hardware control、field deployment 或硬件安全认证。
+
 ## Ownership and lifetime
 
-候选公开对象在实现前必须遵循以下 ownership/lifetime 合同：
+已合并的公开对象遵循以下 ownership/lifetime 合同：
 
 | 对象 | owner | lifetime | authority 约束 |
 | --- | --- | --- | --- |
@@ -22,7 +28,7 @@ P0.7 定义一个同步、caller-owned、transport-neutral 的 multi-cycle sessi
 
 ## Frozen public API shape
 
-P0.7 实现必须只导出以下名称；不得以新增 transport abstraction 改变 P0.6 的调用边界：
+P0.7 已实现并只导出以下名称；不得以新增 transport abstraction 改变 P0.6 的调用边界：
 
 - `ControlledCompositionSessionCreationInput`：包含 caller-owned `session_id`、合法 fresh `ControlledEdgeRuntime`、`ResidentialDeviceAdapterBoundary`、`EdgeCommandHandoffBoundary` 与 `ControlledEdgeCompositionBoundary`。
 - `ControlledCompositionSession`：由 `ControlledCompositionSession.create(creation_input)` 创建；创建本身不执行 P0.6 cycle；只读 `initial_continuation` 返回首个 exact one-shot continuation。
@@ -61,6 +67,6 @@ recovery 不表示同一 session 的状态转换，也绝不提交或重放历�
 
 ## Compatibility, frozen paths and exclusions
 
-P0.7 只新增 session facade 范围。P0.1–P0.6、Residential EMS、Campaign A–F、既有 adapter/handoff/runtime 公共语义必须 frozen zero-diff。候选生产路径是新的 `edge_runtime/controlled_composition_session/`；候选 focused tests 是 `tests/unit/edge_runtime/test_controlled_composition_session.py`。这些路径在本 ADR 阶段未创建代码。
+P0.7 只新增 session facade 范围。P0.1–P0.6、Residential EMS、Campaign A–F、既有 adapter/handoff/runtime 公共语义保持 frozen zero-diff。已合并生产路径是 `edge_runtime/controlled_composition_session/`；focused tests 是 `tests/unit/edge_runtime/test_controlled_composition_session.py`。
 
 P0.7 不实现 network、protocol、thread、scheduler、clock service、persistence、auto-retry、HIL、PCS/BMS、hardware、embedded mapping、real transport 或 field control。

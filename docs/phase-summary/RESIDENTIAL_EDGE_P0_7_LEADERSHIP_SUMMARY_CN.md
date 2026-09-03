@@ -1,8 +1,9 @@
-# Residential Edge P0.7：受控组合会话候选摘要
+# Residential Edge P0.7：受控组合会话已合并摘要
 
 ## 状态
 
-P0.7 是**已本地验证、待最终独立复审和发布的候选**。它不是已合并版本、production release 或设备部署声明。
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。该合并不是 production field deployment 或设备部署声明。
 
 ## 能力与产品价值
 
@@ -33,6 +34,5 @@ PCS/BMS 通信、STM32/DSP 固件、hardware control、field deployment 或硬�
 
 ## 下一阶段建议
 
-在完成独立复审和用户批准的发布后，产品化应优先投入真实 PCS/BMS 接口与安全边界、HIL、真实 telemetry
-与 ACK 语义校准、故障/断电恢复及运营审计。它们是从 transport-neutral candidate 走向产品化的后续范围，
-不是当前 P0.7 候选的已实现能力。
+后续产品化应优先投入真实 PCS/BMS 接口与安全边界、HIL、真实 telemetry 与 ACK 语义校准、故障/断电恢复及
+运营审计。它们是从当前 transport-neutral 合同走向产品化的后续范围，不是已合并 P0.7 的已实现能力。

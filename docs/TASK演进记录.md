@@ -5418,7 +5418,7 @@ command authority。P0.4 的 ACK/actual/unavailable 都是审计事实，不反�
 reconciliation，也不声称真实物理完成。本条目仍为本地治理修订中，未提交、未 push、无 PR、未合并；
 不增加协议、网络、HIL、硬件或现场控制能力。
 
-## Edge P0.6–P0.7 学习材料（本地 docs 候选）
+## Edge P0.6–P0.7 学习材料（P0.7 已合并 main）
 
 新增 P0.6→P0.7 的集中学习导航，目的不是扩展 Runtime，而是说明：P0.6 组合 approved
 `FeasibleDecision + EdgeCommandMetadata`、P0.5 handoff、一次 P0.3 tick 与 P0.4 audit；P0.7 则以 caller
@@ -5426,9 +5426,10 @@ reconciliation，也不声称真实物理完成。本条目仍为本地治理修
 P0.5 生成。P0.3 reconciliation retained actual 与 P0.4 actual telemetry 保持独立，ACK/adapter evidence
 不能自证 physical completion。
 
-P0.7 标记为**已本地验证、待最终独立复审和发布的候选**，不写作已 merge、production released 或硬件部署。
-failure、non-admission、unavailable/malformed facts、ACK/identity mismatch 与 continuation misuse 都是 terminal
-fail-closed；recovery 只能新建 session，不能 auto-retry/replay。详见
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。该合并不是 production field deployment 或硬件部署；failure、
+non-admission、unavailable/malformed facts、ACK/identity mismatch 与 continuation misuse 都是 terminal fail-closed；
+recovery 只能新建 session，不能 auto-retry/replay。详见
 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md` 与
 `docs/phase-summary/RESIDENTIAL_EDGE_P0_7_LEADERSHIP_SUMMARY_CN.md`。本 docs-only 记录不包含 protocol、
 network、thread、persistence、HIL、PCS/BMS 或 hardware capability。

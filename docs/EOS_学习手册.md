@@ -3179,7 +3179,7 @@ adapter actual value does not replace P0.3's retained actual fact. Unavailable
 adapter data does not mean zero power or success. P0.6 remains deterministic and
 transport-neutral, not networking, field hardware, or HIL control.
 
-## P0.6–P0.7：从单周期组合到 caller 显式会话（本地候选）
+## P0.6–P0.7：从单周期组合到 caller 显式会话（已合并 main）
 
 P0.6 把 approved `FeasibleDecision + EdgeCommandMetadata` 经 P0.5、一次 P0.3 runtime tick 和 P0.4
 post-tick audit 组合为单周期事实链；audit evidence 与 current-caller continuation 是不同对象。P0.3
@@ -3191,6 +3191,7 @@ metadata、duration 和 tolerance，**不提供 `PowerCommand`**；command 仍�
 caller 获得下一 continuation；fault、non-admission、unavailable fact、ACK/identity mismatch 或 misuse 都会
 fail closed 并终止旧 session。recovery 必须显式创建新 session，不能 replay 历史功率。
 
-P0.7 是已本地验证、待最终独立复审和发布的候选，不是已合并 production Runtime。API 导航、测试阅读、
-mutation 解释及未来 Edge/PCS/BMS 映射见 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`；它不实现
-network、protocol、thread、persistence、HIL 或 hardware control。
+P0.7 已通过 PR #197 合并到 main，merge SHA 为
+`f10852895b289c12d86f7d74fe84d33425411c15`。API 导航、测试阅读、mutation 解释及未来 Edge/PCS/BMS 映射见
+`docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`；该合并仍不表示 production Runtime、network、protocol、
+thread、persistence、HIL 或 hardware control 已实现。
