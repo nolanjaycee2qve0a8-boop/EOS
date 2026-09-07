@@ -1673,10 +1673,10 @@ reconciliation 与 P0.4 actual telemetry 仍为独立事实层，adapter evidenc
 HIL、PCS/BMS、hardware 或 field control。教学导航见
 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`。
 
-## 30. P0.8 Adapter Conformance Harness（本地提交，待最终独立发布复审/合并）
+## 30. P0.8 Adapter Conformance Harness（PR #200 已合并 main）
 
 P0.8 在不修改 P0.1–P0.7 的前提下，加入 test-only、caller-driven、同步、transport-neutral 的 conformance consumer。caller 提供 exact approved `FeasibleDecision`、fresh metadata、duration/tolerance 和 ordered finite scripted transcript；P0.8 只调用一次 P0.7 `run_cycle`，比较 P0.6/P0.4 immutable evidence。它不拥有 adapter、controller、runtime、scheduler、transport 或 command authority。
 
 transcript、ACK、actual、receipt 与 verdict 都是不可执行 audit facts。`AdapterConformanceVerdict` 不含 session、continuation、runtime、adapter、handoff 或 command；P0.3 reconciliation retained actual 与 P0.4 actual telemetry 保持两层事实，后者与 ACK 都不能证明物理完成或替代 logical execution。顺序、重复、availability、correlation 或 actual mismatch 均 fail closed，并由 P0.7 消耗当前 session；fresh recovery 仍是 caller 的新 session 责任。
 
-P0.8 local production commit 为 `993abdf`，尚待最终独立发布复审与合并。当前没有 network、protocol、HIL、PCS/BMS 通信、DSP/STM32、hardware/field control 或安全认证。教学导航见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
+P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS。当前仍没有 network、protocol、HIL、PCS/BMS 通信、DSP/STM32、hardware/field control 或安全认证。教学导航见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。

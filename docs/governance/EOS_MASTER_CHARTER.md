@@ -37,9 +37,11 @@ current-caller（当前调用方）提供的、已批准的输入是 command aut
 ## 3. 已冻结与已合并的事实
 
 - Residential EMS 1.0 保持 functional freeze；Campaign A–F 的实现、数值和证据口径保持冻结。
-- P0.1–P0.6 已合并。它们是产品化第一地平线的边界合同，不等于已经完成真实设备或现场产品。
+- P0.1–P0.8 已合并。它们是产品化第一地平线的边界合同，不等于已经完成真实设备或现场产品。
 - P0.6 是单周期、caller-driven、transport-neutral 的组合：P0.5 command handoff、P0.3 runtime admission/execution 与 P0.4 adapter audit evidence 在一个不可变、可审计的周期内组合。
 - P0.6 不实现网络、真实 transport、协议、HIL、PCS/BMS/STM32/DSP 接口、硬件安全认证或现场控制。
+- P0.7 已将 caller-owned、one-shot controlled-composition session 合并为软件合同；它不引入 scheduler、持久化、协议或现场控制。
+- P0.8 已通过 PR #200 合并为 test-only adapter-conformance harness；它不把 transcript、ACK、actual 或 verdict 变成设备 authority 或物理执行证明。
 
 ## 4. 长期不变量
 
@@ -75,4 +77,4 @@ capability-gap review → 用户阶段批准 → 受限实施 → focused valida
 
 ## 6. 后续能力地平线（候选，不是授权）
 
-以下仅是待 capability-gap review 与用户阶段批准后才能讨论的候选：multi-cycle session、fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不冻结 P0.7/P0.8，也不表示已实现或已批准。
+以下仅是待 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。

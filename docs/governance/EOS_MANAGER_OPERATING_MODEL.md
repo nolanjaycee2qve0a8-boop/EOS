@@ -44,8 +44,9 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 
 ## 4. 当前台账
 
-- P0.1–P0.7 已合并；P0.7 通过 PR #197 合并到 main。
-- 当前 main 基线：`f10852895b289c12d86f7d74fe84d33425411c15`。
+- P0.1–P0.8 已合并；P0.8 通过 PR #200 合并到 main，merge SHA 为 `3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`，Quality checks 为 SUCCESS。
+- 当前 main 基线：`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`。
+- P0.9 尚未授权；下一步仍须先完成 capability-gap review 与用户阶段批准。
 - 后续任何阶段仍须先完成 capability-gap review，再取得用户阶段批准。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
