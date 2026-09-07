@@ -283,8 +283,8 @@ receipt、ACK、trace 或 previous actual 恢复 command authority。successful 
 PCS/BMS、HIL 或 hardware。准确 public API 和 focused test 阅读命令见
 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`。
 
-## Edge P0.8 transcript conformance 阅读入口（本地提交，待复审/合并）
+## Edge P0.8 transcript conformance 阅读入口（PR #200 已合并 main）
 
 P0.8 在一次 P0.7/P0.6 cycle 之后，以 caller-supplied ordered finite transcript 对照 P0.4-style observation、transmission、ACK 和 actual facts。它是 test-only conformance consumer，不是本 Simulator demo 的控制逻辑、adapter 或设备 transport。caller 仍提供 exact approved decision 与 fresh metadata，而不是 `PowerCommand`；verdict 只有 immutable audit facts，不能恢复 session/runtime/adapter/command authority。
 
-阅读时请区分 P0.3 reconciliation（logical execution fact）与 P0.4 actual（独立 adapter fact），也不要把 ACK 当作 PCS/BMS 已物理执行的证明。P0.8 已本地验证并已本地提交 `993abdf`，但未合并 main，也不含 network、protocol、HIL、PCS/BMS、hardware 或 field readiness。详见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
+阅读时请区分 P0.3 reconciliation（logical execution fact）与 P0.4 actual（独立 adapter fact），也不要把 ACK 当作 PCS/BMS 已物理执行的证明。P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；它仍不含 network、protocol、HIL、PCS/BMS、hardware 或 field readiness。详见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。

@@ -1,10 +1,10 @@
 # ADR-096 — Residential Adapter Conformance Harness
 
-> **LOCAL COMMIT STATUS — P0.8.** The strictly limited test-only implementation
-> scope is locally committed as `993abdf` and has local validation evidence.
-> Final independent publication review, user-approved PR, remote CI, and merge
-> remain pending. No production capability, physical device execution, HIL,
-> field readiness, or hardware safety is authorized or claimed.
+> **MERGED STATUS — P0.8.** The strictly limited test-only implementation merged
+> through PR #200 into main as `3ba8480203fc4b16e5cd18ca8ed00d4d1556205a` at
+> 2026-09-07T04:21:48Z; Quality checks completed SUCCESS. This merge grants no
+> production capability, physical device execution, HIL, field readiness, or
+> hardware safety claim.
 
 ## Decision
 
@@ -81,7 +81,6 @@ Isolated mutation evidence covers deletion of transcript-order,
 ACK-correlation, fact-separation, and terminal-consumption guards with
 independent assertions.
 
-The remaining release boundary is final independent publication review, then
-explicit user-approved PR, remote CI, and merge. No publication or merge has
-occurred; the local commit and local validation do not claim a stable public
-API, production capability, or hardware result.
+The publication sequence completed with independent review, user-approved PR
+#200, remote Quality checks SUCCESS, and merge. The merged software contract
+does not claim a stable public API, production capability, or hardware result.

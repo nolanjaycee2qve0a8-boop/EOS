@@ -2,7 +2,7 @@
 
 ## 状态
 
-P0.8 已本地验证并已本地提交（`993abdf`），待最终独立发布复审和合并；尚未合并 main，也不代表 production 或 hardware readiness。
+P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；这不代表 production 或 hardware readiness。
 
 ## 能力与产品价值
 

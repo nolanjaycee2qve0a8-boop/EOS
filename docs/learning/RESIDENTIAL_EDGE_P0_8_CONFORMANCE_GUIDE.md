@@ -2,7 +2,7 @@
 
 ## 1. 状态与专题必要性
 
-P0.8 production scope 已**本地验证并已本地提交**（`993abdf`），待最终独立发布复审和合并；它尚未合并 main，不能称为 production、hardware 或 field ready。
+P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；它仍不能称为 production、hardware 或 field ready。
 
 P0.6–P0.7 指南解释了 caller-driven cycle 与 one-shot session。P0.8 增加 transcript conformance、evidence-versus-authority 与 fact separation；这些内容不能只靠旧指南的一段导航完整教学，因此需要独立专题。
 
