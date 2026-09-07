@@ -1,10 +1,11 @@
-# P0.9 Candidate Only Validation Plan — Device-Fact Readiness Profile
+# P0.9 Provisional Local Validation — Device-Fact Readiness Profile
 
-> **CANDIDATE ONLY — PLANNING APPROVED.** No P0.9 implementation, test result,
-> release gate, or PASS result exists yet. The matrix below is a future evidence
-> plan and must not be read as completed validation.
+> **PROVISIONAL LOCAL IMPLEMENTATION — NOT REVIEWED OR RELEASED.** Focused
+> local validation is planned for the restricted evaluator, but mutation,
+> broader regression, full-suite/pre-commit, independent review, PR, CI, merge,
+> and release results are not claimed here.
 
-## 1. Future focused-test plan
+## 1. Focused local test plan
 
 | Area | Required future evidence |
 | --- | --- |
@@ -19,7 +20,7 @@
 
 ## 2. Future mutation plan
 
-Any future implementation must use isolated mutations and independent
+The provisional implementation must use isolated mutations and independent
 assertions. It must not manually construct final failed results or rely on
 producer/validator common-mode self-certification. At minimum, mutations must
 be killed for:
@@ -39,9 +40,9 @@ Each mutation would require a minimal temporary change, an actual failing test
 and assertion, and cleanup evidence. Syntax, import, fixture, or manually
 fabricated-final-object failures would not count as a kill.
 
-## 3. Future gate sequence
+## 3. Remaining gate sequence
 
-If implementation is separately authorized, the minimum proposed sequence is:
+Before release, the required sequence is:
 
 ```text
 focused P0.9 evidence
@@ -55,15 +56,17 @@ focused P0.9 evidence
 → user-approved release decision
 ```
 
-None of these gates has run for P0.9. This candidate neither introduces nor
-proves protocol, network, HTTP, Modbus, CAN, serial, thread, scheduler,
+Focused local tests may run for P0.9, but mutation, broader regression,
+full-suite/pre-commit, independent review, PR, CI, merge, and release remain
+unclaimed. This provisional evaluator neither introduces nor proves protocol,
+network, HTTP, Modbus, CAN, serial, thread, scheduler,
 persistence, auto-retry, HIL, PCS/BMS connection, DSP/STM32, hardware, field
 deployment, or safety certification capability.
 
 ## 4. Evidence boundary
 
-Future PASS/GAP assessments would remain prospective, immutable audit-only
-facts over caller-supplied deterministic evidence. They would not prove device
+PASS/GAP assessments remain prospective, immutable audit-only facts over
+caller-supplied deterministic evidence. They do not prove device
 execution, physical completion, field safety, or deployment readiness. No
 learning material is added at this candidate stage because stable production
 semantics do not yet exist.

@@ -1,9 +1,9 @@
 # ADR-097 — P0.9 Candidate Only: Residential Device-Fact Readiness Profile
 
-> **CANDIDATE ONLY — PLANNING APPROVED.** This candidate contract has planning
-> approval only. It has **not** received implementation or release
-> authorization. It is not a frozen P0.9 implementation, a production API, or
-> evidence that P0.9 has started or completed.
+> **PROVISIONAL LOCAL IMPLEMENTATION — NOT REVIEWED OR RELEASED.** P0.9 now has
+> a strictly limited local evaluator implementation. It has not received
+> independent review, mutation evidence, full-suite/pre-commit evidence, PR,
+> CI, merge, or release authorization. It is not a frozen production API.
 
 ## Context
 
@@ -14,18 +14,18 @@ actual, disconnect, reboot, and fresh-reassessment facts those boundaries
 need. The next planning question is therefore factual readiness, not command
 execution or connectivity.
 
-## Candidate decision
+## Provisional local decision
 
-The proposed P0.9 readiness profile would evaluate whether a caller-nominated
+The local P0.9 readiness profile evaluates whether a caller-nominated
 candidate device-fact source can meet the required P0.4/P0.8 fact semantics,
 without creating command or device authority.
 
-Its prospective input is limited to caller-owned capability-profile data,
+Its input is limited to caller-owned capability-profile data,
 explicit required-fact semantics, and deterministic evidence samples. It must
 not accept a `PowerCommand`, endpoint, device address, credential, socket, or
 transport object.
 
-Its prospective output is an immutable, audit-only readiness/gap assessment:
+Its output is an immutable, audit-only readiness/gap assessment:
 
 - **PASS** explicitly records that the submitted deterministic evidence meets
   each stated requirement; it never means a physical command completed.
@@ -43,8 +43,8 @@ or physical completion.
 
 ## Candidate fact semantics
 
-Any future implementation proposal must make the following fact dimensions
-explicit and independently auditable:
+The provisional implementation makes the following fact dimensions explicit
+and independently auditable:
 
 | Dimension | Candidate requirement |
 | --- | --- |
@@ -68,8 +68,7 @@ certification.
 
 ## Consequences and future authorization gate
 
-This ADR defines planning vocabulary only. A future implementation would need
-separate user authorization, a stable public-contract decision, focused and
-mutation evidence, frozen-path checks, full/static/pre-commit gates,
-independent review, and a separately authorized release decision. Until then,
-the candidate remains documentation only.
+This ADR retains the candidate planning history. The local implementation still
+needs focused and mutation evidence, frozen-path checks, full/static/pre-commit
+gates, independent review, PR/CI, and a separately authorized release decision.
+It remains provisional and must not be described as deployed capability.
