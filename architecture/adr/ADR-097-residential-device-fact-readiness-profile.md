@@ -5,6 +5,12 @@
 > independent review, mutation evidence, full-suite/pre-commit evidence, PR,
 > CI, merge, or release authorization. It is not a frozen production API.
 
+> **LOCAL EVIDENCE RECORDED.** The isolated P0.9 focused suite completed with
+> 14 passed in 0.20s and exit 0. Scoped Ruff, Ruff format check, mypy, public
+> import smoke, forbidden static/dynamic dependency-import scans, `git diff
+> --check`, and P0.1–P0.8 frozen production-path checks passed. This local
+> evidence does not establish hardware, field, production, or release readiness.
+
 ## Context
 
 P0.4 and P0.8 define transport-neutral observation and deterministic
@@ -68,7 +74,8 @@ certification.
 
 ## Consequences and future authorization gate
 
-This ADR retains the candidate planning history. The local implementation still
-needs focused and mutation evidence, frozen-path checks, full/static/pre-commit
-gates, independent review, PR/CI, and a separately authorized release decision.
-It remains provisional and must not be described as deployed capability.
+This ADR retains the candidate planning history. Focused and scoped static
+evidence is recorded above; mutation, broader regressions, full pytest,
+pre-commit, independent review, PR/CI, and a separately authorized release
+decision remain required. It remains provisional and must not be described as
+deployed capability.

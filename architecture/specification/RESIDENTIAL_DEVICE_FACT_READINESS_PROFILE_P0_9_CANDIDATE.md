@@ -6,6 +6,12 @@
 > evidence of independent review, mutation, full-suite/pre-commit, PR, CI, or
 > merge success.
 
+> **LOCAL EVIDENCE RECORDED.** Isolated focused validation completed with 14
+> passed in 0.20s and exit 0. Scoped Ruff, Ruff format check, mypy, public
+> import smoke, forbidden static/dynamic dependency-import scans, `git diff
+> --check`, and P0.1–P0.8 frozen production-path checks passed. These facts do
+> not establish release, hardware, field, or production readiness.
+
 ## 1. Local purpose
 
 Evaluate whether a candidate PCS/BMS device-fact source, described only by
@@ -81,5 +87,6 @@ certification.
 
 The planning decision authorizes this local, test-only evaluator only. It does
 not authorize a stable public API, external evidence source, real device
-connection, or release. Focused/static evidence, mutation, broader regression,
-independent review, PR/CI, and a separately approved release remain required.
+connection, or release. Focused/scoped-static evidence is recorded above;
+mutation, broader regression, full pytest, pre-commit, independent review,
+PR/CI, and a separately approved release remain required.

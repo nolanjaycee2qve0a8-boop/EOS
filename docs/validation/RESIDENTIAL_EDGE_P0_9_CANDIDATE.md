@@ -1,11 +1,14 @@
 # P0.9 Provisional Local Validation — Device-Fact Readiness Profile
 
 > **PROVISIONAL LOCAL IMPLEMENTATION — NOT REVIEWED OR RELEASED.** Focused
-> local validation is planned for the restricted evaluator, but mutation,
-> broader regression, full-suite/pre-commit, independent review, PR, CI, merge,
-> and release results are not claimed here.
+> local validation completed with 14 passed in 0.20s and exit 0 using an
+> isolated runner. Scoped Ruff, Ruff format check, mypy, public import smoke,
+> forbidden static/dynamic dependency-import scans, `git diff --check`, and
+> P0.1–P0.8 frozen production-path checks also passed. Mutation, broader
+> regression, full pytest, pre-commit, independent review, PR, CI, merge, and
+> release results are not claimed here.
 
-## 1. Focused local test plan
+## 1. Focused local evidence
 
 | Area | Required future evidence |
 | --- | --- |
@@ -17,6 +20,10 @@
 | Disconnect/reboot | Disconnect, unavailable, and reboot evidence cannot auto-recover; fresh caller evidence is required for reassessment. |
 | Authority negatives | Evidence/result copy, serialization, hydration, factory, historical replay, or conversion into runtime/session/adapter/handoff/command authority is rejected. |
 | Frozen boundary | P0.1–P0.8, Residential EMS 1.0, and Campaign A–F remain zero-diff. |
+
+The completed isolated focused run is retained as local evidence at
+`C:\Users\22908\AppData\Local\Temp\eos-p09-focused-910ab3f5-7138-474f-aa09-2fcd5858f085`.
+It is a local test artifact, not a release artifact or a device/field claim.
 
 ## 2. Future mutation plan
 
@@ -56,10 +63,10 @@ focused P0.9 evidence
 → user-approved release decision
 ```
 
-Focused local tests may run for P0.9, but mutation, broader regression,
-full-suite/pre-commit, independent review, PR, CI, merge, and release remain
-unclaimed. This provisional evaluator neither introduces nor proves protocol,
-network, HTTP, Modbus, CAN, serial, thread, scheduler,
+Focused local and scoped static evidence completed as recorded above, but
+mutation, broader regression, full pytest, pre-commit, independent review, PR,
+CI, merge, and release remain unclaimed. This provisional evaluator neither
+introduces nor proves protocol, network, HTTP, Modbus, CAN, serial, thread, scheduler,
 persistence, auto-retry, HIL, PCS/BMS connection, DSP/STM32, hardware, field
 deployment, or safety certification capability.
 
