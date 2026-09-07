@@ -3196,10 +3196,10 @@ P0.7 已通过 PR #197 合并到 main，merge SHA 为
 `docs/learning/RESIDENTIAL_EDGE_P0_6_P0_7_GUIDE.md`；该合并仍不表示 production Runtime、network、protocol、
 thread、persistence、HIL 或 hardware control 已实现。
 
-## P0.8：Adapter Conformance 的 transcript 与 authority 边界（本地提交，待复审/合并）
+## P0.8：Adapter Conformance 的 transcript 与 authority 边界（PR #200 已合并 main）
 
 P0.8 是 test-only、caller-driven、同步、transport-neutral 的 conformance consumer：它以 ordered finite transcript 核对一次 P0.7/P0.6 cycle 的 P0.4-style observation、transmission、ACK 与 actual facts。它不是 adapter、controller、transport 或设备执行功能。caller 仍提供 exact approved `FeasibleDecision` 与 fresh `EdgeCommandMetadata`，而不是 `PowerCommand`。
 
 输出 `AdapterConformanceVerdict` 只保留 immutable audit facts，不含 session、continuation、runtime、adapter、handoff 或 command authority；transcript、ACK、actual、receipt、history 与 verdict 都不能恢复或 replay command。P0.3 reconciliation 是 logical execution fact，P0.4 actual 是独立 adapter fact，ACK 也不证明物理完成。顺序、重复、unavailable、ACK mismatch、actual mismatch 与将 non-admission 说成成功都会 fail closed，并消费当前 P0.7 session；recovery 必须是新 session、新 decision 和 fresh metadata。
 
-P0.8 production scope 已本地验证并已本地提交 `993abdf`，待最终独立发布复审和合并；这不表示 main、production、HIL、PCS/BMS、hardware 或 field readiness。完整教学、API 和 focused test 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
+P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；这不表示 production、HIL、PCS/BMS、hardware 或 field readiness。完整教学、API 和 focused test 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。

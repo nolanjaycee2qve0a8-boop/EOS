@@ -1,10 +1,10 @@
 # Residential Edge P0.8 Validation — Adapter Conformance Harness
 
-> **LOCAL COMMIT STATUS — P0.8.** The strictly limited test-only implementation
-> scope is locally committed as `993abdf` and has local validation evidence.
-> Final independent publication review, user-approved PR, remote CI, and merge
-> remain pending. No production capability, physical device execution, HIL,
-> field readiness, or hardware safety is authorized or claimed.
+> **MERGED STATUS — P0.8.** The strictly limited test-only implementation merged
+> through PR #200 into main as `3ba8480203fc4b16e5cd18ca8ed00d4d1556205a` at
+> 2026-09-07T04:21:48Z; Quality checks completed SUCCESS. This merge grants no
+> production capability, physical device execution, HIL, field readiness, or
+> hardware safety claim.
 
 ## Current validation purpose
 
@@ -29,9 +29,9 @@ serialized evidence must remain non-executable audit facts.
 | Fresh recovery | A terminal/unavailable case cannot resume from history; any recovery uses P0.7's explicit fresh-session contract, not a harness retry. |
 | Authority negatives | Equal-but-distinct source/metadata, historical receipt/transcript, or copied/serialized evidence cannot obtain command or continuation authority. |
 
-The matrix describes locally committed behavior and local validation evidence.
-It does not claim final independent publication review, PR, CI, merge, or
-hardware readiness has passed.
+The matrix describes merged behavior and its validation evidence. Independent
+publication review, PR #200, remote Quality checks SUCCESS, and merge are
+complete; none of those facts claims hardware readiness.
 
 ## Local mutation evidence
 
@@ -56,8 +56,8 @@ P0.8 focused tests
 → pre-commit
 ```
 
-Final independent publication review, explicit user-approved PR, remote CI,
-and merge remain pending. This local evidence does not authorize
+Independent publication review, user-approved PR #200, remote Quality checks
+SUCCESS, and merge are complete. This merged evidence does not authorize
 network/protocol/Modbus/CAN/serial work,
 threads, schedulers, persistence, clock services, auto-retry, HIL, PCS/BMS
 connectivity, DSP/STM32 integration, field deployment, or hardware safety
