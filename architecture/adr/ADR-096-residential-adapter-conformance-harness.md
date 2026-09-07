@@ -1,11 +1,10 @@
 # ADR-096 — Residential Adapter Conformance Harness
 
-> **PROVISIONAL IMPLEMENTATION STATUS — P0.8.** The user has approved the
-> strictly limited test-only implementation scope. The implementation exists in
-> this worktree and has initial focused validation, but is uncommitted and
-> unpublished; independent review, mutation evidence, full gates, release, and
-> merge remain incomplete. No production capability, physical device execution,
-> HIL, field readiness, or hardware safety is authorized or claimed.
+> **LOCAL COMMIT STATUS — P0.8.** The strictly limited test-only implementation
+> scope is locally committed as `993abdf` and has local validation evidence.
+> Final independent publication review, user-approved PR, remote CI, and merge
+> remain pending. No production capability, physical device execution, HIL,
+> field readiness, or hardware safety is authorized or claimed.
 
 ## Decision
 
@@ -73,16 +72,16 @@ clock services, auto-retry, HIL, PCS/BMS connectivity, DSP/STM32 work, field
 deployment, or hardware safety certification. It is not an authorization to
 implement a real transport or a durable recovery mechanism.
 
-## Remaining validation and release gate
+## Local validation and remaining publication gate
 
-Initial focused validation covers normal, non-admission, unavailable,
+Local validation covers normal, non-admission, unavailable,
 ACK-mismatch, actual-mismatch, transcript-order, exact-once, fresh-recovery,
 source/metadata, P0.5-to-P0.3 lineage, and P0.3/P0.4 fact-separation behavior.
-It is not final publication evidence. Future mutation work must remove the
-transcript-order, ACK-correlation, fact-separation, and terminal-consumption
-guards and show independent assertions kill each mutation.
+Isolated mutation evidence covers deletion of transcript-order,
+ACK-correlation, fact-separation, and terminal-consumption guards with
+independent assertions.
 
-Any publication gate remains conditional on focused tests, frozen-path
-checks, the full suite, mutation evidence, pre-commit, independent review, and
-explicit user-approved publication. No publication or merge has occurred, and
-the remaining implementation evidence is pending.
+The remaining release boundary is final independent publication review, then
+explicit user-approved PR, remote CI, and merge. No publication or merge has
+occurred; the local commit and local validation do not claim a stable public
+API, production capability, or hardware result.

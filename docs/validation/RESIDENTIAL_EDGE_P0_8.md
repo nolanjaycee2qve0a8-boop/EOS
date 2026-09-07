@@ -1,11 +1,10 @@
 # Residential Edge P0.8 Validation — Adapter Conformance Harness
 
-> **PROVISIONAL IMPLEMENTATION STATUS — P0.8.** The user has approved the
-> strictly limited test-only implementation scope. The implementation exists in
-> this worktree and has initial focused validation, but is uncommitted and
-> unpublished; independent review, mutation evidence, full gates, release, and
-> merge remain incomplete. No production capability, physical device execution,
-> HIL, field readiness, or hardware safety is authorized or claimed.
+> **LOCAL COMMIT STATUS — P0.8.** The strictly limited test-only implementation
+> scope is locally committed as `993abdf` and has local validation evidence.
+> Final independent publication review, user-approved PR, remote CI, and merge
+> remain pending. No production capability, physical device execution, HIL,
+> field readiness, or hardware safety is authorized or claimed.
 
 ## Current validation purpose
 
@@ -16,7 +15,7 @@ add a real device adapter, command authority, runtime authority, or transport
 authority. Scripted transcript facts, ACKs, actuals, history, receipts, and
 serialized evidence must remain non-executable audit facts.
 
-## Implemented focused matrix; terminal evidence pending
+## Implemented focused matrix; local terminal evidence recorded
 
 | Case | Implemented focused behavior |
 | --- | --- |
@@ -30,23 +29,21 @@ serialized evidence must remain non-executable audit facts.
 | Fresh recovery | A terminal/unavailable case cannot resume from history; any recovery uses P0.7's explicit fresh-session contract, not a harness retry. |
 | Authority negatives | Equal-but-distinct source/metadata, historical receipt/transcript, or copied/serialized evidence cannot obtain command or continuation authority. |
 
-The matrix describes initial focused behavior in the current worktree. It does
-not claim final validation, mutation evidence, publication, or hardware
-readiness has passed.
+The matrix describes locally committed behavior and local validation evidence.
+It does not claim final independent publication review, PR, CI, merge, or
+hardware readiness has passed.
 
-## Remaining mutation evidence
+## Local mutation evidence
 
-Future mutation work, if authorized, would run only in isolated temporary
-worktrees and must record the actual test node and failed independent assertion.
-The planned mutations are removal of transcript-order, ACK-correlation,
-P0.3/P0.4 fact-separation, and terminal-consumption guards. Each must be killed
-through the public harness composition or a corrupted producer and an
-independent validator; manually constructed final failure objects and
-producer/validator common-mode self-certification are not acceptable evidence.
+Four isolated mutations removed transcript-order, ACK-correlation,
+P0.3/P0.4 fact-separation, and terminal-consumption guards. Each was killed
+through public harness composition or a corrupted producer with an independent
+validator; manually constructed final failure objects and producer/validator
+common-mode self-certification remain unacceptable evidence.
 
-## Remaining regression and publication sequence
+## Local regression evidence and remaining publication sequence
 
-Before publication, the current implementation requires, in order:
+Local evidence completed the following sequence:
 
 ```text
 P0.8 focused tests
@@ -57,12 +54,11 @@ P0.8 focused tests
 → static, import, sensitive-data, generated-output, and transport scans
 → isolated mutation evidence
 → pre-commit
-→ independent review
-→ explicit user-approved PR, CI, and merge
 ```
 
-This document does not report any final result from that sequence. It does
-not authorize network/protocol/Modbus/CAN/serial work,
+Final independent publication review, explicit user-approved PR, remote CI,
+and merge remain pending. This local evidence does not authorize
+network/protocol/Modbus/CAN/serial work,
 threads, schedulers, persistence, clock services, auto-retry, HIL, PCS/BMS
 connectivity, DSP/STM32 integration, field deployment, or hardware safety
 certification.

@@ -1,11 +1,10 @@
 # Residential Adapter Conformance Harness — P0.8 Provisional Contract
 
-> **PROVISIONAL IMPLEMENTATION STATUS — P0.8.** The user has approved the
-> strictly limited test-only implementation scope. The implementation exists in
-> this worktree and has initial focused validation, but is uncommitted and
-> unpublished; independent review, mutation evidence, full gates, release, and
-> merge remain incomplete. No production capability, physical device execution,
-> HIL, field readiness, or hardware safety is authorized or claimed.
+> **LOCAL COMMIT STATUS — P0.8.** The strictly limited test-only implementation
+> scope is locally committed as `993abdf` and has local validation evidence.
+> Final independent publication review, user-approved PR, remote CI, and merge
+> remain pending. No production capability, physical device execution, HIL,
+> field readiness, or hardware safety is authorized or claimed.
 
 ## 1. Current scope
 
@@ -48,8 +47,8 @@ continuation, handoff boundary, prepared request, or command authority.
 `DeterministicAdapterConformanceHarness.evaluate(...)` returns an audit-only
 `AdapterConformanceVerdict` over existing P0.7 immutable receipt/evidence. It
 does not emit an executable command, continuation, adapter, runtime, request
-factory, or replay capability. This result is provisional and unpublished, not
-a stable long-term API.
+factory, or replay capability. This result remains a provisional interface and
+does not claim a stable long-term API.
 
 P0.3 retained actual/reconciliation remains the logical execution fact. A
 scripted P0.4 actual observation is a distinct adapter fact and may be compared
@@ -84,15 +83,15 @@ hardware safety certification.
 Tutorial, Demo, and leadership materials remain outside this implementation
 scope until independent evidence supports a separate documentation decision.
 
-## 6. Remaining conditional acceptance
+## 6. Local validation and remaining publication boundary
 
-Initial focused validation exercises normal transcripts; non-admission;
+Local validation exercises normal transcripts; non-admission;
 unavailable facts; ACK and actual mismatch; transcript order; exact-once
 behavior; fresh recovery; source/metadata and P0.5-to-P0.3 lineage; and
-P0.3/P0.4 fact separation. Isolated mutations still need to show that deleting transcript-order,
-ACK-correlation, fact-separation, or terminal-consumption guards is detected.
+P0.3/P0.4 fact separation. Isolated mutation evidence shows that deleting
+transcript-order, ACK-correlation, fact-separation, or terminal-consumption
+guards is detected.
 
-Publication remains conditional on frozen-diff checks, focused and full
-tests, mutation evidence, pre-commit, independent review, and explicit user
-approval. Those remaining gates are not completed or implied by this
-provisional implementation.
+Final independent publication review, explicit user-approved PR, remote CI,
+and merge remain pending. The local commit and its validation evidence do not
+imply a stable public API, production device capability, or hardware result.
