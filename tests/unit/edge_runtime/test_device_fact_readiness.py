@@ -373,6 +373,7 @@ def test_public_surface_has_no_transport_or_predecessor_runtime_imports() -> Non
                 imports.update(alias.name for alias in node.names)
             if isinstance(node, ast.ImportFrom) and node.module:
                 imports.add(node.module)
+                imports.update(f"{node.module}.{alias.name}" for alias in node.names)
     assert not any(
         imported == forbidden_name or imported.startswith(f"{forbidden_name}.")
         for imported in imports
