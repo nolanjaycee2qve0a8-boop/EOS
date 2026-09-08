@@ -53,11 +53,24 @@ requirements = frozenset(DeviceFactRequirement)
 profile = DeviceFactCapabilityProfile('profile-a', 'source-a', 'prov-a', 'boot-a', requirements)
 as_of = datetime(2034, 1, 1, tzinfo=UTC)
 policies = tuple(DeviceFactRequirementPolicy(item, timedelta(minutes=5)) for item in requirements)
-evidence = tuple(DeviceFactEvidenceSample(
-    f'fact-{item}', item, 'source-a', 'prov-a', 'boot-a', 'assessment-a',
-    'evidence-a', as_of, DeviceFactAvailability.AVAILABLE,
-    actual_present=(item is DeviceFactRequirement.ACTUAL_TELEMETRY),
-) for item in requirements)
+def sample(item: DeviceFactRequirement) -> DeviceFactEvidenceSample:
+    ack = (
+        {
+            'request_id': 'request-a', 'request_sequence': 7,
+            'request_correlation_id': 'correlation-a',
+            'acknowledgement_request_id': 'request-a',
+            'acknowledgement_sequence': 7,
+            'acknowledgement_correlation_id': 'correlation-a',
+        }
+        if item is DeviceFactRequirement.ACK_CORRELATION else {}
+    )
+    return DeviceFactEvidenceSample(
+        f'fact-{item}', item, 'source-a', 'prov-a', 'boot-a', 'assessment-a',
+        'evidence-a', as_of, DeviceFactAvailability.AVAILABLE,
+        actual_present=(item is DeviceFactRequirement.ACTUAL_TELEMETRY), **ack,
+    )
+
+evidence = tuple(sample(item) for item in requirements)
 assessment = DeterministicDeviceFactReadinessEvaluator().evaluate(
     DeviceFactReadinessInput('assessment-a', 'evidence-a', profile, policies, evidence, as_of)
 )
@@ -67,7 +80,9 @@ assessment = DeterministicDeviceFactReadinessEvaluator().evaluate(
 
 ## 6. 验证、mutation 与实际系统映射
 
-本地候选证据包括 focused 14 passed、相关 Edge 回归、Residential frozen `211 passed, 62 deselected`、Campaign A–F `62 passed in 626.85s`、full pytest `2735 passed in 702.76s`、静态门禁及 pre-commit 四 hook exit 0。五个有效 mutation（identity、future timestamp、ACK correlation、reassessment、forbidden predecessor import）均被测试杀死；早期一次错误导入正式模块的 mutation 尝试无效，未计入证据。
+ACK requirement 的六个 request/ACK ID、sequence 与 correlation 字段必须全部明确存在并完全一致；all-None 不是有效 ACK，而是 fail-closed GAP。
+
+最终本地候选证据包括 P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁及 pre-commit 四 hook exit 0。七个有效 mutation（identity/provenance、future timestamp、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment、package-level forbidden ImportFrom alias）均被测试杀死；早期一次错误导入正式模块的 mutation 尝试无效，未计入证据。独立审阅、integration、PR/CI、merge 与 release 仍待后续阶段。
 
 未来 PCS/BMS 可把真实 observation、ACK 与 telemetry 映射为 caller facts；当前没有 protocol/network/HTTP/Modbus/CAN/serial、thread/scheduler/persistence/auto-retry、HIL、PCS/BMS connection、DSP/STM32、hardware control 或 field deployment。
 

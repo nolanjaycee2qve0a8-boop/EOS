@@ -12,7 +12,7 @@ P0.9 是本地 production candidate，尚未 push、PR、合并或发布；本�
 
 ## 实际验证
 
-focused 14、相关 Edge 回归、Residential frozen、Campaign A–F 62、full pytest 2735、静态门禁与 pre-commit 四 hooks 均有本地终态证据；identity、future-time、ACK correlation、reassessment 和 forbidden-import 五项有效 mutation 均被 killed。这些是代码与合同证据，不是设备结果。
+P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁与 pre-commit 四 hooks 均有本地终态证据；identity/provenance、future-time、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment 和 package-level forbidden ImportFrom alias 七项有效 mutation 均被 killed。这些是代码与合同证据，不是设备结果。
 
 ## 安全边界与下一步
 

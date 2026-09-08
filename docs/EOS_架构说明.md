@@ -1685,4 +1685,4 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 
 `edge_runtime/device_fact_readiness/` 是 test-only、caller-driven、同步且 protocol-free 的 read model。它只消费 immutable profile、policy、evidence 和 explicit `as_of`，输出 immutable PASS/GAP assessment；不导入或调用 P0.3 runtime、P0.4 adapter、P0.5 handoff、P0.6–P0.8 组件。它们只是事实层级的语义来源。
 
-P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中的 ACK/actual 仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。
+P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中 ACK 的六个 correlation 字段须完整且一致；ACK/actual 仍仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。
