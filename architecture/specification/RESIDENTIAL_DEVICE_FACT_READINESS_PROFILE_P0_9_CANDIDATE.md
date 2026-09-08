@@ -1,16 +1,18 @@
 # P0.9 Provisional Local Implementation — Residential Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL IMPLEMENTATION — NOT REVIEWED OR RELEASED.** This
-> specification records a limited local evaluator and focused-test contract. It
-> is not release authorization, a frozen P0.9 scope, a stable public API, or
-> evidence of independent review, mutation, full-suite/pre-commit, PR, CI, or
-> merge success.
+> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
+> RELEASED.** This specification records a limited local evaluator and
+> focused-test contract. It is not release authorization, a frozen P0.9 scope,
+> or a stable public API. It has not been pushed, proposed in a PR, checked by
+> remote CI, merged, or released.
 
-> **LOCAL EVIDENCE RECORDED.** Isolated focused validation completed with 14
-> passed in 0.20s and exit 0. Scoped Ruff, Ruff format check, mypy, public
-> import smoke, forbidden static/dynamic dependency-import scans, `git diff
-> --check`, and P0.1–P0.8 frozen production-path checks passed. These facts do
-> not establish release, hardware, field, or production readiness.
+> **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
+> Residential frozen regression reported 530 passed and 62 deselected; Campaign
+> A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
+> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
+> hooks completed with exit 0 and zero working-tree pollution. Seven valid
+> current-head mutations were killed. These facts do not establish release,
+> hardware, field, or production readiness.
 
 ## 1. Local purpose
 
@@ -87,6 +89,12 @@ certification.
 
 The planning decision authorizes this local, test-only evaluator only. It does
 not authorize a stable public API, external evidence source, real device
-connection, or release. Focused/scoped-static evidence is recorded above;
-mutation, broader regression, full pytest, pre-commit, independent review,
-PR/CI, and a separately approved release remain required.
+connection, or release. The final local-gate evidence is recorded above. The
+seven valid current-head mutation kills cover identity and provenance, future
+timestamps, supplied ACK mismatch, missing ACK correlation fields,
+actual-presence separation, fresh reassessment, and package-level forbidden
+imports; incomplete or incorrectly-targeted attempts are not counted.
+
+Independent final release review, user-approved push, Draft PR, remote CI,
+merge, and a separately approved release remain required. This candidate does
+not establish device, hardware, field, or safety-certification readiness.

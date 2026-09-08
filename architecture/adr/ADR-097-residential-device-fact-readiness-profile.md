@@ -1,15 +1,17 @@
 # ADR-097 — P0.9 Candidate Only: Residential Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL IMPLEMENTATION — NOT REVIEWED OR RELEASED.** P0.9 now has
-> a strictly limited local evaluator implementation. It has not received
-> independent review, mutation evidence, full-suite/pre-commit evidence, PR,
-> CI, merge, or release authorization. It is not a frozen production API.
+> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
+> RELEASED.** P0.9 has a strictly limited local evaluator implementation. It
+> is not a frozen production API and has not been pushed, proposed in a PR,
+> checked by remote CI, merged, or released.
 
-> **LOCAL EVIDENCE RECORDED.** The isolated P0.9 focused suite completed with
-> 14 passed in 0.20s and exit 0. Scoped Ruff, Ruff format check, mypy, public
-> import smoke, forbidden static/dynamic dependency-import scans, `git diff
-> --check`, and P0.1–P0.8 frozen production-path checks passed. This local
-> evidence does not establish hardware, field, production, or release readiness.
+> **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
+> Residential frozen regression reported 530 passed and 62 deselected; Campaign
+> A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
+> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
+> hooks completed with exit 0 and zero working-tree pollution. Seven valid
+> current-head mutations were killed. This local evidence does not establish
+> hardware, field, production, or release readiness.
 
 ## Context
 
@@ -74,8 +76,15 @@ certification.
 
 ## Consequences and future authorization gate
 
-This ADR retains the candidate planning history. Focused and scoped static
-evidence is recorded above; mutation, broader regressions, full pytest,
-pre-commit, independent review, PR/CI, and a separately authorized release
-decision remain required. It remains provisional and must not be described as
-deployed capability.
+This ADR retains the candidate planning history and the final local-gate facts
+recorded above. The seven valid current-head mutation kills cover identity and
+provenance, future timestamps, supplied ACK mismatch, missing ACK correlation
+fields, actual-presence separation, fresh reassessment, and package-level
+forbidden imports. Early incomplete or incorrectly-targeted attempts are not
+counted as mutation evidence.
+
+The candidate remains provisional and must not be described as deployed
+capability. An independent final release review, user-approved push, Draft PR,
+remote CI, merge, and release decision remain pending. None of these local
+facts authorize a real device connection, hardware or field control, or safety
+certification.
