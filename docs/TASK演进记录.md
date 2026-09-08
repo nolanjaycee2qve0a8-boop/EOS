@@ -5436,6 +5436,10 @@ network、thread、persistence、HIL、PCS/BMS 或 hardware capability。
 
 ## Edge P0.8 Adapter Conformance learning materials（PR #200 已合并 main）
 
+## Edge P0.9 Device-Fact Readiness Profile 学习材料（本地候选）
+
+P0.9 仅新增 test-only、同步、caller-driven 的设备事实 readiness evaluator：以 caller-owned `as_of`、`max_age`、profile 与 evidence 形成 immutable PASS/GAP 审计，不拥有 clock、command、runtime、adapter 或设备 authority。focused 14、相关 Edge 回归、Residential frozen、Campaign A–F、full pytest、静态门禁、pre-commit 与五项有效 mutation 已取得本地证据；这不表示 P0.9 已 push、PR、合并、发布或具有 hardware/field readiness。学习材料后续独立审阅并与最终 P0.9 release audit 集成。
+
 P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；这仍不表示 production 或 hardware ready。它新增的是 test-only、caller-driven、同步、transport-neutral 的 adapter conformance consumer：caller 提供 exact `FeasibleDecision`、fresh `EdgeCommandMetadata`、duration/tolerance 与 ordered finite transcript；harness 复用一次 P0.7/P0.6 cycle，核对 P0.4-style observation/transmission/ACK/actual 与 immutable evidence。
 
 本阶段学习材料特别强调 transcript、ACK、actual、receipt 和 verdict 都是不可执行事实，不能取得 command/session/runtime/adapter authority；P0.3 reconciliation 与 P0.4 actual 保持独立，ACK 不证明 physical completion。顺序、重复、unavailable、ACK correlation 或 actual mismatch 全部 fail closed，并由 P0.7 终止当前 session；恢复必须新建 session 并提供新 decision/metadata。学习指南与领导摘要分别为 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md` 和 `docs/phase-summary/RESIDENTIAL_EDGE_P0_8_LEADERSHIP_SUMMARY_CN.md`。

@@ -1680,3 +1680,9 @@ P0.8 在不修改 P0.1–P0.7 的前提下，加入 test-only、caller-driven、
 transcript、ACK、actual、receipt 与 verdict 都是不可执行 audit facts。`AdapterConformanceVerdict` 不含 session、continuation、runtime、adapter、handoff 或 command；P0.3 reconciliation retained actual 与 P0.4 actual telemetry 保持两层事实，后者与 ACK 都不能证明物理完成或替代 logical execution。顺序、重复、availability、correlation 或 actual mismatch 均 fail closed，并由 P0.7 消耗当前 session；fresh recovery 仍是 caller 的新 session 责任。
 
 P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS。当前仍没有 network、protocol、HIL、PCS/BMS 通信、DSP/STM32、hardware/field control 或安全认证。教学导航见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
+
+## 31. P0.9 Device-Fact Readiness Profile（本地候选）
+
+`edge_runtime/device_fact_readiness/` 是 test-only、caller-driven、同步且 protocol-free 的 read model。它只消费 immutable profile、policy、evidence 和 explicit `as_of`，输出 immutable PASS/GAP assessment；不导入或调用 P0.3 runtime、P0.4 adapter、P0.5 handoff、P0.6–P0.8 组件。它们只是事实层级的语义来源。
+
+P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中的 ACK/actual 仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。
