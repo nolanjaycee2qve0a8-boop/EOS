@@ -97,16 +97,26 @@ class DeterministicDeviceFactReadinessEvaluator:
                 DeviceFactGapCode.STALE,
                 "evidence exceeds the caller-provided maximum age",
             )
-        if requirement is DeviceFactRequirement.ACK_CORRELATION and (
-            sample.request_id != sample.acknowledgement_request_id
-            or sample.request_sequence != sample.acknowledgement_sequence
-            or sample.request_correlation_id != sample.acknowledgement_correlation_id
-        ):
-            return self._gap(
-                requirement,
-                DeviceFactGapCode.ACK_CORRELATION_MISMATCH,
-                "ACK correlation does not match the declared request fact",
+        if requirement is DeviceFactRequirement.ACK_CORRELATION:
+            correlation_fields = (
+                sample.request_id,
+                sample.request_sequence,
+                sample.request_correlation_id,
+                sample.acknowledgement_request_id,
+                sample.acknowledgement_sequence,
+                sample.acknowledgement_correlation_id,
             )
+            if any(value is None for value in correlation_fields) or (
+                sample.request_id != sample.acknowledgement_request_id
+                or sample.request_sequence != sample.acknowledgement_sequence
+                or sample.request_correlation_id
+                != sample.acknowledgement_correlation_id
+            ):
+                return self._gap(
+                    requirement,
+                    DeviceFactGapCode.ACK_CORRELATION_MISMATCH,
+                    "ACK correlation does not match the declared request fact",
+                )
         if (
             requirement is DeviceFactRequirement.ACTUAL_TELEMETRY
             and not sample.actual_present

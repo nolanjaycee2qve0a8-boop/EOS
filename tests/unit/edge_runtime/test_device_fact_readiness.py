@@ -208,6 +208,38 @@ def test_ack_correlation_mismatch_is_a_gap_not_completion() -> None:
     assert "completion" not in finding.detail
 
 
+def test_missing_ack_correlation_fields_fail_closed() -> None:
+    missing_ack = DeviceFactEvidenceSample(
+        "fact-ack-missing",
+        DeviceFactRequirement.ACK_CORRELATION,
+        "pcs-bms-fact-source-a",
+        "caller-provenance-a",
+        "boot-epoch-a",
+        "assessment-a",
+        "evidence-a",
+        NOW,
+        DeviceFactAvailability.AVAILABLE,
+        request_id=None,
+        request_sequence=None,
+        request_correlation_id=None,
+        acknowledgement_request_id=None,
+        acknowledgement_sequence=None,
+        acknowledgement_correlation_id=None,
+    )
+    samples = tuple(
+        missing_ack if item is DeviceFactRequirement.ACK_CORRELATION else _sample(item)
+        for item in DeviceFactRequirement
+    )
+
+    assessment = DeterministicDeviceFactReadinessEvaluator().evaluate(
+        _input(samples=samples)
+    )
+
+    finding = _finding(assessment, DeviceFactRequirement.ACK_CORRELATION)
+    assert assessment.status is DeviceFactReadinessStatus.GAP
+    assert finding.gap_code is DeviceFactGapCode.ACK_CORRELATION_MISMATCH
+
+
 def test_actual_is_distinct_and_never_substitutes_another_fact_layer() -> None:
     samples = tuple(
         _sample(item, actual_present=False)
