@@ -16,4 +16,4 @@ P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign 
 
 ## 安全边界与下一步
 
-P0.9 不生成 command，不连接 PCS/BMS，也没有 protocol、network、HIL、DSP/STM32、hardware control、field deployment 或安全认证。PASS 只表示 caller 给出的确定性证据满足 caller 的确定性语义。后续需要独立学习材料审阅，再与最终 P0.9 release audit 集成；真实设备接口、HIL、telemetry 校准和现场安全验证仍是产品化 gap。
+P0.9 不生成 command，不连接 PCS/BMS，也没有 protocol、network、HIL、DSP/STM32、hardware control、field deployment 或安全认证。PASS 只表示 caller 给出的确定性证据满足 caller 的确定性语义。独立学习材料审阅与本地 integration 已完成；最终 P0.9 release audit 与发布门禁仍是下一步。真实设备接口、HIL、telemetry 校准和现场安全验证仍是产品化 gap。

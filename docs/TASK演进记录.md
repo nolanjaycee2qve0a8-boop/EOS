@@ -5438,7 +5438,7 @@ network、thread、persistence、HIL、PCS/BMS 或 hardware capability。
 
 ## Edge P0.9 Device-Fact Readiness Profile 学习材料（本地候选）
 
-P0.9 仅新增 test-only、同步、caller-driven 的设备事实 readiness evaluator：以 caller-owned `as_of`、`max_age`、profile 与 evidence 形成 immutable PASS/GAP 审计，不拥有 clock、command、runtime、adapter 或设备 authority。最终本地证据为 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed`、full pytest `2736 passed`、静态门禁、pre-commit 与七项有效 mutation；ACK 六字段缺失也 fail closed。这不表示 P0.9 已 push、PR、合并、发布或具有 hardware/field readiness。学习材料后续独立审阅并与最终 P0.9 release audit 集成。
+P0.9 仅新增 test-only、同步、caller-driven 的设备事实 readiness evaluator：以 caller-owned `as_of`、`max_age`、profile 与 evidence 形成 immutable PASS/GAP 审计，不拥有 clock、command、runtime、adapter 或设备 authority。最终本地证据为 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed`、full pytest `2736 passed`、静态门禁、pre-commit 与七项有效 mutation；ACK 六字段缺失也 fail closed。这不表示 P0.9 已 push、PR、合并、发布或具有 hardware/field readiness。独立学习材料审阅与本地 integration 已完成；最终 P0.9 release audit 与发布门禁仍待进行。
 
 P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；这仍不表示 production 或 hardware ready。它新增的是 test-only、caller-driven、同步、transport-neutral 的 adapter conformance consumer：caller 提供 exact `FeasibleDecision`、fresh `EdgeCommandMetadata`、duration/tolerance 与 ordered finite transcript；harness 复用一次 P0.7/P0.6 cycle，核对 P0.4-style observation/transmission/ACK/actual 与 immutable evidence。
 

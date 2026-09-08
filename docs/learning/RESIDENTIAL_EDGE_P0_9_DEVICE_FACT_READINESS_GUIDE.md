@@ -82,7 +82,7 @@ assessment = DeterministicDeviceFactReadinessEvaluator().evaluate(
 
 ACK requirement 的六个 request/ACK ID、sequence 与 correlation 字段必须全部明确存在并完全一致；all-None 不是有效 ACK，而是 fail-closed GAP。
 
-最终本地候选证据包括 P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁及 pre-commit 四 hook exit 0。七个有效 mutation（identity/provenance、future timestamp、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment、package-level forbidden ImportFrom alias）均被测试杀死；早期一次错误导入正式模块的 mutation 尝试无效，未计入证据。独立审阅、integration、PR/CI、merge 与 release 仍待后续阶段。
+最终本地候选证据包括 P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁及 pre-commit 四 hook exit 0。七个有效 mutation（identity/provenance、future timestamp、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment、package-level forbidden ImportFrom alias）均被测试杀死；早期一次错误导入正式模块的 mutation 尝试无效，未计入证据。独立学习材料审阅与本地 integration 已完成；最终独立 release audit、push、PR/CI、merge 与 release 仍待后续阶段。
 
 未来 PCS/BMS 可把真实 observation、ACK 与 telemetry 映射为 caller facts；当前没有 protocol/network/HTTP/Modbus/CAN/serial、thread/scheduler/persistence/auto-retry、HIL、PCS/BMS connection、DSP/STM32、hardware control 或 field deployment。
 
