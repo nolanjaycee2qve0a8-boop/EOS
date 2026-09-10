@@ -45,9 +45,9 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 ## 4. 当前台账
 
 - P0.1–P0.9 已合并；P0.8 通过 PR #200 合并到 main，merge SHA 为 `3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`，Quality checks 为 SUCCESS；P0.9 通过 PR #203 合并到 main，merge SHA 为 `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks 为 SUCCESS。
-- 当前 main 基线：`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`。
-- P0.9 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。下一阶段必须先完成 capability-gap review，再取得显式用户阶段批准。
-- 后续任何阶段仍须先完成 capability-gap review，再取得用户阶段批准。
+- 当前 main 基线：`93f3e31773f8ac3a3db9075b4a67e01f841871eb`（PR #204 的 docs-only ordinary merge；P0.9 production merge 仍为 `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`）。
+- P0.9 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。P0.10 device-fact lifecycle continuity candidate 的 planning 已获用户批准，但 implementation、release 与任何外部能力均未获授权。
+- 后续任何 implementation stage 仍须先完成 capability-gap review，并取得单独、显式的用户阶段批准。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
 ## 5. 上下文交接与治理文档边界
