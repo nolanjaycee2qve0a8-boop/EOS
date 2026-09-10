@@ -12,7 +12,7 @@ P0.9 已通过 PR #203 在 Quality checks SUCCESS 后普通合并到 repository 
 
 ## 实际验证
 
-P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁与 pre-commit 四 hooks 均有本地终态证据；identity/provenance、future-time、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment 和 package-level forbidden ImportFrom alias 七项有效 mutation 均被 killed。这些是代码与合同证据，不是设备结果。
+P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign A–F `62 passed in 978.15s`、full pytest `2736 passed in 716.52s`、静态门禁与早期代码阶段 pre-commit 四 hooks 均有本地终态证据；identity/provenance、future-time、supplied ACK mismatch、missing six ACK fields、actual presence、reassessment 和 package-level forbidden ImportFrom alias 七项有效 mutation 均被 killed。学习示例格式修正后的隔离本地 pre-commit 因项目相对 `.pytest_cache` basetemp 的 Windows `WinError 5` 失败（pytest hook `2587 passed, 149 errors`），未计为 PASS；PR #203 的 remote Quality checks SUCCESS 独立验证了该格式修正。这些是代码与合同证据，不是设备结果。
 
 ## 安全边界与下一步
 

@@ -3,12 +3,15 @@
 > **MERGED MAIN RECORD — PR #203 CI SUCCESS.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
 > A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
-> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
-> hooks completed with exit 0 and zero working-tree pollution. Seven valid
-> current-head mutations were killed. PR #203 then passed remote Quality checks
-> and merged normally to main at `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`.
-> This repository merge is not a hardware, field, deployment, or production
-> readiness claim.
+> passed in 716.52s with exit 0. The earlier code-stage pre-commit completed its
+> four hooks with exit 0 and zero working-tree pollution. A later isolated
+> pre-commit after the learning-example Ruff format edit was not PASS: its
+> pytest hook reported 2587 passed and 149 errors when a relative project
+> `.pytest_cache` basetemp hit Windows `WinError 5`; Ruff, format, and mypy
+> passed. That local failure is not counted as PASS. PR #203 then passed remote
+> Quality checks, independently validating the formatting fix, and merged
+> normally to main at `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`. This repository
+> merge is not a hardware, field, deployment, or production readiness claim.
 
 ## 1. Focused local evidence
 

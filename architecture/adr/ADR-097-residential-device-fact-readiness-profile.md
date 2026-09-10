@@ -8,10 +8,14 @@
 > **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
 > A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
-> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
-> hooks completed with exit 0 and zero working-tree pollution. Seven valid
-> current-head mutations were killed. This local evidence does not establish
-> hardware, field, production, or release readiness.
+> passed in 716.52s with exit 0. The earlier code-stage pre-commit completed its
+> four hooks with exit 0 and zero working-tree pollution. A later isolated
+> pre-commit after the learning-example Ruff format edit was not PASS: its
+> pytest hook reported 2587 passed and 149 errors when a relative project
+> `.pytest_cache` basetemp hit Windows `WinError 5`; Ruff, format, and mypy
+> passed. Seven valid current-head mutations were killed. Remote Quality checks
+> then independently validated that formatting fix before PR #203 merged. None
+> of this evidence establishes hardware, field, production, or release readiness.
 
 ## Context
 
