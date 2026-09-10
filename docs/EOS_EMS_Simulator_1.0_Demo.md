@@ -288,3 +288,7 @@ PCS/BMS、HIL 或 hardware。准确 public API 和 focused test 阅读命令见
 P0.8 在一次 P0.7/P0.6 cycle 之后，以 caller-supplied ordered finite transcript 对照 P0.4-style observation、transmission、ACK 和 actual facts。它是 test-only conformance consumer，不是本 Simulator demo 的控制逻辑、adapter 或设备 transport。caller 仍提供 exact approved decision 与 fresh metadata，而不是 `PowerCommand`；verdict 只有 immutable audit facts，不能恢复 session/runtime/adapter/command authority。
 
 阅读时请区分 P0.3 reconciliation（logical execution fact）与 P0.4 actual（独立 adapter fact），也不要把 ACK 当作 PCS/BMS 已物理执行的证明。P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；它仍不含 network、protocol、HIL、PCS/BMS、hardware 或 field readiness。详见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
+
+## Edge P0.9 device-fact readiness 阅读入口（本地候选，非设备 Demo）
+
+P0.9 没有 CLI、网络或硬件 Demo。它的最小、确定性阅读方式是 caller 构造 profile、六项 requirement policy、evidence、`as_of`，再调用 `DeterministicDeviceFactReadinessEvaluator.evaluate(...)` 读取 immutable PASS/GAP assessment；ACK sample 必须提供六项一致 correlation 字段。示例与 API 字段见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`；不得把该评估解释为 command、ACK completion、PCS/BMS 连接或真实执行。

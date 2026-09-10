@@ -1,9 +1,17 @@
 # ADR-097 — P0.9 Candidate Only: Residential Device-Fact Readiness Profile
 
-> **CANDIDATE ONLY — PLANNING APPROVED.** This candidate contract has planning
-> approval only. It has **not** received implementation or release
-> authorization. It is not a frozen P0.9 implementation, a production API, or
-> evidence that P0.9 has started or completed.
+> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
+> RELEASED.** P0.9 has a strictly limited local evaluator implementation. It
+> is not a frozen production API and has not been pushed, proposed in a PR,
+> checked by remote CI, merged, or released.
+
+> **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
+> Residential frozen regression reported 530 passed and 62 deselected; Campaign
+> A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
+> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
+> hooks completed with exit 0 and zero working-tree pollution. Seven valid
+> current-head mutations were killed. This local evidence does not establish
+> hardware, field, production, or release readiness.
 
 ## Context
 
@@ -14,18 +22,18 @@ actual, disconnect, reboot, and fresh-reassessment facts those boundaries
 need. The next planning question is therefore factual readiness, not command
 execution or connectivity.
 
-## Candidate decision
+## Provisional local decision
 
-The proposed P0.9 readiness profile would evaluate whether a caller-nominated
+The local P0.9 readiness profile evaluates whether a caller-nominated
 candidate device-fact source can meet the required P0.4/P0.8 fact semantics,
 without creating command or device authority.
 
-Its prospective input is limited to caller-owned capability-profile data,
+Its input is limited to caller-owned capability-profile data,
 explicit required-fact semantics, and deterministic evidence samples. It must
 not accept a `PowerCommand`, endpoint, device address, credential, socket, or
 transport object.
 
-Its prospective output is an immutable, audit-only readiness/gap assessment:
+Its output is an immutable, audit-only readiness/gap assessment:
 
 - **PASS** explicitly records that the submitted deterministic evidence meets
   each stated requirement; it never means a physical command completed.
@@ -43,8 +51,8 @@ or physical completion.
 
 ## Candidate fact semantics
 
-Any future implementation proposal must make the following fact dimensions
-explicit and independently auditable:
+The provisional implementation makes the following fact dimensions explicit
+and independently auditable:
 
 | Dimension | Candidate requirement |
 | --- | --- |
@@ -68,8 +76,15 @@ certification.
 
 ## Consequences and future authorization gate
 
-This ADR defines planning vocabulary only. A future implementation would need
-separate user authorization, a stable public-contract decision, focused and
-mutation evidence, frozen-path checks, full/static/pre-commit gates,
-independent review, and a separately authorized release decision. Until then,
-the candidate remains documentation only.
+This ADR retains the candidate planning history and the final local-gate facts
+recorded above. The seven valid current-head mutation kills cover identity and
+provenance, future timestamps, supplied ACK mismatch, missing ACK correlation
+fields, actual-presence separation, fresh reassessment, and package-level
+forbidden imports. Early incomplete or incorrectly-targeted attempts are not
+counted as mutation evidence.
+
+The candidate remains provisional and must not be described as deployed
+capability. An independent final release review, user-approved push, Draft PR,
+remote CI, merge, and release decision remain pending. None of these local
+facts authorize a real device connection, hardware or field control, or safety
+certification.

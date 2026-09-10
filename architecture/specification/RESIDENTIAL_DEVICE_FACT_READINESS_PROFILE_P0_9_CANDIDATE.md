@@ -1,10 +1,20 @@
-# P0.9 Candidate Only — Residential Device-Fact Readiness Profile
+# P0.9 Provisional Local Implementation — Residential Device-Fact Readiness Profile
 
-> **CANDIDATE ONLY — PLANNING APPROVED.** This is a proposed contract, not an
-> implementation, release authorization, frozen P0.9 scope, or public API. No
-> P0.9 production code or tests are created by this document.
+> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
+> RELEASED.** This specification records a limited local evaluator and
+> focused-test contract. It is not release authorization, a frozen P0.9 scope,
+> or a stable public API. It has not been pushed, proposed in a PR, checked by
+> remote CI, merged, or released.
 
-## 1. Candidate purpose
+> **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
+> Residential frozen regression reported 530 passed and 62 deselected; Campaign
+> A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
+> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
+> hooks completed with exit 0 and zero working-tree pollution. Seven valid
+> current-head mutations were killed. These facts do not establish release,
+> hardware, field, or production readiness.
+
+## 1. Local purpose
 
 Evaluate whether a candidate PCS/BMS device-fact source, described only by
 caller-owned capability data and deterministic evidence samples, satisfies the
@@ -12,22 +22,22 @@ identity, availability, time, ACK-correlation, actual, disconnect/reboot, and
 fresh-reassessment semantics required by the P0.4/P0.8 boundaries—without
 creating command or device authority.
 
-## 2. Prospective input contract
+## 2. Input contract
 
-A future caller would supply all of the following explicitly:
+The caller supplies all of the following explicitly:
 
 1. a caller-owned capability profile identifying declared fact capabilities;
 2. an explicit set of required fact semantics; and
 3. finite deterministic evidence samples for those requirements.
 
-The candidate input contract must reject `PowerCommand`, an endpoint, device
+The input contract rejects `PowerCommand`, an endpoint, device
 address, credential, socket, adapter, runtime, session, handoff boundary,
 prepared request, command factory, or serialized authority. It is an evidence
 profile, not a transport or execution request.
 
-## 3. Prospective output contract
+## 3. Output contract
 
-A future result must be immutable and audit-only. It may report a requirement
+The result is immutable and audit-only. It may report a requirement
 as explicit **PASS** or explicit **GAP**, together with non-executable evidence
 references and gap reasons. It must not contain a live input reference or any
 hydration, factory, copy, serialization, replay, continuation, adapter,
@@ -39,7 +49,7 @@ physical completion, hardware qualification, or field-readiness assertion.
 
 ## 4. Required semantic assessments
 
-| Required fact | Prospective assessment rule |
+| Required fact | Local assessment rule |
 | --- | --- |
 | Identity and provenance | Require explicit, internally consistent source and fact identity plus provenance. Missing or conflicting claims are GAP/fail-closed. |
 | Availability and time | Require explicit availability, timestamps, freshness, and stale/unknown meaning. Absence of proof is not inferred as available or fresh. |
@@ -54,7 +64,7 @@ as zero power, success, ACK, actual, execution, or recovery.
 
 ## 5. Authority and lifecycle boundary
 
-The future evaluator is stateless for authority purposes. It owns no clock,
+The evaluator is stateless for authority purposes. It owns no clock,
 thread, scheduler, session, durable store, retry loop, adapter, transport, or
 device connection. Evidence has no command or device authority. Historical
 evidence cannot be replayed into an assessment; each assessment is a fresh
@@ -75,9 +85,16 @@ threading, scheduler, persistence, auto-retry, HIL, PCS/BMS connection,
 DSP/STM32 integration, hardware authority, field deployment, and safety
 certification.
 
-## 7. Implementation decision required
+## 7. Remaining release decision
 
-Before any implementation, the user must separately authorize a stable API,
-the exact capability-profile/evidence schema, PASS/GAP taxonomy, provenance and
-time rules, and accepted future evidence sources. This candidate itself is not
-authorization to write production or test code.
+The planning decision authorizes this local, test-only evaluator only. It does
+not authorize a stable public API, external evidence source, real device
+connection, or release. The final local-gate evidence is recorded above. The
+seven valid current-head mutation kills cover identity and provenance, future
+timestamps, supplied ACK mismatch, missing ACK correlation fields,
+actual-presence separation, fresh reassessment, and package-level forbidden
+imports; incomplete or incorrectly-targeted attempts are not counted.
+
+Independent final release review, user-approved push, Draft PR, remote CI,
+merge, and a separately approved release remain required. This candidate does
+not establish device, hardware, field, or safety-certification readiness.
