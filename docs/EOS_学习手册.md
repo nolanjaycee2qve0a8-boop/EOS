@@ -3204,8 +3204,8 @@ P0.8 是 test-only、caller-driven、同步、transport-neutral 的 conformance 
 
 P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；这不表示 production、HIL、PCS/BMS、hardware 或 field readiness。完整教学、API 和 focused test 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
 
-## P0.9：Device-Fact Readiness Profile（本地候选，未发布）
+## P0.9：Device-Fact Readiness Profile（PR #203 已合并 main，非设备能力）
 
-P0.9 把 caller 明确给出的设备事实放进同步、纯函数式 PASS/GAP 审计：`as_of` 与每项 `max_age` 都由 caller 提供，系统没有全局时钟或默认新鲜度阈值。它检查 identity/provenance、时间、ACK 关联、actual presence、disconnect/reboot 与 fresh reassessment；ACK 的六个 request/ACK correlation 字段缺一不可，PASS 只表示这些确定性输入满足这些确定性语义。
+P0.9 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS）。它把 caller 明确给出的设备事实放进同步、纯函数式 PASS/GAP 审计：`as_of` 与每项 `max_age` 都由 caller 提供，系统没有全局时钟或默认新鲜度阈值。它检查 identity/provenance、时间、ACK 关联、actual presence、disconnect/reboot 与 fresh reassessment；ACK 的六个 request/ACK correlation 字段缺一不可，PASS 只表示这些确定性输入满足这些确定性语义。
 
 这不是 command、device 或 P0.3–P0.8 authority。ACK 不等于 actual，也不等于物理完成或 hardware readiness。完整教学、最小示例、验证和非目标见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`。

@@ -1,18 +1,21 @@
 # P0.9 Provisional Local Implementation — Residential Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
-> RELEASED.** This specification records a limited local evaluator and
-> focused-test contract. It is not release authorization, a frozen P0.9 scope,
-> or a stable public API. It has not been pushed, proposed in a PR, checked by
-> remote CI, merged, or released.
+> **MERGED MAIN RECORD — PR #203 CI SUCCESS.** This specification records the
+> limited, test-only evaluator and focused-test contract merged to repository
+> main through PR #203 at `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`. It is not
+> a stable public API, hardware, field, or deployment authorization.
 
 > **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
 > A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
-> passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
-> hooks completed with exit 0 and zero working-tree pollution. Seven valid
-> current-head mutations were killed. These facts do not establish release,
-> hardware, field, or production readiness.
+> passed in 716.52s with exit 0. The earlier code-stage pre-commit completed its
+> four hooks with exit 0 and zero working-tree pollution. A later isolated
+> pre-commit after the learning-example Ruff format edit was not PASS: its
+> pytest hook reported 2587 passed and 149 errors when a relative project
+> `.pytest_cache` basetemp hit Windows `WinError 5`; Ruff, format, and mypy
+> passed. Remote Quality checks then independently validated that formatting fix
+> before PR #203 merged. Seven valid current-head mutations were killed. These
+> facts do not establish release, hardware, field, or production readiness.
 
 ## 1. Local purpose
 
@@ -95,6 +98,8 @@ timestamps, supplied ACK mismatch, missing ACK correlation fields,
 actual-presence separation, fresh reassessment, and package-level forbidden
 imports; incomplete or incorrectly-targeted attempts are not counted.
 
-Independent final release review, user-approved push, Draft PR, remote CI,
-merge, and a separately approved release remain required. This candidate does
-not establish device, hardware, field, or safety-certification readiness.
+Independent final review, user-approved push, Draft PR, remote CI success, and
+ordinary merge of PR #203 are complete. This historic candidate path does not
+establish device, hardware, field, deployment, or safety-certification
+readiness; a subsequent capability stage still requires a new capability-gap
+review and explicit user approval.
