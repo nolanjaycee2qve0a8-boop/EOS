@@ -8,7 +8,7 @@
 
 P0.10 would audit a finite sequence of caller-owned device-fact snapshots for
 lifecycle continuity across explicit disconnect, reboot, reconnect,
-identity-epoch, time-discontinuity, and fresh-reassessment transitions. It
+identity-epoch, time-discontinuity, and within-input identity-reuse rules. It
 addresses the gap left intentionally by P0.9's single-`as_of` readiness
 assessment. It does not connect to a device, issue a command, or execute a
 cycle.
@@ -20,12 +20,14 @@ A prospective `DeviceFactLifecycleContinuityInput` would contain only:
 1. a non-empty finite sequence of caller-owned immutable P0.9-style declared
    fact snapshots;
 2. an explicit transition policy for every adjacent snapshot; and
-3. caller-supplied `as_of` and time/identity-epoch constraints.
+3. a caller-owned immutable `assessment_identity` and `assessment_as_of`; and
+4. caller-supplied time/identity-epoch constraints.
 
-Each snapshot would be independently bound to its caller assessment/evidence
-identity. Transition policy would state, rather than infer, whether the next
-snapshot represents continuity, disconnect, reboot, reconnect,
-identity-epoch change, time discontinuity, or fresh reassessment.
+One input would represent exactly one audit. Its `assessment_identity` must
+differ from every snapshot/evidence identity in that input, and every sequence
+position must have unique snapshot/evidence identities. Transition policy would
+state, rather than infer, whether the next snapshot represents continuity,
+disconnect, reboot, reconnect, identity-epoch change, or time discontinuity.
 
 The contract would reject `PowerCommand`, raw strategy/EMS requests, endpoint,
 address, credential, socket, transport, adapter, runtime, session,
@@ -52,8 +54,8 @@ or suitable for field deployment.
   state.
 - A reconnect cannot silently inherit a previous identity epoch, availability,
   time, ACK correlation, actual presence, or PASS result.
-- Fresh reassessment requires explicitly new caller evidence identity and
-  declared facts; historical assessment output cannot be replayed as input.
+- Within one audit, assessment/snapshot/evidence identity reuse is an explicit
+  GAP. A historical assessment output cannot be replayed as input.
 - ACK remains only an exact request-correlation fact. It cannot prove actual,
   execution, or physical completion.
 - Actual remains a separate observed fact. It cannot create command/device
@@ -100,8 +102,7 @@ be new at every sequence position.
 
 Every adjacent pair would have exactly one closed-set label:
 `CONTINUITY`, `DISCONNECT`, `REBOOT`, `RECONNECT`,
-`IDENTITY_EPOCH_CHANGE`, `TIME_DISCONTINUITY`, or
-`FRESH_REASSESSMENT`. Missing, duplicated, or unknown labels produce
+`IDENTITY_EPOCH_CHANGE`, or `TIME_DISCONTINUITY`. Missing, duplicated, or unknown labels produce
 `UNLABELLED_OR_UNKNOWN_TRANSITION` GAP; labels are never inferred from values.
 
 | Label | Prospective acceptance condition | Exact audit GAP category |
@@ -112,16 +113,22 @@ Every adjacent pair would have exactly one closed-set label:
 | `RECONNECT` | Immediately follows disconnect/reboot/epoch discontinuity; next fact available with all required facts; same source but changed epoch; strictly increasing time; new evidence identity. | `RECONNECT_PRECONDITION_UNMET` |
 | `IDENTITY_EPOCH_CHANGE` | Explicit discontinuity with same source, changed epoch, strictly increasing time, and new evidence identity. | `IDENTITY_EPOCH_DISCONTINUITY` |
 | `TIME_DISCONTINUITY` | Explicitly identifies non-monotonic, future, stale, or policy-invalid time relation and has new evidence identity. | `TIME_DISCONTINUITY_RECORDED` |
-| `FRESH_REASSESSMENT` | A wholly new caller audit input with new snapshot, assessment, and evidence identities plus explicit time applicability. | `FRESH_REASSESSMENT_NOT_PROVEN` |
 
 All discontinuity labels (`DISCONNECT`, `REBOOT`,
 `IDENTITY_EPOCH_CHANGE`, and `TIME_DISCONTINUITY`) are explicit GAP records;
-they cannot be silently recovered. `RECONNECT` and `FRESH_REASSESSMENT` only
-document later caller-supplied facts and never rewrite prior GAPs. Overall PASS
+they cannot be silently recovered. `RECONNECT` only documents later
+caller-supplied facts and never rewrites prior GAPs. Overall PASS
 would require every transition to conform and zero GAP records. Therefore a
-finite sequence containing a discontinuity label is overall GAP; a later,
-separate caller input may be audited independently without restoring the old
-result.
+finite sequence containing a discontinuity label is overall GAP. Reuse of the
+top-level assessment identity or any snapshot/evidence identity within that
+input is `ASSESSMENT_OR_EVIDENCE_IDENTITY_REUSED` GAP.
+
+The evaluator would have no cross-call history, state, or global identity
+registry, so it cannot prove that a separate later call is globally new. A
+later audit must be a caller-provided independent input; a historical
+assessment/result supplied as input is
+`HISTORICAL_ASSESSMENT_INPUT_REJECTED` GAP and cannot hydrate, restore, replay,
+or create authority.
 
 ACK remains exact correlation-only, actual remains a distinct presence fact,
 and missing, fused, or defaulted-`None` declarations are
