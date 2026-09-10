@@ -1,9 +1,9 @@
 # ADR-097 — P0.9 Candidate Only: Residential Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
-> RELEASED.** P0.9 has a strictly limited local evaluator implementation. It
-> is not a frozen production API and has not been pushed, proposed in a PR,
-> checked by remote CI, merged, or released.
+> **MERGED MAIN RECORD — PR #203 CI SUCCESS.** P0.9 is a strictly limited,
+> test-only local evaluator merged to repository main through PR #203 at
+> `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`. This repository merge does not
+> create a hardware, field, deployment, or stable production API claim.
 
 > **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
@@ -83,8 +83,9 @@ fields, actual-presence separation, fresh reassessment, and package-level
 forbidden imports. Early incomplete or incorrectly-targeted attempts are not
 counted as mutation evidence.
 
-The candidate remains provisional and must not be described as deployed
-capability. An independent final release review, user-approved push, Draft PR,
-remote CI, merge, and release decision remain pending. None of these local
-facts authorize a real device connection, hardware or field control, or safety
-certification.
+The independent final review, user-approved push, Draft PR, remote CI success,
+and ordinary merge of PR #203 are complete. This historical candidate path must
+not be described as deployed capability: none of these repository facts
+authorize a real device connection, hardware or field control, or safety
+certification. Any subsequent capability stage remains subject to a new
+capability-gap review and explicit user approval.

@@ -1,13 +1,14 @@
 # P0.9 Provisional Local Validation — Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL CANDIDATE — FINAL LOCAL GATES PASS; NOT INDEPENDENTLY
-> RELEASE-REVIEWED OR RELEASED.** P0.1–P0.9 focused suites passed; the
+> **MERGED MAIN RECORD — PR #203 CI SUCCESS.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
 > A–F reported 62 passed in 978.15s with exit 0; and full pytest reported 2736
 > passed in 716.52s with exit 0. Final static gates passed, and pre-commit's four
 > hooks completed with exit 0 and zero working-tree pollution. Seven valid
-> current-head mutations were killed. This remains local candidate evidence,
-> not a remote CI, merge, release, hardware, field, or production claim.
+> current-head mutations were killed. PR #203 then passed remote Quality checks
+> and merged normally to main at `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`.
+> This repository merge is not a hardware, field, deployment, or production
+> readiness claim.
 
 ## 1. Focused local evidence
 
@@ -40,25 +41,25 @@ The candidate uses isolated mutations and independent assertions. It does not
 count syntax, import, fixture, manually fabricated-final-object, incomplete, or
 incorrectly-targeted mutation attempts as kills.
 
-## 3. Remaining release sequence
+## 3. Completed publication record and next-stage boundary
 
-Before release, the required sequence is:
+The completed repository publication sequence was:
 
 ```text
-independent final release review
+independent final review
 → user-approved push
 → Draft PR
-→ remote CI
-→ merge decision
-→ separately approved release
+→ remote Quality checks SUCCESS
+→ ordinary PR #203 merge to main
 ```
 
 The local focused, frozen, Campaign A–F, full pytest, static-release,
-pre-commit, and mutation gates are current. Independent final release review,
-push, PR, CI, merge, and release remain unclaimed. This provisional evaluator
-neither introduces nor proves protocol, network, HTTP, Modbus, CAN, serial,
-thread, scheduler, persistence, auto-retry, HIL, PCS/BMS connection,
-DSP/STM32, hardware, field deployment, or safety certification capability.
+pre-commit, and mutation gates are recorded, and the final review, PR, remote
+CI, and ordinary merge are complete. This historic candidate evaluator neither
+introduces nor proves protocol, network, HTTP, Modbus, CAN, serial, thread,
+scheduler, persistence, auto-retry, HIL, PCS/BMS connection, DSP/STM32,
+hardware, field deployment, or safety certification capability. Any next stage
+must begin with a new capability-gap review and explicit user approval.
 
 ## 4. Evidence boundary
 

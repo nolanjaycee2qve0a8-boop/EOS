@@ -1,10 +1,9 @@
 # P0.9 Provisional Local Implementation — Residential Device-Fact Readiness Profile
 
-> **PROVISIONAL LOCAL CANDIDATE — NOT INDEPENDENTLY RELEASE-REVIEWED OR
-> RELEASED.** This specification records a limited local evaluator and
-> focused-test contract. It is not release authorization, a frozen P0.9 scope,
-> or a stable public API. It has not been pushed, proposed in a PR, checked by
-> remote CI, merged, or released.
+> **MERGED MAIN RECORD — PR #203 CI SUCCESS.** This specification records the
+> limited, test-only evaluator and focused-test contract merged to repository
+> main through PR #203 at `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`. It is not
+> a stable public API, hardware, field, or deployment authorization.
 
 > **FINAL LOCAL EVIDENCE RECORDED.** P0.1–P0.9 focused suites passed; the
 > Residential frozen regression reported 530 passed and 62 deselected; Campaign
@@ -95,6 +94,8 @@ timestamps, supplied ACK mismatch, missing ACK correlation fields,
 actual-presence separation, fresh reassessment, and package-level forbidden
 imports; incomplete or incorrectly-targeted attempts are not counted.
 
-Independent final release review, user-approved push, Draft PR, remote CI,
-merge, and a separately approved release remain required. This candidate does
-not establish device, hardware, field, or safety-certification readiness.
+Independent final review, user-approved push, Draft PR, remote CI success, and
+ordinary merge of PR #203 are complete. This historic candidate path does not
+establish device, hardware, field, deployment, or safety-certification
+readiness; a subsequent capability stage still requires a new capability-gap
+review and explicit user approval.

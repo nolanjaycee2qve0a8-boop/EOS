@@ -1681,8 +1681,8 @@ transcript、ACK、actual、receipt 与 verdict 都是不可执行 audit facts�
 
 P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS。当前仍没有 network、protocol、HIL、PCS/BMS 通信、DSP/STM32、hardware/field control 或安全认证。教学导航见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
 
-## 31. P0.9 Device-Fact Readiness Profile（本地候选）
+## 31. P0.9 Device-Fact Readiness Profile（PR #203 已合并 main）
 
-`edge_runtime/device_fact_readiness/` 是 test-only、caller-driven、同步且 protocol-free 的 read model。它只消费 immutable profile、policy、evidence 和 explicit `as_of`，输出 immutable PASS/GAP assessment；不导入或调用 P0.3 runtime、P0.4 adapter、P0.5 handoff、P0.6–P0.8 组件。它们只是事实层级的语义来源。
+`edge_runtime/device_fact_readiness/` 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS）。它仍是 test-only、caller-driven、同步且 protocol-free 的 read model：只消费 immutable profile、policy、evidence 和 explicit `as_of`，输出 immutable PASS/GAP assessment；不导入或调用 P0.3 runtime、P0.4 adapter、P0.5 handoff、P0.6–P0.8 组件。它们只是事实层级的语义来源。
 
 P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中 ACK 的六个 correlation 字段须完整且一致；ACK/actual 仍仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。

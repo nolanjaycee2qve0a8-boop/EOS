@@ -2,7 +2,7 @@
 
 ## 状态
 
-P0.9 是本地 production candidate，尚未 push、PR、合并或发布；本摘要是学习材料，不替代 ADR、specification 或 validation contract。
+P0.9 已通过 PR #203 在 Quality checks SUCCESS 后普通合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`）；本摘要是学习材料，不替代 ADR、specification 或 validation contract。该仓库合并不是硬件、现场或产品发布结论。
 
 ## 产品价值
 
@@ -16,4 +16,4 @@ P0.1–P0.9 focused、Residential frozen `530 passed, 62 deselected`、Campaign 
 
 ## 安全边界与下一步
 
-P0.9 不生成 command，不连接 PCS/BMS，也没有 protocol、network、HIL、DSP/STM32、hardware control、field deployment 或安全认证。PASS 只表示 caller 给出的确定性证据满足 caller 的确定性语义。独立学习材料审阅与本地 integration 已完成；最终 P0.9 release audit 与发布门禁仍是下一步。真实设备接口、HIL、telemetry 校准和现场安全验证仍是产品化 gap。
+P0.9 不生成 command，不连接 PCS/BMS，也没有 protocol、network、HIL、DSP/STM32、hardware control、field deployment 或安全认证。PASS 只表示 caller 给出的确定性证据满足 caller 的确定性语义。独立学习材料审阅、本地 integration、最终审阅、PR #203 CI success 与普通 main merge 已完成；真实设备接口、HIL、telemetry 校准和现场安全验证仍是产品化 gap，并且任何后续能力须先完成 capability-gap review 与显式用户批准。

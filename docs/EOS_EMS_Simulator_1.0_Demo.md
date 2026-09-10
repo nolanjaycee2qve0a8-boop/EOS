@@ -289,6 +289,6 @@ P0.8 在一次 P0.7/P0.6 cycle 之后，以 caller-supplied ordered finite trans
 
 阅读时请区分 P0.3 reconciliation（logical execution fact）与 P0.4 actual（独立 adapter fact），也不要把 ACK 当作 PCS/BMS 已物理执行的证明。P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`），Quality checks 为 SUCCESS；它仍不含 network、protocol、HIL、PCS/BMS、hardware 或 field readiness。详见 `docs/learning/RESIDENTIAL_EDGE_P0_8_CONFORMANCE_GUIDE.md`。
 
-## Edge P0.9 device-fact readiness 阅读入口（本地候选，非设备 Demo）
+## Edge P0.9 device-fact readiness 阅读入口（PR #203 已合并 main，非设备 Demo）
 
-P0.9 没有 CLI、网络或硬件 Demo。它的最小、确定性阅读方式是 caller 构造 profile、六项 requirement policy、evidence、`as_of`，再调用 `DeterministicDeviceFactReadinessEvaluator.evaluate(...)` 读取 immutable PASS/GAP assessment；ACK sample 必须提供六项一致 correlation 字段。示例与 API 字段见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`；不得把该评估解释为 command、ACK completion、PCS/BMS 连接或真实执行。
+P0.9 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS），但没有 CLI、网络或硬件 Demo。它的最小、确定性阅读方式是 caller 构造 profile、六项 requirement policy、evidence、`as_of`，再调用 `DeterministicDeviceFactReadinessEvaluator.evaluate(...)` 读取 immutable PASS/GAP assessment；ACK sample 必须提供六项一致 correlation 字段。示例与 API 字段见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`；不得把该评估解释为 command、ACK completion、PCS/BMS 连接或真实执行。
