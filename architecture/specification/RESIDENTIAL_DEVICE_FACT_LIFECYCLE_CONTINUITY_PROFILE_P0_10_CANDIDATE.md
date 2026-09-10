@@ -87,3 +87,43 @@ P0.1–P0.9, but only after explicit user stage approval. That approval must
 freeze the exact input/output names, transition-policy semantics, evidence
 format, mutation matrix, and publication gates; it must not infer permission
 from this planning draft.
+
+## 8. Prospective semantic freeze
+
+This section resolves the candidate semantics for a future authorization
+review. It is not a current API or implementation claim. Every snapshot would
+be a caller-owned immutable value with a unique snapshot/evidence identity,
+source identity, identity epoch, availability, `observed_at`, explicit
+`as_of`/maximum-age applicability, exact ACK-correlation declaration, and
+independent actual-presence declaration. Snapshot and evidence identities must
+be new at every sequence position.
+
+Every adjacent pair would have exactly one closed-set label:
+`CONTINUITY`, `DISCONNECT`, `REBOOT`, `RECONNECT`,
+`IDENTITY_EPOCH_CHANGE`, `TIME_DISCONTINUITY`, or
+`FRESH_REASSESSMENT`. Missing, duplicated, or unknown labels produce
+`UNLABELLED_OR_UNKNOWN_TRANSITION` GAP; labels are never inferred from values.
+
+| Label | Prospective acceptance condition | Exact audit GAP category |
+| --- | --- | --- |
+| `CONTINUITY` | Both available; same source/epoch; strictly increasing observed time; each meets explicit `as_of`/max-age; new evidence identity. | `CONTINUITY_FACT_MISMATCH` |
+| `DISCONNECT` | Next fact explicitly disconnected; same source/epoch; strictly increasing time; new evidence identity. | `DISCONNECT_RECORDED` |
+| `REBOOT` | Next fact explicitly rebooted; same source; changed explicit epoch; strictly increasing time; new evidence identity. | `REBOOT_RECORDED` |
+| `RECONNECT` | Immediately follows disconnect/reboot/epoch discontinuity; next fact available with all required facts; same source but changed epoch; strictly increasing time; new evidence identity. | `RECONNECT_PRECONDITION_UNMET` |
+| `IDENTITY_EPOCH_CHANGE` | Explicit discontinuity with same source, changed epoch, strictly increasing time, and new evidence identity. | `IDENTITY_EPOCH_DISCONTINUITY` |
+| `TIME_DISCONTINUITY` | Explicitly identifies non-monotonic, future, stale, or policy-invalid time relation and has new evidence identity. | `TIME_DISCONTINUITY_RECORDED` |
+| `FRESH_REASSESSMENT` | A wholly new caller audit input with new snapshot, assessment, and evidence identities plus explicit time applicability. | `FRESH_REASSESSMENT_NOT_PROVEN` |
+
+All discontinuity labels (`DISCONNECT`, `REBOOT`,
+`IDENTITY_EPOCH_CHANGE`, and `TIME_DISCONTINUITY`) are explicit GAP records;
+they cannot be silently recovered. `RECONNECT` and `FRESH_REASSESSMENT` only
+document later caller-supplied facts and never rewrite prior GAPs. Overall PASS
+would require every transition to conform and zero GAP records. Therefore a
+finite sequence containing a discontinuity label is overall GAP; a later,
+separate caller input may be audited independently without restoring the old
+result.
+
+ACK remains exact correlation-only, actual remains a distinct presence fact,
+and missing, fused, or defaulted-`None` declarations are
+`ACK_ACTUAL_FACT_MISSING_OR_FUSED` GAP. Neither fact proves a command,
+transmission, execution, device authority, or physical completion.

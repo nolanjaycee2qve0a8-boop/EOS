@@ -25,17 +25,36 @@ discontinuity/fresh-reassessment gaps without creating execution authority?
 | Authority negatives | Result/evidence cannot yield command, runtime, adapter, handoff, session, continuation, transmission, hydration, or replay authority. |
 | Frozen/import boundary | P0.1–P0.9 and Campaign A–F remain zero-diff; transport/network/thread/persistence/HIL imports are absent. |
 
+## Prospective frozen semantic cases
+
+Future focused tests must use the closed transition set `CONTINUITY`,
+`DISCONNECT`, `REBOOT`, `RECONNECT`, `IDENTITY_EPOCH_CHANGE`,
+`TIME_DISCONTINUITY`, and `FRESH_REASSESSMENT`; unknown, duplicated, or absent
+labels must produce `UNLABELLED_OR_UNKNOWN_TRANSITION` GAP. The minimum
+contract cases are:
+
+| Case | Required prospective result |
+| --- | --- |
+| Continuity | Both available with same source/epoch, strictly increasing observed time, valid `as_of`/max-age, and new evidence identity; otherwise `CONTINUITY_FACT_MISMATCH` GAP. |
+| Disconnect/reboot/epoch/time discontinuity | Each is recorded as its exact explicit GAP category; it cannot be represented as continuity or erased by a later fact. |
+| Reconnect | Only follows a declared discontinuity and needs available complete facts, same source, changed epoch, strictly increasing time, and new evidence identity; otherwise `RECONNECT_PRECONDITION_UNMET` GAP. |
+| Fresh reassessment | Requires a wholly new caller audit input and new snapshot/assessment/evidence identities; history, restore, hydration, or reuse yields `FRESH_REASSESSMENT_NOT_PROVEN` GAP. |
+| Overall status | PASS only with zero GAP records and fully conformant transitions; any finite sequence containing a discontinuity is GAP. A later independent caller input is a new audit, not history repair. |
+| ACK/actual | Exact correlation-only ACK and separate actual presence are required; missing, fused, or defaulted-`None` facts yield `ACK_ACTUAL_FACT_MISSING_OR_FUSED` GAP and never prove completion. |
+
 ## Prospective mutation evidence
 
 Any future mutation must run in an isolated temporary worktree and record a
 real focused/static failure assertion. At minimum, it should remove or corrupt:
 
-1. identity-epoch/continuity validation;
-2. transition-policy validation;
-3. time-discontinuity or freshness validation;
-4. ACK/actual fact separation;
-5. fresh-reassessment and historical-evidence no-replay validation; and
-6. forbidden transport/import boundary checks.
+1. snapshot/evidence identity reuse validation;
+2. an unlabelled, unknown, or forged transition-label gate;
+3. continuity source/epoch/strict-time validation;
+4. discontinuity GAP recording or no-erasure validation;
+5. reconnect precondition validation;
+6. fresh-reassessment/history replay validation;
+7. ACK/actual fusion or missing/defaulted-fact handling; and
+8. forbidden transport/import boundary checks.
 
 Producer/validator common-mode self-certification, manually fabricated final
 failure objects, syntax/import failures, and incomplete attempts would not be

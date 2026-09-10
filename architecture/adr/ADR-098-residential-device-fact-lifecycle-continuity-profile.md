@@ -66,6 +66,53 @@ until the caller supplies a policy-conforming fresh fact set. The candidate may
 not infer availability, continuity, zero power, transmission success, recovery,
 or physical completion from an earlier snapshot.
 
+## Prospective semantic freeze for later scope review
+
+The following rules are normative **only within this planning-only candidate**.
+They are not current Python types, imports, implementation, or release
+authorization. A later implementation proposal must implement these rules or
+return for a new candidate review.
+
+Every prospective snapshot must be a caller-owned immutable value containing:
+its unique snapshot identity and evidence identity; source identity; identity
+epoch; availability; `observed_at`; explicit `as_of` and maximum-age
+applicability; and the independent P0.9-style required declarations for ACK
+correlation and actual presence. A sequence must use a new snapshot/evidence
+identity at every position. It cannot accept a `PowerCommand`, historical
+assessment, adapter, runtime, session, endpoint, transport object, or any live
+authority.
+
+Each adjacent pair must carry exactly one caller-declared label from this closed
+set: `CONTINUITY`, `DISCONNECT`, `REBOOT`, `RECONNECT`,
+`IDENTITY_EPOCH_CHANGE`, `TIME_DISCONTINUITY`, or `FRESH_REASSESSMENT`.
+An absent, duplicate, or unknown label is an explicit
+`UNLABELLED_OR_UNKNOWN_TRANSITION` audit GAP. The labels have these prospective
+rules and exact candidate GAP categories:
+
+| Label | Required pair facts | Epoch/time/freshness rule | GAP when unmet or recorded |
+| --- | --- | --- | --- |
+| `CONTINUITY` | both snapshots are explicitly available | same source and epoch; strictly increasing `observed_at`; each satisfies caller `as_of`/max-age; new evidence identity | `CONTINUITY_FACT_MISMATCH` |
+| `DISCONNECT` | next snapshot is explicitly disconnected | same source/epoch; strictly increasing time and new evidence identity | `DISCONNECT_RECORDED` |
+| `REBOOT` | next snapshot explicitly records reboot | same source, different explicit epoch, strictly increasing time, new evidence identity | `REBOOT_RECORDED` |
+| `RECONNECT` | may follow only `DISCONNECT`, `REBOOT`, or `IDENTITY_EPOCH_CHANGE`; next snapshot is available with complete required facts | same source, different epoch, strictly increasing time, new evidence identity | `RECONNECT_PRECONDITION_UNMET` |
+| `IDENTITY_EPOCH_CHANGE` | next snapshot explicitly declares the epoch discontinuity | same source, different epoch, strictly increasing time, new evidence identity | `IDENTITY_EPOCH_DISCONTINUITY` |
+| `TIME_DISCONTINUITY` | next snapshot explicitly declares a non-monotonic, future, stale, or otherwise policy-invalid time relation | new evidence identity; it may never be represented as continuity | `TIME_DISCONTINUITY_RECORDED` |
+| `FRESH_REASSESSMENT` | next snapshot is a wholly new caller audit input, not a historical assessment/result | new snapshot, assessment, and evidence identities plus explicit time applicability | `FRESH_REASSESSMENT_NOT_PROVEN` |
+
+`DISCONNECT`, `REBOOT`, `IDENTITY_EPOCH_CHANGE`, and `TIME_DISCONTINUITY`
+always record an audit GAP. A later `RECONNECT` or `FRESH_REASSESSMENT` can
+only document newly supplied facts; it cannot erase, rewrite, or turn an
+earlier GAP into success. The overall prospective result is PASS only when all
+evaluated transitions are structurally conformant and no GAP record exists.
+Thus any finite sequence containing one of those discontinuity labels is GAP.
+A later, independent caller input may start a new audit; it cannot hydrate,
+restore, replay, or amend the earlier result.
+
+ACK is exact correlation-only and actual is a separate presence fact. Missing,
+mixed, or defaulted `None` ACK/actual declarations are
+`ACK_ACTUAL_FACT_MISSING_OR_FUSED` GAPs; neither fact can prove execution,
+device authority, or physical completion.
+
 ## Frozen predecessors and non-goals
 
 P0.1–P0.9, Residential EMS 1.0, and Campaign A–F are frozen dependencies.
