@@ -42,37 +42,60 @@ P0.3 runtime、P0.4 adapter、P0.5 handoff 和 P0.6–P0.8 是事实/authority �
 
 ```python
 from datetime import UTC, datetime, timedelta
+
 from edge_runtime.device_fact_readiness import (
-    DeterministicDeviceFactReadinessEvaluator, DeviceFactAvailability,
-    DeviceFactCapabilityProfile, DeviceFactEvidenceSample,
-    DeviceFactReadinessInput, DeviceFactRequirement,
+    DeterministicDeviceFactReadinessEvaluator,
+    DeviceFactAvailability,
+    DeviceFactCapabilityProfile,
+    DeviceFactEvidenceSample,
+    DeviceFactReadinessInput,
+    DeviceFactRequirement,
     DeviceFactRequirementPolicy,
 )
 
 requirements = frozenset(DeviceFactRequirement)
-profile = DeviceFactCapabilityProfile('profile-a', 'source-a', 'prov-a', 'boot-a', requirements)
+profile = DeviceFactCapabilityProfile(
+    "profile-a", "source-a", "prov-a", "boot-a", requirements
+)
 as_of = datetime(2034, 1, 1, tzinfo=UTC)
-policies = tuple(DeviceFactRequirementPolicy(item, timedelta(minutes=5)) for item in requirements)
+policies = tuple(
+    DeviceFactRequirementPolicy(item, timedelta(minutes=5)) for item in requirements
+)
+
+
 def sample(item: DeviceFactRequirement) -> DeviceFactEvidenceSample:
     ack = (
         {
-            'request_id': 'request-a', 'request_sequence': 7,
-            'request_correlation_id': 'correlation-a',
-            'acknowledgement_request_id': 'request-a',
-            'acknowledgement_sequence': 7,
-            'acknowledgement_correlation_id': 'correlation-a',
+            "request_id": "request-a",
+            "request_sequence": 7,
+            "request_correlation_id": "correlation-a",
+            "acknowledgement_request_id": "request-a",
+            "acknowledgement_sequence": 7,
+            "acknowledgement_correlation_id": "correlation-a",
         }
-        if item is DeviceFactRequirement.ACK_CORRELATION else {}
+        if item is DeviceFactRequirement.ACK_CORRELATION
+        else {}
     )
     return DeviceFactEvidenceSample(
-        f'fact-{item}', item, 'source-a', 'prov-a', 'boot-a', 'assessment-a',
-        'evidence-a', as_of, DeviceFactAvailability.AVAILABLE,
-        actual_present=(item is DeviceFactRequirement.ACTUAL_TELEMETRY), **ack,
+        f"fact-{item}",
+        item,
+        "source-a",
+        "prov-a",
+        "boot-a",
+        "assessment-a",
+        "evidence-a",
+        as_of,
+        DeviceFactAvailability.AVAILABLE,
+        actual_present=item is DeviceFactRequirement.ACTUAL_TELEMETRY,
+        **ack,
     )
+
 
 evidence = tuple(sample(item) for item in requirements)
 assessment = DeterministicDeviceFactReadinessEvaluator().evaluate(
-    DeviceFactReadinessInput('assessment-a', 'evidence-a', profile, policies, evidence, as_of)
+    DeviceFactReadinessInput(
+        "assessment-a", "evidence-a", profile, policies, evidence, as_of
+    )
 )
 ```
 
