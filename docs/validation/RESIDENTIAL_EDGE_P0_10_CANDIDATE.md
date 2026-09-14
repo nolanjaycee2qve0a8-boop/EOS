@@ -1,19 +1,20 @@
-# P0.10 Planning-Only Candidate Validation — Device-Fact Lifecycle Continuity Profile
+# P0.10 Restricted Implementation Validation — Device-Fact Lifecycle Continuity Profile
 
-> **PROSPECTIVE ONLY.** This is a validation plan for a possible P0.10 phase.
-> No P0.10 implementation, test execution, mutation, CI, release, or hardware
-> result is claimed here.
+> **INITIAL IMPLEMENTATION EVIDENCE PENDING.** The user authorized a restricted,
+> uncommitted P0.10 test-only implementation. This page states its focused
+> validation contract; it does not claim test, mutation, CI, full regression,
+> pre-commit, release, or hardware success until those results are recorded.
 
-## Candidate validation question
+## Validation question
 
 Given an explicit, finite, caller-supplied sequence of P0.9-style facts and an
 explicit lifecycle transition policy, can a deterministic audit distinguish
 valid continuity from disconnect/reboot/reconnect/identity-epoch/time-
 discontinuity/identity-reuse/replay gaps without creating execution authority?
 
-## Prospective focused matrix
+## Focused matrix
 
-| Category | Required future evidence |
+| Category | Required implementation evidence |
 | --- | --- |
 | Finite caller facts | Reject empty, non-contract, historical-result, command, transport, or live-authority input. |
 | Normal continuity | Explicit continuous identities, time bounds, and fresh facts yield only an audit PASS. |
@@ -25,24 +26,24 @@ discontinuity/identity-reuse/replay gaps without creating execution authority?
 | Authority negatives | Result/evidence cannot yield command, runtime, adapter, handoff, session, continuation, transmission, hydration, or replay authority. |
 | Frozen/import boundary | P0.1–P0.9 and Campaign A–F remain zero-diff; transport/network/thread/persistence/HIL imports are absent. |
 
-## Prospective frozen semantic cases
+## Frozen semantic cases
 
-Future focused tests must use the closed transition set `CONTINUITY`,
+Focused tests use the closed transition set `CONTINUITY`,
 `DISCONNECT`, `REBOOT`, `RECONNECT`, `IDENTITY_EPOCH_CHANGE`,
 `TIME_DISCONTINUITY`; unknown, duplicated, or absent
 labels must produce `UNLABELLED_OR_UNKNOWN_TRANSITION` GAP. The minimum
 contract cases are:
 
-| Case | Required prospective result |
+| Case | Required result |
 | --- | --- |
 | Continuity | Both available with same source/epoch, strictly increasing observed time, valid `as_of`/max-age, and new evidence identity; otherwise `CONTINUITY_FACT_MISMATCH` GAP. |
-| Disconnect/reboot/epoch/time discontinuity | Each is recorded as its exact explicit GAP category; it cannot be represented as continuity or erased by a later fact. |
+| Disconnect/reboot/epoch/time discontinuity | Each records its exact explicit GAP category and validates its documented source/epoch/time pair facts; it cannot be represented as continuity or erased by a later fact. |
 | Reconnect | Only follows a declared discontinuity and needs available complete facts, same source, changed epoch, strictly increasing time, and new evidence identity; otherwise `RECONNECT_PRECONDITION_UNMET` GAP. |
 | Stateless top-level audit | Assessment identity differs from all snapshot/evidence identities, and all sequence positions are unique; reuse yields `ASSESSMENT_OR_EVIDENCE_IDENTITY_REUSED`, while historical assessment/result input yields `HISTORICAL_ASSESSMENT_INPUT_REJECTED`. Cross-call newness is intentionally not asserted. |
 | Overall status | PASS only with zero GAP records and fully conformant transitions; any finite sequence containing a discontinuity is GAP. A later independent caller input is a new audit, not history repair. |
 | ACK/actual | Exact correlation-only ACK and separate actual presence are required; missing, fused, or defaulted-`None` facts yield `ACK_ACTUAL_FACT_MISSING_OR_FUSED` GAP and never prove completion. |
 
-## Prospective mutation evidence
+## Future mutation evidence
 
 Any future mutation must run in an isolated temporary worktree and record a
 real focused/static failure assertion. At minimum, it should remove or corrupt:
@@ -60,7 +61,7 @@ Producer/validator common-mode self-certification, manually fabricated final
 failure objects, syntax/import failures, and incomplete attempts would not be
 valid mutation kills.
 
-## Prospective gate order
+## Remaining gate order
 
 ```text
 P0.10 focused
@@ -75,6 +76,6 @@ P0.10 focused
 → user-approved PR, CI, and merge
 ```
 
-This future plan does not authorize its own execution. It excludes real
+The restricted implementation excludes real
 protocols, transport, hardware, field control, HIL, and deployment, and it
 does not convert PASS/GAP into device readiness or physical-completion claims.
