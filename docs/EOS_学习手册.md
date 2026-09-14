@@ -1,5 +1,34 @@
 # EOS 学习手册
 
+## Edge P0.10 设备事实生命周期连续性（候选，本地教学材料）
+
+P0.10 是一个纯审计 profile：caller 一次性提供按时间排序的设备事实快照和相邻对的
+transition 标签，evaluator 只返回 immutable `PASS` 或 `GAP` assessment。它不拥有 clock、
+session、command、lifecycle book、adapter、replay 入口或真实设备 authority；历史 assessment
+也不能再次作为新的 audit input。因而它回答的是“已提供的事实序列是否连续且可解释”，不是
+“下一步该下什么功率命令”。
+
+每对快照必须使用六种封闭标签之一：`CONTINUITY`、`DISCONNECT`、`REBOOT`、
+`IDENTITY_EPOCH_CHANGE`、`TIME_DISCONTINUITY` 或 `RECONNECT`。正常 continuity 要求同一
+source、同一 identity epoch、严格递增且 fresh 的时间戳、available 状态，以及 request 与 ACK
+的精确 correlation 加上 `actual_present=True`。任何缺项、未知标签、重复 assessment/evidence
+identity 或不满足的关系都 fail closed 为 `GAP`；不会猜测零功率、补造 ACK、推断 actual，或把
+不连续静默改写成连续。
+
+断连、重启、epoch change 与 time discontinuity 是可审计的显式 GAP，而不是可擦除的异常注释。
+恢复也不是自动成功：`RECONNECT` 必须紧邻一个已声明的断连、重启或 epoch-change，并带有新的
+available/fresh/完整事实。这样，现场采集链恢复时仍能区分“观察到恢复”与“已证明连续”。
+
+最小阅读方式是把每条快照视为 PCS/BMS telemetry adapter **未来可能提供的事实值**：source
+identity、identity epoch、observed time、availability、request/ACK correlation 与 actual-presence。
+P0.10 不连接 PCS/BMS，不定义 CAN、Modbus、网络协议、轮询、时钟同步、持久恢复、HIL 或硬件
+安全认证。真实产品仍需由设备接口、时间源、消息完整性、现场故障处理和安全认证来产生这些事实。
+
+测试阅读应先看正常 `CONTINUITY`，再看六类 label 和 GAP code；mutation evidence 则验证删除
+identity、transition、continuity、disconnect/reconnect、historical-input、ACK/actual 或 forbidden-
+import 防线时，focused assertion 会失败。该证据只说明候选审计合同的回归敏感性，不证明设备
+物理完成或现场可靠性。
+
 ## Edge P0.4 设备适配边界
 
 P0.4 只定义“未来设备适配器可提供或消费哪些事实”，不定义 Modbus/CAN/网络字节。它把 observation、一次 safety-final transmission、ACK 和 actual telemetry 分开：ACK 不是实际执行，actual 仍是执行事实。P0.4 不生成/复制/重试 `PowerCommand`；一次 transmission request 只能由当前 P0.3 caller/admitted command 与 safety decision 构造，失败、轮询或重建 adapter 都不能重放它。时间戳由设备事实提供，fresh/stale 仍由 P0.1 判定。可序列化的 adapter evidence 只能审计，不能恢复 Runtime、lifecycle 或执行 authority。
