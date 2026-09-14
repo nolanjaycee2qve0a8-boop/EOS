@@ -1,9 +1,8 @@
 # P0.10 Restricted Implementation Validation — Device-Fact Lifecycle Continuity Profile
 
-> **INITIAL IMPLEMENTATION EVIDENCE PENDING.** The user authorized a restricted,
-> uncommitted P0.10 test-only implementation. This page states its focused
-> validation contract; it does not claim test, mutation, CI, full regression,
-> pre-commit, release, or hardware success until those results are recorded.
+> **LOCAL VALIDATION EVIDENCE RECORDED; UNPUBLISHED AND UNMERGED.** The
+> production candidate is local commit `c8d730f833759acd8c25269eea9b93335b17c1c9`.
+> It has no push, PR, remote CI, release, or hardware-success claim.
 
 ## Validation question
 
@@ -43,10 +42,10 @@ contract cases are:
 | Overall status | PASS only with zero GAP records and fully conformant transitions; any finite sequence containing a discontinuity is GAP. A later independent caller input is a new audit, not history repair. |
 | ACK/actual | Exact correlation-only ACK and separate actual presence are required; missing, fused, or defaulted-`None` facts yield `ACK_ACTUAL_FACT_MISSING_OR_FUSED` GAP and never prove completion. |
 
-## Future mutation evidence
+## Completed local mutation evidence
 
-Any future mutation must run in an isolated temporary worktree and record a
-real focused/static failure assertion. At minimum, it should remove or corrupt:
+Eight mutations ran in isolated temporary worktrees and each recorded a real
+focused/static failure assertion. The killed guards covered:
 
 1. top-level assessment identity or within-input snapshot/evidence reuse validation;
 2. an unlabelled, unknown, or forged transition-label gate;
@@ -58,21 +57,30 @@ real focused/static failure assertion. At minimum, it should remove or corrupt:
 8. forbidden transport/import boundary checks.
 
 Producer/validator common-mode self-certification, manually fabricated final
-failure objects, syntax/import failures, and incomplete attempts would not be
-valid mutation kills.
+failure objects, syntax/import failures, and incomplete attempts are not valid
+mutation kills.
 
-## Remaining gate order
+## Recorded local gate evidence
+
+| Gate | Recorded local result | Release meaning |
+| --- | --- | --- |
+| P0.10 focused | `28 passed` | Candidate contract regression evidence only. |
+| Isolated mutations | 8 guards killed | Evidence that focused/static tests detect the listed semantic regressions. |
+| Campaign A–F | `62 passed` | Frozen residential validation remains intact. |
+| Full pytest | `2764 passed` | Local repository regression evidence only. |
+| Static and frozen checks | Ruff, format, mypy, import/scope/sensitive/generated scans and P0.1–P0.9 frozen diffs passed | No remote CI or release conclusion. |
+| Pre-commit | Passed with isolated tool caches | Local hook evidence only; not CI. |
+
+The learning material was committed locally as
+`e29342cb3d2e8542803ae9770cd3eb3035085b41` and
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it documents this same candidate
+boundary and does not change production semantics.
+
+## Remaining release gate order
 
 ```text
-P0.10 focused
-→ P0.9 and predecessor/downstream focused
-→ frozen Residential and Campaign A–F regression
-→ full pytest with terminating summary and exit code
-→ Ruff / format / mypy / import / sensitive / generated-output scans
-→ P0.1–P0.9 frozen zero-diff
-→ isolated mutation evidence
+recorded local focused / frozen / Campaign / full / static / mutation / pre-commit evidence
 → independent read-only review
-→ pre-commit
 → user-approved PR, CI, and merge
 ```
 

@@ -1,10 +1,10 @@
 # ADR-098 — P0.10 Residential Device-Fact Lifecycle Continuity Profile
 
-> **RESTRICTED UNCOMMITTED IMPLEMENTATION.** The user authorized a minimal,
-> test-only implementation in the isolated P0.10 package. It remains
-> uncommitted and unreleased. This ADR does not authorize device access,
-> execution authority, publication, or hardware work; later gate results are
-> recorded only after they actually occur.
+> **RESTRICTED LOCAL IMPLEMENTATION — COMMITTED, UNPUBLISHED, UNMERGED.**
+> The P0.10 production candidate is local commit
+> `c8d730f833759acd8c25269eea9b93335b17c1c9`; it has no push, PR, CI, release,
+> or merge claim. This ADR does not authorize device access, execution authority,
+> or hardware work.
 
 ## Context
 
@@ -68,7 +68,7 @@ or physical completion from an earlier snapshot.
 
 ## Restricted implemented semantic contract
 
-The following rules are normative for this user-authorized, uncommitted
+The following rules are normative for this user-authorized local
 implementation. The actual public API is limited to immutable input, snapshot,
 transition, finding, assessment, and evaluator types in
 `edge_runtime.device_fact_lifecycle_continuity`; this is still not release or
@@ -133,11 +133,21 @@ It excludes protocol, network, HTTP, Modbus, CAN, serial, thread, scheduler,
 persistence, auto-retry, HIL, PCS/BMS connection, DSP/STM32 work, hardware or
 field control, safety certification, and product deployment.
 
-## Evidence gate
+## Local evidence and remaining release boundary
 
-The implementation is authorized but this ADR claims no completed verification.
-Any release proposal must show focused
-continuity tests, predecessor/frozen regression, static import and scope scans,
-isolated mutation evidence, independent review, publication gate, and explicit
-release approval. No result in this planning document is a test, CI, mutation,
-or release claim.
+The local candidate has recorded terminating evidence: P0.10 focused tests
+(`28 passed`); eight isolated mutation kills covering identity, labels,
+continuity, discontinuity recording, reconnect, historical input, ACK/actual,
+and forbidden imports; Campaign A–F (`62 passed`); full pytest (`2764 passed`);
+scoped/static/frozen-path checks; and isolated-cache pre-commit. These are local
+verification facts, not remote CI, publication, device access, or release facts.
+
+The integrated learning material originated in local docs commits
+`e29342cb3d2e8542803ae9770cd3eb3035085b41` and
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`. It explains the same restricted
+contract; it does not expand authority or turn the candidate into a released
+product.
+
+Any release proposal still requires independent review, user-approved push and
+PR, remote CI, and an explicit merge decision. No local evidence authorizes
+device connectivity, hardware work, or deployment.

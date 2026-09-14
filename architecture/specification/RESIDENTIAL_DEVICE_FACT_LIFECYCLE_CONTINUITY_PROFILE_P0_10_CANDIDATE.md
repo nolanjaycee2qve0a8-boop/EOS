@@ -1,9 +1,10 @@
 # P0.10 Restricted Implementation — Residential Device-Fact Lifecycle Continuity Profile
 
-> **USER-AUTHORIZED, UNCOMMITTED, AND UNRELEASED.** The names below are the
-> actual minimal public API in `edge_runtime.device_fact_lifecycle_continuity`.
-> This restricted test-only implementation is not a release, device-access, or
-> hardware-execution authorization; no later gate is claimed as passed here.
+> **USER-AUTHORIZED, LOCALLY COMMITTED, UNPUBLISHED, AND UNMERGED.** The
+> minimal public API in `edge_runtime.device_fact_lifecycle_continuity` is in
+> local commit `c8d730f833759acd8c25269eea9b93335b17c1c9`. This restricted
+> test-only implementation is not a release, device-access, or
+> hardware-execution authorization; it has no PR, CI, or merge claim.
 
 ## 1. Purpose
 
@@ -44,8 +45,8 @@ session, continuation, replay, transmission, or execution path. It may be
 copied or serialized only as inert audit data and cannot restore an evaluator
 or any execution authority.
 
-PASS would mean only that the supplied finite facts conform to the explicit
-candidate policy. It would not mean a command was admitted, transmitted,
+PASS means only that the supplied finite facts conform to the explicit
+candidate policy. It does not mean a command was admitted, transmitted,
 acknowledged as physical completion, reconciled in P0.3, executed in hardware,
 or suitable for field deployment.
 
@@ -84,12 +85,20 @@ scheduler, persistence, HIL, PCS/BMS connectivity, DSP/STM32 integration,
 hardware/field control, safety certification, or product deployment. It would
 not declare a stable public API.
 
-## 7. Restricted authorization and remaining gates
+## 7. Local evidence and remaining release gates
 
-The user authorized this isolated test-only module without changing P0.1–P0.9.
-Focused testing, frozen-path checks, mutation evidence, independent review, and
-publication gates remain separate future requirements; this document does not
-claim their success.
+The isolated test-only module leaves P0.1–P0.9 unchanged. Local terminating
+evidence is recorded as: P0.10 focused (`28 passed`); eight isolated mutation
+kills; Campaign A–F (`62 passed`); full pytest (`2764 passed`); scoped Ruff,
+format, mypy, import, sensitive-data, generated-output and frozen-path checks;
+and isolated-cache pre-commit. This evidence is local only and does not claim
+remote CI or release success.
+
+The companion learning material was authored in local docs commits
+`e29342cb3d2e8542803ae9770cd3eb3035085b41` and
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it is integrated with this local
+candidate but grants no new API or authority. Independent review, user-approved
+push/PR, remote CI, and merge remain separate future gates.
 
 ## 8. Implemented semantic contract
 
