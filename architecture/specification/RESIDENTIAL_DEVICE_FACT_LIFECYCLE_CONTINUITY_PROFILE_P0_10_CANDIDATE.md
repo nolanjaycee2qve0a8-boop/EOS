@@ -1,10 +1,10 @@
 # P0.10 Restricted Implementation — Residential Device-Fact Lifecycle Continuity Profile
 
-> **USER-AUTHORIZED, LOCALLY COMMITTED, UNPUBLISHED, AND UNMERGED.** The
-> minimal public API in `edge_runtime.device_fact_lifecycle_continuity` is in
-> local commit `c8d730f833759acd8c25269eea9b93335b17c1c9`. This restricted
-> test-only implementation is not a release, device-access, or
-> hardware-execution authorization; it has no PR, CI, or merge claim.
+> **USER-AUTHORIZED AND MERGED TO MAIN.** The minimal public API in
+> `edge_runtime.device_fact_lifecycle_continuity` merged through PR #207 as
+> `b78425f85fb3ccb7515cf6d69e0d0f2`; EOS CI `Quality checks` succeeded. This
+> restricted test-only implementation is not a device-access or hardware-
+> execution authorization.
 
 ## 1. Purpose
 
@@ -45,8 +45,8 @@ session, continuation, replay, transmission, or execution path. It may be
 copied or serialized only as inert audit data and cannot restore an evaluator
 or any execution authority.
 
-PASS means only that the supplied finite facts conform to the explicit
-candidate policy. It does not mean a command was admitted, transmitted,
+PASS means only that the supplied finite facts conform to the explicit profile
+policy. It does not mean a command was admitted, transmitted,
 acknowledged as physical completion, reconciled in P0.3, executed in hardware,
 or suitable for field deployment.
 
@@ -94,11 +94,12 @@ format, mypy, import, sensitive-data, generated-output and frozen-path checks;
 and isolated-cache pre-commit. This evidence is local only and does not claim
 remote CI or release success.
 
-The companion learning material was authored in local docs commits
+The companion learning material was authored in docs commits
 `e29342cb3d2e8542803ae9770cd3eb3035085b41` and
 `3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it is integrated with this local
-candidate but grants no new API or authority. Independent review, user-approved
-push/PR, remote CI, and merge remain separate future gates.
+implementation but grants no new API or authority. PR #207 completed independent
+review, publication, remote CI, and merge; any device-facing follow-on remains a
+separate, user-authorized stage.
 
 ## 8. Implemented semantic contract
 

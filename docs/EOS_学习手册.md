@@ -1,12 +1,16 @@
 # EOS 学习手册
 
-## Edge P0.10 设备事实生命周期连续性（候选，本地教学材料）
+## Edge P0.10 设备事实生命周期连续性（已合并，audit-only）
 
 P0.10 是一个纯审计 profile：caller 一次性提供按时间排序的设备事实快照和相邻对的
 transition 标签，evaluator 只返回 immutable `PASS` 或 `GAP` assessment。它不拥有 clock、
 session、command、lifecycle book、adapter、replay 入口或真实设备 authority；历史 assessment
 也不能再次作为新的 audit input。因而它回答的是“已提供的事实序列是否连续且可解释”，不是
 “下一步该下什么功率命令”。
+
+该 profile 已通过 PR #207 合并到 main（merge SHA
+`b78425f85fb3ccb7515cf6d69e0d0f2`），EOS CI `Quality checks` 为 SUCCESS；合并不把
+审计 evidence 升级为 PCS/BMS 接入或物理执行能力。
 
 每对快照必须使用六种封闭标签之一：`CONTINUITY`、`DISCONNECT`、`REBOOT`、
 `IDENTITY_EPOCH_CHANGE`、`TIME_DISCONTINUITY` 或 `RECONNECT`。正常 continuity 要求同一
@@ -26,7 +30,7 @@ P0.10 不连接 PCS/BMS，不定义 CAN、Modbus、网络协议、轮询、时�
 
 测试阅读应先看正常 `CONTINUITY`，再看六类 label 和 GAP code；mutation evidence 则验证删除
 identity、transition、continuity、disconnect/reconnect、historical-input、ACK/actual 或 forbidden-
-import 防线时，focused assertion 会失败。该证据只说明候选审计合同的回归敏感性，不证明设备
+import 防线时，focused assertion 会失败。该证据只说明审计合同的回归敏感性，不证明设备
 物理完成或现场可靠性。
 
 ## Edge P0.4 设备适配边界

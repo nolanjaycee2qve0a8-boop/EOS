@@ -1,8 +1,8 @@
 # EOS TASK 演进记录
 
-## Edge P0.10 — Device-Fact Lifecycle Continuity Profile（候选，本地 docs-only 记录）
+## Edge P0.10 — Device-Fact Lifecycle Continuity Profile（PR #207 已合并）
 
-P0.10 候选定义一个纯、确定性的 device-fact 生命周期连续性审计 profile：caller 提供 immutable
+P0.10 定义一个纯、确定性的 device-fact 生命周期连续性审计 profile：caller 提供 immutable
 snapshots 与六个 closed transition labels（continuity、disconnect、reboot、identity epoch change、
 time discontinuity、reconnect），evaluator 只产生 `PASS`/`GAP` assessment 和不可执行 findings。
 它对 identity reuse、未知/缺失 label、source/epoch/time 连续性、断连/恢复前置条件、ACK correlation
@@ -11,7 +11,9 @@ time discontinuity、reconnect），evaluator 只产生 `PASS`/`GAP` assessment 
 该项不修改或调用 P0.1–P0.5、冻结 Residential EMS 或 Campaign A–F；不实现 command authority、
 PCS/BMS 接口、协议、网络、scheduler、thread、persistence、HIL、实机控制、硬件安全认证或现场部署。
 `actual_present` 是 caller-supplied audit fact，不能证明物理完成，也不能从 assessment/evidence 恢复
-Runtime、lifecycle 或 command。当前仅为本地候选教学记录：未合并、未 push、未创建 PR。
+Runtime、lifecycle 或 command。P0.10 已通过 PR #207 合并到 main，merge SHA 为
+`b78425f85fb3ccb7515cf6d69e0d0f2`，EOS CI `Quality checks` 为 SUCCESS；这不扩展为
+PCS/BMS 接入、协议、硬件或现场控制能力。
 
 ## Edge P0.4 — Transport-Neutral Device Adapter Boundary
 

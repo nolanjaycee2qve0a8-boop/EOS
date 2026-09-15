@@ -1,11 +1,15 @@
 # EOS 架构说明
 
-## P0.10 Device-Fact Lifecycle Continuity Profile（候选，非 Runtime）
+## P0.10 Device-Fact Lifecycle Continuity Profile（已合并，非 Runtime）
 
 P0.10 在既有 P0.1–P0.5 事实边界之外增加一个 caller-driven、deterministic、audit-only 的
 连续性评估器。输入是 immutable device-fact snapshots 与 closed-set transition labels；输出是
 immutable assessment/GAP findings。它不调用 P0.1 safety、P0.2 simulator、P0.3 runtime、P0.4
 adapter 或 P0.5 handoff，也不改变任何 command、SOC、lifecycle、ACK、actual 或生产控制状态。
+
+该 profile 已通过 PR #207 合并到 main（merge SHA
+`b78425f85fb3ccb7515cf6d69e0d0f2`），EOS CI `Quality checks` 为 SUCCESS；合并不改变它
+作为非 Runtime 审计层的职责。
 
 其事实链为：`caller-owned snapshots + declared transition -> P0.10 audit assessment`。其中
 `actual_present` 仅表示调用方提供了 actual telemetry fact；它不是 physical completion、ACK 的
@@ -15,7 +19,7 @@ adapter 或 P0.5 handoff，也不改变任何 command、SOC、lifecycle、ACK、
 
 P0.10 将 identity reuse、未知/缺失 transition、时间/epoch/source 不连续、断连/重启/恢复关系及
 ACK/actual 事实缺失统一为显式 `GAP`。这是 fail-closed 的审计分类，不是 scheduler、自动恢复、
-retry、协议、网络、线程、持久化、HIL、PCS/BMS/STM32/DSP 控制或硬件安全机制。候选实现不改变
+retry、协议、网络、线程、持久化、HIL、PCS/BMS/STM32/DSP 控制或硬件安全机制。该实现不改变
 冻结 Residential EMS Strategy、MPC、Feasibility、Actuation、Simulator、economics 或 Campaign A–F。
 
 ## P0.4 Transport-Neutral Device Adapter Boundary

@@ -1,8 +1,9 @@
 # P0.10 Restricted Implementation Validation — Device-Fact Lifecycle Continuity Profile
 
-> **LOCAL VALIDATION EVIDENCE RECORDED; UNPUBLISHED AND UNMERGED.** The
-> production candidate is local commit `c8d730f833759acd8c25269eea9b93335b17c1c9`.
-> It has no push, PR, remote CI, release, or hardware-success claim.
+> **MERGED IMPLEMENTATION; VALIDATION EVIDENCE RECORDED.** P0.10 merged through
+> PR #207 as `b78425f85fb3ccb7515cf6d69e0d0f2`, and EOS CI `Quality checks`
+> succeeded. This is not a hardware-success, device-access, or release-of-field-
+> control claim.
 
 ## Validation question
 
@@ -64,7 +65,7 @@ mutation kills.
 
 | Gate | Recorded local result | Release meaning |
 | --- | --- | --- |
-| P0.10 focused | `28 passed` | Candidate contract regression evidence only. |
+| P0.10 focused | `28 passed` | Implementation-contract regression evidence only. |
 | Isolated mutations | 8 guards killed | Evidence that focused/static tests detect the listed semantic regressions. |
 | Campaign A–F | `62 passed` | Frozen residential validation remains intact. |
 | Full pytest | `2764 passed` | Local repository regression evidence only. |
@@ -73,15 +74,17 @@ mutation kills.
 
 The learning material was committed locally as
 `e29342cb3d2e8542803ae9770cd3eb3035085b41` and
-`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it documents this same candidate
-boundary and does not change production semantics.
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it documents this same merged
+audit boundary and does not change production semantics.
 
 ## Remaining release gate order
 
 ```text
-recorded local focused / frozen / Campaign / full / static / mutation / pre-commit evidence
+focused / frozen / Campaign / full / static / mutation / pre-commit evidence
 → independent read-only review
-→ user-approved PR, CI, and merge
+→ user-approved PR #207
+→ EOS CI `Quality checks` SUCCESS
+→ merge to main `b78425f85fb3ccb7515cf6d69e0d0f2`
 ```
 
 The restricted implementation excludes real

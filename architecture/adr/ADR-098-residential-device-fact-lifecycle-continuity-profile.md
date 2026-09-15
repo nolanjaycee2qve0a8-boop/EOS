@@ -1,9 +1,8 @@
 # ADR-098 — P0.10 Residential Device-Fact Lifecycle Continuity Profile
 
-> **RESTRICTED LOCAL IMPLEMENTATION — COMMITTED, UNPUBLISHED, UNMERGED.**
-> The P0.10 production candidate is local commit
-> `c8d730f833759acd8c25269eea9b93335b17c1c9`; it has no push, PR, CI, release,
-> or merge claim. This ADR does not authorize device access, execution authority,
+> **RESTRICTED IMPLEMENTATION — MERGED TO MAIN.** P0.10 merged through PR #207
+> as `b78425f85fb3ccb7515cf6d69e0d0f2`; the EOS CI `Quality checks` job
+> succeeded. This merge does not authorize device access, execution authority,
 > or hardware work.
 
 ## Context
@@ -126,7 +125,7 @@ device authority, or physical completion.
 ## Frozen predecessors and non-goals
 
 P0.1–P0.9, Residential EMS 1.0, and Campaign A–F are frozen dependencies.
-This candidate must not alter predecessor behavior, public APIs, or numerical
+This implementation must not alter predecessor behavior, public APIs, or numerical
 results. It is deliberately not a real device integration.
 
 It excludes protocol, network, HTTP, Modbus, CAN, serial, thread, scheduler,
@@ -135,7 +134,7 @@ field control, safety certification, and product deployment.
 
 ## Local evidence and remaining release boundary
 
-The local candidate has recorded terminating evidence: P0.10 focused tests
+The merged implementation has recorded terminating evidence: P0.10 focused tests
 (`28 passed`); eight isolated mutation kills covering identity, labels,
 continuity, discontinuity recording, reconnect, historical input, ACK/actual,
 and forbidden imports; Campaign A–F (`62 passed`); full pytest (`2764 passed`);
@@ -145,9 +144,9 @@ verification facts, not remote CI, publication, device access, or release facts.
 The integrated learning material originated in local docs commits
 `e29342cb3d2e8542803ae9770cd3eb3035085b41` and
 `3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`. It explains the same restricted
-contract; it does not expand authority or turn the candidate into a released
-product.
+contract; it does not expand authority or turn the merged audit profile into a
+device product.
 
-Any release proposal still requires independent review, user-approved push and
-PR, remote CI, and an explicit merge decision. No local evidence authorizes
-device connectivity, hardware work, or deployment.
+PR #207 completed independent review, user-approved publication, remote CI, and
+merge. No test or merge evidence authorizes device connectivity, hardware work,
+or deployment.

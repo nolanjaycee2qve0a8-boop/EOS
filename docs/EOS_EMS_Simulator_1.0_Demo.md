@@ -1,8 +1,8 @@
 # EOS EMS Simulator 1.0 Demo
 
-## Edge P0.10 lifecycle-continuity audit candidate
+## Edge P0.10 lifecycle-continuity audit profile（PR #207 已合并）
 
-候选分支中的 focused entry 为：
+已合并实现的 focused entry 为：
 
 ```powershell
 python -m pytest tests/unit/edge_runtime/test_device_fact_lifecycle_continuity.py -q
@@ -15,8 +15,9 @@ time 连续性、断连/重启/恢复关系以及 ACK correlation 与 actual-pre
 
 阅读结果时不要把 `actual_present=True` 当作物理完成：它只说明输入事实明确带有 actual telemetry
 字段。`DISCONNECT`、`REBOOT`、`IDENTITY_EPOCH_CHANGE` 与 `TIME_DISCONTINUITY` 会保留为可见 GAP；
-`RECONNECT` 只有紧邻已声明不连续且新事实完整时才可成立。该命令和本节描述的是尚未合并的 P0.10
-候选合同，不是已发布设备功能。
+`RECONNECT` 只有紧邻已声明不连续且新事实完整时才可成立。P0.10 已通过 PR #207 合并到 main
+（merge SHA `b78425f85fb3ccb7515cf6d69e0d0f2`，EOS CI `Quality checks` 为 SUCCESS），但该命令和
+本节仍只描述 audit-only 合同，不是设备接入、现场控制或硬件安全功能。
 
 ## Edge P0.3 focused runtime prototype
 
