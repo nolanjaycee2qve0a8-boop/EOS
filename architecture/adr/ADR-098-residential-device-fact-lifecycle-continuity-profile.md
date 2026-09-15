@@ -1,9 +1,10 @@
-# ADR-098 — P0.10 Planning-Only Candidate: Residential Device-Fact Lifecycle Continuity Profile
+# ADR-098 — P0.10 Residential Device-Fact Lifecycle Continuity Profile
 
-> **CANDIDATE ONLY — NOT APPROVED FOR IMPLEMENTATION.** This document records a
-> planning proposal after P0.1–P0.9 merged. It neither freezes a P0.10
-> specification nor authorizes implementation, release, device access, or any
-> execution authority.
+> **RESTRICTED LOCAL IMPLEMENTATION — COMMITTED, UNPUBLISHED, UNMERGED.**
+> The P0.10 production candidate is local commit
+> `c8d730f833759acd8c25269eea9b93335b17c1c9`; it has no push, PR, CI, release,
+> or merge claim. This ADR does not authorize device access, execution authority,
+> or hardware work.
 
 ## Context
 
@@ -18,38 +19,37 @@ logical reconciliation, P0.4 adapter observations, P0.8 conformance verdicts,
 and P0.9 readiness PASS/GAP facts remain distinct facts with their existing
 meanings.
 
-## Candidate decision
+## Restricted implementation decision
 
-If separately authorized, P0.10 may add a deterministic, test-only,
-caller-driven **Device-Fact Lifecycle Continuity Profile**. It would evaluate a
-finite caller-owned sequence of P0.9-style declared fact snapshots under an
-explicit transition policy. The candidate would report immutable PASS/GAP audit
-findings for lifecycle continuity only.
+P0.10 adds a deterministic, test-only, caller-driven **Device-Fact Lifecycle
+Continuity Profile**. It evaluates a finite caller-owned sequence of declared
+fact snapshots under an explicit transition policy and reports immutable
+PASS/GAP audit findings for lifecycle continuity only.
 
 ```text
 caller-owned finite facts + explicit transition policy + explicit as_of bounds
                              |
                              v
-    deterministic lifecycle-continuity qualification (candidate only)
+    deterministic lifecycle-continuity qualification (test-only)
                              |
                              v
            immutable PASS/GAP audit assessment and gap records
 ```
 
-The prospective input may contain only immutable caller facts, explicit
+The input contains only immutable caller facts, explicit
 transition labels/policy, declared P0.9-style fact semantics, and explicit
 time constraints. It must reject a command, endpoint, credential, socket,
 adapter, runtime, session, continuation, handoff boundary, prepared request,
 or command factory.
 
-The prospective output may contain only immutable, non-executable PASS/GAP
+The output contains only immutable, non-executable PASS/GAP
 assessment values and gap records. It cannot hold a live input, create a
 command, transmission, runtime, adapter, session, continuation, replay entry,
 or physical-completion claim.
 
-## Candidate authority and safety boundary
+## Authority and safety boundary
 
-The candidate owns no clock, session, continuation, runtime, handoff, adapter,
+The evaluator owns no clock, session, continuation, runtime, handoff, adapter,
 `PowerCommand`, command factory, execution authority, persistence, retry, or
 background work. Every assessment is one explicit caller action over a finite
 set of supplied facts; a historical assessment cannot hydrate, restore, resume,
@@ -62,21 +62,22 @@ that the explicit supplied facts meet the declared lifecycle-continuity rule.
 
 Disconnect, reboot, reconnect, identity-epoch change, time discontinuity, or
 reused within-input identity must remain explicit GAP/fail-closed facts
-until the caller supplies a policy-conforming fresh fact set. The candidate may
+until the caller supplies a policy-conforming fresh fact set. It may
 not infer availability, continuity, zero power, transmission success, recovery,
 or physical completion from an earlier snapshot.
 
-## Prospective semantic freeze for later scope review
+## Restricted implemented semantic contract
 
-The following rules are normative **only within this planning-only candidate**.
-They are not current Python types, imports, implementation, or release
-authorization. A later implementation proposal must implement these rules or
-return for a new candidate review.
+The following rules are normative for this user-authorized local
+implementation. The actual public API is limited to immutable input, snapshot,
+transition, finding, assessment, and evaluator types in
+`edge_runtime.device_fact_lifecycle_continuity`; this is still not release or
+device authorization.
 
-Every prospective top-level input must be one caller-owned immutable audit with
+Every top-level input is one caller-owned immutable audit with
 its own `assessment_identity` and `assessment_as_of`. That assessment identity
 must differ from every snapshot and evidence identity within the input. Every
-prospective snapshot must be a caller-owned immutable value containing its
+snapshot must be a caller-owned immutable value containing its
 unique snapshot identity and evidence identity; source identity; identity
 epoch; availability; `observed_at`; explicit `as_of` and maximum-age
 applicability; and the independent P0.9-style required declarations for ACK
@@ -85,12 +86,12 @@ identity at every position. It cannot accept a `PowerCommand`, historical
 assessment, adapter, runtime, session, endpoint, transport object, or any live
 authority.
 
-Each adjacent pair must carry exactly one caller-declared label from this closed
+Each adjacent pair carries exactly one caller-declared label from this closed
 set: `CONTINUITY`, `DISCONNECT`, `REBOOT`, `RECONNECT`,
 `IDENTITY_EPOCH_CHANGE`, or `TIME_DISCONTINUITY`.
 An absent, duplicate, or unknown label is an explicit
-`UNLABELLED_OR_UNKNOWN_TRANSITION` audit GAP. The labels have these prospective
-rules and exact candidate GAP categories:
+`UNLABELLED_OR_UNKNOWN_TRANSITION` audit GAP. The labels have these implemented
+rules and exact GAP categories:
 
 | Label | Required pair facts | Epoch/time/freshness rule | GAP when unmet or recorded |
 | --- | --- | --- | --- |
@@ -102,15 +103,16 @@ rules and exact candidate GAP categories:
 | `TIME_DISCONTINUITY` | next snapshot explicitly declares a non-monotonic, future, stale, or otherwise policy-invalid time relation | new evidence identity; it may never be represented as continuity | `TIME_DISCONTINUITY_RECORDED` |
 
 `DISCONNECT`, `REBOOT`, `IDENTITY_EPOCH_CHANGE`, and `TIME_DISCONTINUITY`
-always record an audit GAP. A later `RECONNECT` can only document newly
+always record their exact audit GAP and also validate their documented pair
+facts. A later `RECONNECT` can only document newly
 supplied facts; it cannot erase, rewrite, or turn an earlier GAP into success.
 Within one input, reuse of an assessment, snapshot, or evidence identity is
-`ASSESSMENT_OR_EVIDENCE_IDENTITY_REUSED` GAP. The overall prospective result is
+`ASSESSMENT_OR_EVIDENCE_IDENTITY_REUSED` GAP. The overall result is
 PASS only when all evaluated transitions are structurally conformant and no GAP
 record exists. Thus any finite sequence containing one of those discontinuity
 labels is GAP.
 
-The prospective evaluator has no history, state, or global identity registry
+The evaluator has no history, state, or global identity registry
 across calls and therefore cannot prove a later call is globally “new”. A later
 audit is only a distinct caller-provided top-level input. It must reject a prior
 assessment/result as `HISTORICAL_ASSESSMENT_INPUT_REJECTED`; it cannot hydrate,
@@ -131,11 +133,21 @@ It excludes protocol, network, HTTP, Modbus, CAN, serial, thread, scheduler,
 persistence, auto-retry, HIL, PCS/BMS connection, DSP/STM32 work, hardware or
 field control, safety certification, and product deployment.
 
-## Authorization and evidence gate
+## Local evidence and remaining release boundary
 
-Implementation requires a new explicit user stage authorization and a separate
-frozen specification/validation contract. Any proposal must show focused
-continuity tests, predecessor/frozen regression, static import and scope scans,
-isolated mutation evidence, independent review, publication gate, and explicit
-release approval. No result in this planning document is a test, CI, mutation,
-or release claim.
+The local candidate has recorded terminating evidence: P0.10 focused tests
+(`28 passed`); eight isolated mutation kills covering identity, labels,
+continuity, discontinuity recording, reconnect, historical input, ACK/actual,
+and forbidden imports; Campaign A–F (`62 passed`); full pytest (`2764 passed`);
+scoped/static/frozen-path checks; and isolated-cache pre-commit. These are local
+verification facts, not remote CI, publication, device access, or release facts.
+
+The integrated learning material originated in local docs commits
+`e29342cb3d2e8542803ae9770cd3eb3035085b41` and
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`. It explains the same restricted
+contract; it does not expand authority or turn the candidate into a released
+product.
+
+Any release proposal still requires independent review, user-approved push and
+PR, remote CI, and an explicit merge decision. No local evidence authorizes
+device connectivity, hardware work, or deployment.

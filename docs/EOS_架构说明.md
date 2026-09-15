@@ -1,5 +1,23 @@
 # EOS 架构说明
 
+## P0.10 Device-Fact Lifecycle Continuity Profile（候选，非 Runtime）
+
+P0.10 在既有 P0.1–P0.5 事实边界之外增加一个 caller-driven、deterministic、audit-only 的
+连续性评估器。输入是 immutable device-fact snapshots 与 closed-set transition labels；输出是
+immutable assessment/GAP findings。它不调用 P0.1 safety、P0.2 simulator、P0.3 runtime、P0.4
+adapter 或 P0.5 handoff，也不改变任何 command、SOC、lifecycle、ACK、actual 或生产控制状态。
+
+其事实链为：`caller-owned snapshots + declared transition -> P0.10 audit assessment`。其中
+`actual_present` 仅表示调用方提供了 actual telemetry fact；它不是 physical completion、ACK 的
+替代、命令 authority 或新的设备读取。P0.3 actual reconciliation 与 P0.10 continuity assessment
+属于不同证据层，互不覆盖、互不 hydration。历史 assessment、序列化 evidence 和 GAP finding 都
+不能构造新的 audit authority、Runtime 或 command。
+
+P0.10 将 identity reuse、未知/缺失 transition、时间/epoch/source 不连续、断连/重启/恢复关系及
+ACK/actual 事实缺失统一为显式 `GAP`。这是 fail-closed 的审计分类，不是 scheduler、自动恢复、
+retry、协议、网络、线程、持久化、HIL、PCS/BMS/STM32/DSP 控制或硬件安全机制。候选实现不改变
+冻结 Residential EMS Strategy、MPC、Feasibility、Actuation、Simulator、economics 或 Campaign A–F。
+
 ## P0.4 Transport-Neutral Device Adapter Boundary
 
 P0.4 在 P0.3 语义与未来 PCS/BMS I/O 之间增加事实边界，不是 controller 或真实设备接线。它保留 P0.1 observation/capability/health 类型，P0.1 仍拥有 freshness 和 safety，P0.3 仍拥有 command authority、reconciliation 与 lifecycle。adapter 只接受从当前 caller/admitted identity 和 safety-final request 产生的一次性 transmission request；zero 是明确消息，ACK 和 actual telemetry 独立到达。无协议、网络、线程、HIL、持久化、硬件控制或自动重试。

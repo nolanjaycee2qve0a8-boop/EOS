@@ -1,5 +1,18 @@
 # EOS TASK 演进记录
 
+## Edge P0.10 — Device-Fact Lifecycle Continuity Profile（候选，本地 docs-only 记录）
+
+P0.10 候选定义一个纯、确定性的 device-fact 生命周期连续性审计 profile：caller 提供 immutable
+snapshots 与六个 closed transition labels（continuity、disconnect、reboot、identity epoch change、
+time discontinuity、reconnect），evaluator 只产生 `PASS`/`GAP` assessment 和不可执行 findings。
+它对 identity reuse、未知/缺失 label、source/epoch/time 连续性、断连/恢复前置条件、ACK correlation
+与 actual-presence 采取 fail-closed 语义；断连、重启、epoch/time discontinuity 均保留显式 GAP。
+
+该项不修改或调用 P0.1–P0.5、冻结 Residential EMS 或 Campaign A–F；不实现 command authority、
+PCS/BMS 接口、协议、网络、scheduler、thread、persistence、HIL、实机控制、硬件安全认证或现场部署。
+`actual_present` 是 caller-supplied audit fact，不能证明物理完成，也不能从 assessment/evidence 恢复
+Runtime、lifecycle 或 command。当前仅为本地候选教学记录：未合并、未 push、未创建 PR。
+
 ## Edge P0.4 — Transport-Neutral Device Adapter Boundary
 
 P0.4 新增 future PCS/BMS I/O 的 transport-neutral facts port 和 deterministic scripted contract adapter；不修改 P0.1 safety/freshness/lifecycle、P0.2 plant dynamics、P0.3 caller-driven loop 或冻结 Residential 控制链。observation、transmission、ACK、actual 分离；P0.3 safety-final request 才能形成不可复制/不可序列化的一次性 transmission carrier，失败和重建均不重放。P0.4 仅保留可序列化审计 evidence，不能 hydration Runtime、Simulator、lifecycle 或 adapter authority；未实现协议、network、thread、scheduler、HIL、persistence 或 hardware control。

@@ -1,21 +1,23 @@
-# P0.10 Planning-Only Candidate — Residential Device-Fact Lifecycle Continuity Profile
+# P0.10 Restricted Implementation — Residential Device-Fact Lifecycle Continuity Profile
 
-> **NOT AN IMPLEMENTED API.** The names and shapes below are prospective
-> contract language for user evaluation. They are not current imports, a frozen
-> specification, implementation authorization, or release authorization.
+> **USER-AUTHORIZED, LOCALLY COMMITTED, UNPUBLISHED, AND UNMERGED.** The
+> minimal public API in `edge_runtime.device_fact_lifecycle_continuity` is in
+> local commit `c8d730f833759acd8c25269eea9b93335b17c1c9`. This restricted
+> test-only implementation is not a release, device-access, or
+> hardware-execution authorization; it has no PR, CI, or merge claim.
 
-## 1. Candidate purpose
+## 1. Purpose
 
-P0.10 would audit a finite sequence of caller-owned device-fact snapshots for
+P0.10 audits a finite sequence of caller-owned device-fact snapshots for
 lifecycle continuity across explicit disconnect, reboot, reconnect,
 identity-epoch, time-discontinuity, and within-input identity-reuse rules. It
 addresses the gap left intentionally by P0.9's single-`as_of` readiness
 assessment. It does not connect to a device, issue a command, or execute a
 cycle.
 
-## 2. Prospective input contract
+## 2. Input contract
 
-A prospective `DeviceFactLifecycleContinuityInput` would contain only:
+`DeviceFactLifecycleContinuityInput` contains only:
 
 1. a non-empty finite sequence of caller-owned immutable P0.9-style declared
    fact snapshots;
@@ -23,31 +25,32 @@ A prospective `DeviceFactLifecycleContinuityInput` would contain only:
 3. a caller-owned immutable `assessment_identity` and `assessment_as_of`; and
 4. caller-supplied time/identity-epoch constraints.
 
-One input would represent exactly one audit. Its `assessment_identity` must
+One input represents exactly one audit. Its `assessment_identity` must
 differ from every snapshot/evidence identity in that input, and every sequence
-position must have unique snapshot/evidence identities. Transition policy would
+position must have unique snapshot/evidence identities. Transition policy does
 state, rather than infer, whether the next snapshot represents continuity,
 disconnect, reboot, reconnect, identity-epoch change, or time discontinuity.
 
-The contract would reject `PowerCommand`, raw strategy/EMS requests, endpoint,
+The contract rejects `PowerCommand`, raw strategy/EMS requests, endpoint,
 address, credential, socket, transport, adapter, runtime, session,
 continuation, handoff boundary, prepared request, command factory, ACK power,
 previous actual power, trace, receipt, or historical assessment as authority.
 
-## 3. Prospective output contract
+## 3. Output contract
 
-A prospective `DeviceFactLifecycleContinuityAssessment` would be immutable and
-audit-only. It would expose an overall PASS/GAP plus per-transition gap records
-and non-executable references to evaluated snapshot facts. It would not retain
-live input objects or provide copy-to-authority, hydration, restore, factory,
-session, continuation, replay, transmission, or execution paths.
+`DeviceFactLifecycleAssessment` is immutable and audit-only. It exposes an
+overall PASS/GAP plus gap records, but does not retain evaluated snapshots or a
+live input. It provides no authority, hydration-to-authority, restore, factory,
+session, continuation, replay, transmission, or execution path. It may be
+copied or serialized only as inert audit data and cannot restore an evaluator
+or any execution authority.
 
-PASS would mean only that the supplied finite facts conform to the explicit
-candidate policy. It would not mean a command was admitted, transmitted,
+PASS means only that the supplied finite facts conform to the explicit
+candidate policy. It does not mean a command was admitted, transmitted,
 acknowledged as physical completion, reconciled in P0.3, executed in hardware,
 or suitable for field deployment.
 
-## 4. Candidate lifecycle semantics
+## 4. Lifecycle semantics
 
 - A disconnect, unavailable state, reboot, or identity/time discontinuity is
   an explicit GAP until policy-conforming fresh caller facts establish the next
@@ -61,13 +64,13 @@ or suitable for field deployment.
 - Actual remains a separate observed fact. It cannot create command/device
   authority or replace P0.3 retained actual/reconciliation.
 - Missing, conflicting, malformed, or unproven transition facts fail closed;
-  the candidate cannot invent defaults, zero power, success, recovery, or
+  the evaluator cannot invent defaults, zero power, success, recovery, or
   continuity.
 
 ## 5. Authority, state, and replay boundary
 
-The prospective evaluator would be synchronous and stateless for authority
-purposes. It would own no wall clock, background loop, thread, scheduler,
+The evaluator is synchronous and stateless for authority purposes. It owns no
+wall clock, background loop, thread, scheduler,
 durable store, retry, session, continuation, runtime, adapter, handoff, or
 command book. One call would consume only the explicit finite caller facts for
 that audit and return only non-executable values. A later audit would require a
@@ -76,36 +79,41 @@ or replay.
 
 ## 6. Frozen scope and non-goals
 
-P0.1–P0.9, Residential EMS 1.0, and Campaign A–F would remain zero-diff.
-P0.10 would not add protocol, network, HTTP, Modbus, CAN, serial, thread,
+P0.1–P0.9, Residential EMS 1.0, and Campaign A–F remain zero-diff.
+P0.10 adds no protocol, network, HTTP, Modbus, CAN, serial, thread,
 scheduler, persistence, HIL, PCS/BMS connectivity, DSP/STM32 integration,
 hardware/field control, safety certification, or product deployment. It would
 not declare a stable public API.
 
-## 7. Required approval before implementation
+## 7. Local evidence and remaining release gates
 
-This candidate is feasible as a new, isolated test-only module without changing
-P0.1–P0.9, but only after explicit user stage approval. That approval must
-freeze the exact input/output names, transition-policy semantics, evidence
-format, mutation matrix, and publication gates; it must not infer permission
-from this planning draft.
+The isolated test-only module leaves P0.1–P0.9 unchanged. Local terminating
+evidence is recorded as: P0.10 focused (`28 passed`); eight isolated mutation
+kills; Campaign A–F (`62 passed`); full pytest (`2764 passed`); scoped Ruff,
+format, mypy, import, sensitive-data, generated-output and frozen-path checks;
+and isolated-cache pre-commit. This evidence is local only and does not claim
+remote CI or release success.
 
-## 8. Prospective semantic freeze
+The companion learning material was authored in local docs commits
+`e29342cb3d2e8542803ae9770cd3eb3035085b41` and
+`3169469d0ce1ee1aa6fc9cfea51c2f68007cfeb1`; it is integrated with this local
+candidate but grants no new API or authority. Independent review, user-approved
+push/PR, remote CI, and merge remain separate future gates.
 
-This section resolves the candidate semantics for a future authorization
-review. It is not a current API or implementation claim. Every snapshot would
-be a caller-owned immutable value with a unique snapshot/evidence identity,
+## 8. Implemented semantic contract
+
+Every snapshot is a caller-owned immutable value with a unique snapshot/evidence identity,
 source identity, identity epoch, availability, `observed_at`, explicit
 `as_of`/maximum-age applicability, exact ACK-correlation declaration, and
 independent actual-presence declaration. Snapshot and evidence identities must
 be new at every sequence position.
 
-Every adjacent pair would have exactly one closed-set label:
+Every adjacent pair has exactly one closed-set label:
 `CONTINUITY`, `DISCONNECT`, `REBOOT`, `RECONNECT`,
 `IDENTITY_EPOCH_CHANGE`, or `TIME_DISCONTINUITY`. Missing, duplicated, or unknown labels produce
 `UNLABELLED_OR_UNKNOWN_TRANSITION` GAP; labels are never inferred from values.
 
-| Label | Prospective acceptance condition | Exact audit GAP category |
+| Label | Acceptance condition | Exact audit GAP category |
 | --- | --- | --- |
 | `CONTINUITY` | Both available; same source/epoch; strictly increasing observed time; each meets explicit `as_of`/max-age; new evidence identity. | `CONTINUITY_FACT_MISMATCH` |
 | `DISCONNECT` | Next fact explicitly disconnected; same source/epoch; strictly increasing time; new evidence identity. | `DISCONNECT_RECORDED` |
@@ -116,14 +124,14 @@ Every adjacent pair would have exactly one closed-set label:
 
 All discontinuity labels (`DISCONNECT`, `REBOOT`,
 `IDENTITY_EPOCH_CHANGE`, and `TIME_DISCONTINUITY`) are explicit GAP records;
-they cannot be silently recovered. `RECONNECT` only documents later
+  their pair facts are also validated and they cannot be silently recovered. `RECONNECT` only documents later
 caller-supplied facts and never rewrites prior GAPs. Overall PASS
-would require every transition to conform and zero GAP records. Therefore a
+requires every transition to conform and zero GAP records. Therefore a
 finite sequence containing a discontinuity label is overall GAP. Reuse of the
 top-level assessment identity or any snapshot/evidence identity within that
 input is `ASSESSMENT_OR_EVIDENCE_IDENTITY_REUSED` GAP.
 
-The evaluator would have no cross-call history, state, or global identity
+The evaluator has no cross-call history, state, or global identity
 registry, so it cannot prove that a separate later call is globally new. A
 later audit must be a caller-provided independent input; a historical
 assessment/result supplied as input is

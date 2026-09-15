@@ -1,5 +1,23 @@
 # EOS EMS Simulator 1.0 Demo
 
+## Edge P0.10 lifecycle-continuity audit candidate
+
+候选分支中的 focused entry 为：
+
+```powershell
+python -m pytest tests/unit/edge_runtime/test_device_fact_lifecycle_continuity.py -q
+```
+
+它读取 caller-supplied 的 immutable snapshots 与六类 transition label，验证 identity、source/epoch/
+time 连续性、断连/重启/恢复关系以及 ACK correlation 与 actual-presence 的分离。输出是 audit
+`PASS` 或明确 `GAP` finding；它不运行 Strategy、MPC、Simulator、P0.3 tick 或 P0.4 transmission，
+也不连接 PCS/BMS、CAN/Modbus、网络、HIL 或硬件。
+
+阅读结果时不要把 `actual_present=True` 当作物理完成：它只说明输入事实明确带有 actual telemetry
+字段。`DISCONNECT`、`REBOOT`、`IDENTITY_EPOCH_CHANGE` 与 `TIME_DISCONTINUITY` 会保留为可见 GAP；
+`RECONNECT` 只有紧邻已声明不连续且新事实完整时才可成立。该命令和本节描述的是尚未合并的 P0.10
+候选合同，不是已发布设备功能。
+
 ## Edge P0.3 focused runtime prototype
 
 `python -m pytest tests/unit/edge_runtime/test_controlled_runtime.py -q` 验证 caller-driven
