@@ -19,16 +19,22 @@ logical execution, reconciliation, hardware execution, or physical completion.
 
 A future input would require all of the following caller-owned immutable facts:
 
-1. an inert transmission/request identity, including explicit identity and
-   correlation fields but no executable command authority;
-2. one explicit ACK observation/correlation fact;
-3. one independent explicit actual-observation fact; and
+1. an inert transmission/request identity, including explicit identity,
+   sequence, origin, source identity, identity epoch, time, and correlation
+   fields but no executable command authority;
+2. one explicit ACK observation/correlation fact with its own source identity
+   and identity epoch;
+3. one independent explicit actual-observation fact with its own source
+   identity and identity epoch; and
 4. a distinct `assessment_identity` and `assessment_as_of` that define this
    one audit's identity and time scope.
 
 All identity, origin, availability, time, and correlation claims must be
-explicit. Equal values are not assumed to be the same authority or provenance.
-The assessment identity must not be reused as a transmission, ACK, or actual
+explicit. The caller must also declare the permitted source/epoch relationship
+among transmission, ACK, and actual; it is not inferred from equal values. A
+missing, unknown, conflicting, or relationship-undeclared source/epoch claim is
+GAP. Equal values are not assumed to be the same authority or provenance. The
+assessment identity must not be reused as a transmission, ACK, or actual
 identity within the same audit.
 
 The input must reject commands, `PowerCommand`, raw strategy/EMS requests,
@@ -53,9 +59,9 @@ or field-deployment readiness.
 
 | Subject | Prospective fail-closed rule | Not established by a PASS |
 | --- | --- | --- |
-| Transmission identity | It is caller-owned, inert, explicit, and internally consistent; missing or conflicting fields are GAP. | Command authority, transmission, or replay permission. |
-| ACK correlation | Every required declared identity/sequence/origin/time correlation must exactly match the inert transmission identity; missing, unavailable, malformed, stale, or mismatched facts are GAP. | Physical completion or actual execution. |
-| Actual observation | It is explicitly present or explicitly unavailable and remains distinct from ACK and transmission identity. | P0.3 retained actual/reconciliation or command authority. |
+| Transmission identity | It is caller-owned, inert, explicit, and internally consistent, including source identity and identity epoch; missing, unknown, or conflicting fields are GAP. | Command authority, transmission, or replay permission. |
+| ACK correlation | Every required declared identity/sequence/origin/time/source/epoch correlation must exactly match the inert transmission identity or satisfy the caller-declared relationship; missing, unavailable, malformed, stale, unknown, conflicting, mismatched, or relationship-undeclared facts are GAP. | Physical completion or actual execution. |
+| Actual observation | It is explicitly present or explicitly unavailable, has explicit source identity and identity epoch, and remains distinct from ACK and transmission identity; missing, unknown, conflicting, or relationship-undeclared source/epoch facts are GAP. | P0.3 retained actual/reconciliation or command authority. |
 | Assessment identity / `as_of` | They are explicit, caller-owned, distinct audit facts; unknown or inconsistent scope/time is GAP. | A runtime clock, continuation, history, or freshness inference. |
 
 An unavailable or malformed fact is an explicit GAP, not a default zero-power
@@ -87,10 +93,11 @@ authority, field control, safety certification, or deployment feature.
 ## 7. Future validation and review plan
 
 If a separate future implementation is authorized, its tests must independently
-cover exact inert identity preservation; ACK correlation mismatch/missing/
-unavailable facts; actual-vs-P0.3-reconciliation separation; `assessment_as_of`
-scope; non-authority serialization/copy/hydration negatives; no replay from
-historical evidence; and frozen/import boundaries.
+cover positive matching and declared-relationship source/epoch facts; ACK
+correlation mismatch/missing/unavailable/unknown/conflicting/undeclared
+source-epoch facts; actual-vs-P0.3-reconciliation separation;
+`assessment_as_of` scope; non-authority serialization/copy/hydration negatives;
+no replay from historical evidence; and frozen/import boundaries.
 
 Future mutations must corrupt producers or public composition boundaries rather
 than fabricate final PASS/GAP objects or share the producer's validator. The

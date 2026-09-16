@@ -37,10 +37,12 @@ inert caller transmission identity + declared ACK correlation + actual observati
 The prospective input would carry only inert values: a caller-owned
 transmission/request identity, declared ACK-correlation facts, a distinct
 actual-observation fact, and a caller-owned `assessment_identity` and
-`assessment_as_of`. It would reject a command, command factory, raw EMS or
-strategy request, runtime, adapter, session, continuation, handoff boundary,
-prepared request, trace, receipt, endpoint, credential, socket, transport, or
-historical assessment as authority.
+`assessment_as_of`. Transmission, ACK, and actual facts would each carry an
+explicit caller-owned source identity and identity epoch, together with an
+explicit declared source/epoch relationship for this audit. It would reject a
+command, command factory, raw EMS or strategy request, runtime, adapter,
+session, continuation, handoff boundary, prepared request, trace, receipt,
+endpoint, credential, socket, transport, or historical assessment as authority.
 
 The prospective output would be immutable PASS/GAP audit evidence only. It
 would retain no live input and expose no command, adapter, runtime, session,
@@ -49,13 +51,19 @@ transmission authority.
 
 ## Candidate fact and authority semantics
 
-- The transmission identity is caller-owned and inert. It is an audit subject,
-  never a permission to issue or repeat a command.
+- The transmission identity, source identity, and identity epoch are
+  caller-owned and inert. They are audit subjects, never permissions to issue
+  or repeat a command.
 - ACK correlation must be explicit and exact against the declared transmission
-  identity. Missing, malformed, stale, conflicting, or mismatched correlation
-  facts fail closed as GAP; a correlated ACK is not physical completion.
+  identity, source identity, identity epoch, and declared source/epoch
+  relationship. Missing, unknown, malformed, stale, conflicting, mismatched,
+  or relationship-undeclared correlation facts fail closed as GAP; a correlated
+  ACK is not physical completion.
 - Actual is a distinct caller-supplied observation fact. It cannot manufacture
   authority, prove transmission, or replace P0.3 retained actual/reconciliation.
+  Its source identity and identity epoch must also conform to the same explicit
+  declared relationship; absent, unknown, conflicting, or undeclared facts are
+  GAP rather than an inferred match.
 - `assessment_identity` and `assessment_as_of` are caller-owned audit facts,
   distinct from the other declared identities. They make the audit scope and
   time explicit; they do not create a clock, freshness inference, or history.
