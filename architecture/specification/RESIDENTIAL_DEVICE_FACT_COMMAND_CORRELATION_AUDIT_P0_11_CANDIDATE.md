@@ -1,8 +1,9 @@
 # P0.11 — Residential Device-Fact Command-Correlation Audit
 
-> **RESTRICTED LOCAL IMPLEMENTATION / UNPUBLISHED.** This specification defines
-> a test-only immutable audit contract. It is not device, transport, hardware,
-> field, or release authorization.
+> **RESTRICTED LOCAL COMMIT / UNPUBLISHED.** This specification defines a
+> test-only immutable audit contract. The implementation and learning-material
+> integration are committed locally, but this remains neither device,
+> transport, hardware, field, nor release authorization.
 
 ## 1. Purpose
 
@@ -74,9 +75,15 @@ persistence, retry, HIL, PCS/BMS/DSP/STM32 integration, device connection,
 hardware authority, field control, safety certification, or deployment feature
 is included.
 
-## 6. Validation boundary
+## 6. Local validation and publication boundary
 
-Focused tests verify the deterministic contract and import boundary. Future
-publication requires separately authorized upstream/frozen/Campaign regression,
-full pytest, static/pre-commit terminal evidence, isolated producer-corruption
-mutations, independent review, and an explicit user publication decision.
+Completed local evidence is P0.9 focused 15 passed, P0.10 focused 28 passed,
+P0.11 focused 20 passed, Edge Runtime 284 passed, Residential frozen 23
+passed, Campaign A–F 62 passed in 934.67s (exit 0), full pytest 2784 passed in
+550.42s (exit 0), passing static gates, and passing isolated pre-commit
+ruff/format/mypy/pytest hooks (exit 0). Seven isolated mutation cases were
+killed, including the package-level `ImportFrom` alias regression.
+
+These results do not establish a push, PR, remote CI, merge, release, hardware
+or field claim. Publication remains contingent on independent review and an
+explicit user decision.

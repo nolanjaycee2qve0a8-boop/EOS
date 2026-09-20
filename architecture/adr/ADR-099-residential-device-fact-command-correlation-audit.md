@@ -1,8 +1,9 @@
 # ADR-099 — P0.11: Residential Device-Fact Command-Correlation Audit
 
-> **RESTRICTED LOCAL IMPLEMENTATION / NOT PUBLISHED OR RELEASED.** P0.11 is a
-> synchronous, deterministic, test-only audit of finite caller facts. It grants
-> no device, hardware, field, transport, or release authority.
+> **RESTRICTED LOCAL COMMIT / NOT PUBLISHED OR RELEASED.** P0.11 is a
+> synchronous, deterministic, test-only audit of finite caller facts. Its
+> implementation and learning-material integration are committed locally only;
+> they grant no device, hardware, field, transport, or release authority.
 
 ## Context
 
@@ -67,11 +68,18 @@ threading, scheduling, persistence, retries, HIL, PCS/BMS/DSP/STM32
 integration, hardware control, field control, safety certification, or product
 deployment.
 
-## Local evidence and later gate
+## Local validation evidence and publication boundary
 
-The focused suite covers positive same-source/same-epoch and explicitly
-declared cross-source/epoch facts; missing, unavailable, malformed,
-mismatched, stale, conflicting, and undeclared GAP paths; actual/ACK/P0.3
-separation; historical-evidence rejection; inert serialization; and forbidden
-imports. It does not establish publication, CI, mutation, hardware, or field
-evidence. Those later gates require separate authorization.
+The locally completed evidence is: P0.9 focused 15 passed, P0.10 focused 28
+passed, P0.11 focused 20 passed, Edge Runtime 284 passed, Residential frozen
+23 passed, Campaign A–F 62 passed in 934.67s (exit 0), and full pytest 2784
+passed in 550.42s (exit 0). Static gates passed, isolated pre-commit's
+ruff/format/mypy/pytest hooks passed (exit 0), and seven isolated mutations
+were killed: source/epoch exactness, undeclared relationship, ACK
+identity/sequence/origin, unavailable actual, actual-not-curing-unavailable
+ACK, historical-assessment replay, and package-level `ImportFrom` alias.
+
+This is local validation and learning-integration evidence only. P0.11 has not
+been pushed, opened as a PR, reviewed by remote CI, merged, released, or
+authorized for hardware or field use. Any publication still requires a separate
+user decision.
