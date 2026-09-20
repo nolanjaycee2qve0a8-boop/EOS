@@ -1,67 +1,48 @@
-# P0.11 Candidate Validation Plan — Device-Fact Command-Correlation Audit
+# P0.11 Local Validation — Device-Fact Command-Correlation Audit
 
-> **PLANNING-ONLY / NO IMPLEMENTATION EVIDENCE.** This is a prospective test
-> and review plan. It reports no executed test, mutation, CI, PR, release, or
-> hardware result and grants no implementation authority.
+> **LOCAL COMMIT AND VALIDATION EVIDENCE ONLY / UNPUBLISHED.** This record is
+> neither a release claim nor an authorization for device, hardware, transport,
+> or field operation.
 
 ## Validation question
 
-If separately authorized, can an immutable audit evaluate finite caller-owned
-inert transmission identity, ACK correlation, actual observation, and explicit
-assessment identity/`as_of` facts as PASS/GAP—without creating execution,
-replay, or physical-completion authority?
+Can a pure evaluator assess finite caller-owned inert transmission, ACK, actual,
+relationship, and assessment-time facts as PASS/GAP without manufacturing
+command, replay, transport, execution, reconciliation, or physical-completion
+authority?
 
-## Future focused matrix
+## Focused contract matrix
 
-| Area | Required future evidence |
+| Area | Required local evidence |
 | --- | --- |
-| Inert transmission identity | Caller-owned identity/origin/sequence/time/source identity/identity epoch fields are preserved for audit and cannot become a command or retry authority. |
-| ACK correlation | Exact declared identity/sequence/origin/time/source/epoch correlation, or an explicit caller-declared source/epoch relationship, is required; missing, unavailable, malformed, stale, unknown, conflicting, mismatched, or relationship-undeclared facts fail closed as GAP. |
-| Actual separation | Actual stays an independent observation with explicit source identity and identity epoch; it cannot prove ACK, transmission, command execution, or replace P0.3 reconciliation. |
-| Assessment scope | Distinct `assessment_identity` and explicit `assessment_as_of` are required; absent/conflicting/reused scope facts fail closed. |
-| Historical evidence | Prior PASS/GAP, ACK, actual, or identity facts cannot hydrate, restore, clone, retime, re-number, or replay authority. |
-| Authority negatives | Result/evidence cannot yield a command, request, runtime, adapter, session, continuation, handoff, transmission, or device connection. |
-| Frozen boundary | P0.1–P0.10, Residential EMS 1.0, Campaign A–F, and forbidden transport/protocol imports remain unchanged. |
+| Transmission identity | Caller identity, sequence, origin, time, source, and epoch remain inert audit values. |
+| ACK correlation | Identity, sequence, origin, time, source, epoch, availability, and explicit relationship mismatch fail closed as GAP. |
+| Actual separation | Actual is independent from ACK and cannot cure an ACK GAP or replace P0.3 reconciliation. |
+| Relationship | Same source/epoch and explicitly declared cross-source/epoch relationships pass; absent or conflicting relationships GAP. |
+| Assessment scope | Reused identity, stale/future time, and historical evidence-as-input fail closed. |
+| Authority boundary | Assessment holds no input, command, request, runtime, adapter, session, continuation, or transmission reference. |
+| Import boundary | No transport, protocol, thread, persistence, P0.3/P0.4 runtime, P0.9, or P0.10 import is permitted. |
 
-## Future mutation matrix
+## Completed local evidence
 
-Any future mutation run must use a clean temporary worktree and record a real
-independent failure assertion. At minimum it must attempt to remove or corrupt:
+| Gate | Completed local terminal evidence |
+| --- | --- |
+| Focused / upstream | P0.9: 15 passed; P0.10: 28 passed; P0.11: 20 passed; Edge Runtime: 284 passed; Residential frozen: 23 passed. |
+| Campaign regression | Campaign A–F: 62 passed in 934.67s, exit 0. |
+| Full regression | 2784 passed in 550.42s, exit 0. |
+| Static and hooks | Static gates passed; isolated pre-commit ruff/format/mypy/pytest hooks passed, exit 0. |
+| Mutation evidence | Seven isolated cases were killed: source/epoch exactness, undeclared relationship, ACK identity/sequence/origin, unavailable actual, actual-not-curing-unavailable ACK, historical replay, and package-level `ImportFrom` alias. |
 
-1. inert transmission identity exactness, provenance, source identity, or
-   identity epoch validation;
-2. ACK identity/sequence/origin/time/source/epoch correlation or the declared
-   source/epoch relationship validation;
-3. unavailable, malformed, unknown, conflicting, or relationship-undeclared
-   fact fail-closed behavior;
-4. actual-observation separation from P0.3 reconciliation;
-5. assessment identity/`as_of` scope validation;
-6. no-hydration/no-replay/no-authority result boundary; and
-7. forbidden protocol/network/thread/persistence/HIL imports.
+The P0.11 implementation and its learning-material integration are locally
+committed. They have not been pushed, opened as a PR, checked by remote CI,
+merged, released, or authorized for device, transport, hardware, or field use.
 
-Producer/validator common-mode self-certification, hand-constructed final
-PASS/GAP objects, syntax/import failures, incomplete runs, and unrelated
-environment errors would not count as mutation kills.
-
-The future focused suite must include positive same-source/same-epoch and
-explicitly declared permitted-relationship cases, as well as negative missing,
-unknown, conflicting, and undeclared relationship cases. The future mutation
-suite must independently corrupt source identity, identity epoch, and the
-declared relationship without fabricating a final PASS/GAP object.
-
-## Future gate order
+## Publication sequence still required
 
 ```text
-separate user implementation authorization
-→ focused candidate tests
-→ upstream / frozen / Campaign A–F regression
-→ full pytest with terminal summary and exit code
-→ static, import, sensitive-data, generated-output, and pre-commit gates
-→ isolated mutation evidence
 → independent read-only review
 → explicit user decision on push / PR / merge
 ```
 
-This candidate has not entered that sequence. P0.11 does not implement or
-authorize protocols, networking, HIL, PCS/BMS/DSP/hardware work, field control,
-or physical-completion claims.
+P0.11 does not implement or authorize protocols, networking, HIL,
+PCS/BMS/DSP/hardware work, field control, or physical-completion claims.
