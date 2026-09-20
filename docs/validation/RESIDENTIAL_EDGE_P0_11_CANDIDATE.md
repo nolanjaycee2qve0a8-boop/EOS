@@ -1,8 +1,9 @@
-# P0.11 Local Validation — Device-Fact Command-Correlation Audit
+# P0.11 Validation — Device-Fact Command-Correlation Audit
 
-> **LOCAL COMMIT AND VALIDATION EVIDENCE ONLY / UNPUBLISHED.** This record is
-> neither a release claim nor an authorization for device, hardware, transport,
-> or field operation.
+> **MERGED AUDIT-ONLY CONTRACT / NOT A RELEASE CLAIM.** PR #211 merged P0.11
+> to main at `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`; final head
+> `c040d9ef237a01ba9250ae51f2ccb4508d474c32` passed `Quality checks`. This is
+> not authorization for device, hardware, transport, or field operation.
 
 ## Validation question
 
@@ -33,15 +34,20 @@ authority?
 | Static and hooks | Static gates passed; isolated pre-commit ruff/format/mypy/pytest hooks passed, exit 0. |
 | Mutation evidence | Seven isolated cases were killed: source/epoch exactness, undeclared relationship, ACK identity/sequence/origin, unavailable actual, actual-not-curing-unavailable ACK, historical replay, and package-level `ImportFrom` alias. |
 
-The P0.11 implementation and its learning-material integration are locally
-committed. They have not been pushed, opened as a PR, checked by remote CI,
-merged, released, or authorized for device, transport, hardware, or field use.
+The final head of PR #211 made only the semantic-equivalent Python 3.12 Ruff
+`UP038` correction `(int, float)` → `int | float`; its final `Quality checks`
+run was SUCCESS. The initial CI failure is not PASS. P0.11 is merged, but is
+not authorized for device, transport, hardware, or field use.
 
-## Publication sequence still required
+## Completed publication sequence and next boundary
 
 ```text
 → independent read-only review
 → explicit user decision on push / PR / merge
+→ PR #211 merge and final CI SUCCESS
+
+The next possible stage is only a P0.12 capability-gap review followed by
+explicit user approval; no P0.12 implementation is authorized by this record.
 ```
 
 P0.11 does not implement or authorize protocols, networking, HIL,

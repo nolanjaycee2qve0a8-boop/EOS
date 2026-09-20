@@ -1,6 +1,6 @@
 # Residential Edge P0.11 命令关联审计指南
 
-> 本地候选、audit-only、未发布。它不是 command transmission、physical completion 或设备能力声明。
+> PR #211 已合并的 audit-only 合同。它不是 command transmission、physical completion 或设备能力声明。
 
 ## 一句话
 
@@ -30,3 +30,8 @@ identity/as-of 组成；输出仅为 immutable `PASS` 或 `GAP` findings。relat
 focused 20 tests 与 7 项 mutation 覆盖 source/epoch、relationship、ACK correlation、availability、
 actual separation、history replay 和 ImportFrom alias。未来 PCS/BMS/EMS/Edge 可提供事实，仍须另行
 实现可信通信、时间治理、HIL 与现场验证。
+
+PR #211 合并 SHA 为 `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`，最终 head
+`c040d9ef237a01ba9250ae51f2ccb4508d474c32` 的 `Quality checks` 为 SUCCESS。首次 CI 的
+Ruff UP038 不是 PASS；其后仅作语义等价的 Python 3.12 兼容修复。合并不授权真实通信、
+硬件控制或现场使用。

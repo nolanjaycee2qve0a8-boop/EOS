@@ -1,8 +1,8 @@
 # EOS TASK 演进记录
 
-## Edge P0.11 — Device-Fact Command-Correlation Audit 学习材料（local only）
+## Edge P0.11 — Device-Fact Command-Correlation Audit（PR #211 已合并）
 
-P0.11 本地候选新增的是 caller-driven、deterministic、immutable 的有限事实审计：
+P0.11 新增的是 caller-driven、deterministic、immutable 的有限事实审计：
 transmission identity、ACK、actual 与显式 source/epoch relationship 只能形成 PASS/GAP
 evidence，不能形成 command 或设备 authority。ACK 不代表 physical completion，actual 不替代
 P0.3 reconciliation；缺失、未知、过期、冲突、mismatch 或 undeclared relationship 均为 GAP。
@@ -10,8 +10,10 @@ P0.3 reconciliation；缺失、未知、过期、冲突、mismatch 或 undeclare
 本地证据：P0.9 focused 15、P0.10 focused 28、P0.11 focused 20、Edge Runtime 284、
 Residential frozen 23、Campaign A–F 62 passed in 934.67s（exit 0）、full pytest 2784
 passed in 550.42s（exit 0）、static PASS、isolated pre-commit 的 ruff/format/mypy/pytest
-hooks PASS（exit 0）、以及七项有效 mutation。该 docs-only 资料仍未 push、未建 PR、未合并；
-不增加协议、网络、HIL、硬件或现场能力。
+hooks PASS（exit 0）、以及七项有效 mutation。PR #211 的首次 CI 正确报告 Ruff UP038；最终
+head `c040d9ef237a01ba9250ae51f2ccb4508d474c32` 只做语义等价的 Python 3.12 兼容修复，
+`Quality checks` SUCCESS，并以 `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c` 合并到 main。
+这不增加协议、网络、HIL、硬件或现场能力。
 
 ## Edge P0.10 — Device-Fact Lifecycle Continuity Profile（PR #207 已合并）
 

@@ -1,9 +1,11 @@
 # ADR-099 — P0.11: Residential Device-Fact Command-Correlation Audit
 
-> **RESTRICTED LOCAL COMMIT / NOT PUBLISHED OR RELEASED.** P0.11 is a
-> synchronous, deterministic, test-only audit of finite caller facts. Its
-> implementation and learning-material integration are committed locally only;
-> they grant no device, hardware, field, transport, or release authority.
+> **MERGED AUDIT-ONLY CONTRACT / NOT A DEVICE OR RELEASE AUTHORIZATION.** P0.11
+> was merged through PR #211 at main merge SHA
+> `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`; its final PR head was
+> `c040d9ef237a01ba9250ae51f2ccb4508d474c32`, with `Quality checks` SUCCESS.
+> It remains a synchronous, deterministic, test-only audit of finite caller
+> facts and grants no device, hardware, field, transport, or release authority.
 
 ## Context
 
@@ -79,7 +81,8 @@ were killed: source/epoch exactness, undeclared relationship, ACK
 identity/sequence/origin, unavailable actual, actual-not-curing-unavailable
 ACK, historical-assessment replay, and package-level `ImportFrom` alias.
 
-This is local validation and learning-integration evidence only. P0.11 has not
-been pushed, opened as a PR, reviewed by remote CI, merged, released, or
-authorized for hardware or field use. Any publication still requires a separate
-user decision.
+PR #211's first CI run correctly failed Ruff `UP038`; the final head made only
+the syntax-equivalent Python 3.12 replacement `(int, float)` → `int | float`.
+The final `Quality checks` run was SUCCESS. The initial failure is not recorded
+as PASS. Merge preserves this audit-only contract and does not authorize
+hardware or field use.

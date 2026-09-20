@@ -1,13 +1,14 @@
 # EOS EMS Simulator 1.0 Demo
 
-## Edge P0.11 command-correlation audit（本地候选，非设备 Demo）
+## Edge P0.11 command-correlation audit（PR #211 已合并，非设备 Demo）
 
 P0.11 没有设备 Demo 或 CLI。其最小阅读方式是 caller 构造 inert transmission、ACK、
 actual 与明确 source/epoch relationship，然后读取 immutable PASS/GAP assessment。必须同时
 看到：ACK 不等于物理完成；actual 不替代 P0.3 reconciliation；未声明或不一致关系 fail closed。
 可运行示例与字段导航见
 `docs/learning/RESIDENTIAL_EDGE_P0_11_COMMAND_CORRELATION_GUIDE.md`。这不连接 PCS/BMS，
-不实现协议、网络、HIL 或硬件执行，且尚未发布。
+不实现协议、网络、HIL 或硬件执行。它已通过 PR #211 合并，最终 `Quality checks` SUCCESS；
+这不将阅读示例变成设备 Demo 或执行授权。
 
 ## Edge P0.10 lifecycle-continuity audit profile（PR #207 已合并）
 
