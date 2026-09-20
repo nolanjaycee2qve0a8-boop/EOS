@@ -1,95 +1,77 @@
-# ADR-099 — P0.11 Candidate: Residential Device-Fact Command-Correlation Audit
+# ADR-099 — P0.11: Residential Device-Fact Command-Correlation Audit
 
-> **PLANNING-ONLY / NOT APPROVED FOR IMPLEMENTATION OR RELEASE.** This is a
-> prospective candidate contract. It does not create a public API, authorize
-> implementation, or establish device, hardware, field, or release readiness.
+> **RESTRICTED LOCAL IMPLEMENTATION / NOT PUBLISHED OR RELEASED.** P0.11 is a
+> synchronous, deterministic, test-only audit of finite caller facts. It grants
+> no device, hardware, field, transport, or release authority.
 
 ## Context
 
-P0.9 records whether caller-supplied device-fact evidence can meet declared
-readiness semantics. P0.10 records whether a finite caller-supplied sequence
-of those facts preserves lifecycle-continuity semantics. Neither stage defines
-an audit-only assessment of whether inert caller-declared transmission identity,
-ACK correlation, and actual-observation facts are mutually consistent at a
-declared assessment identity and `as_of` time.
+P0.9 assesses caller-supplied device-fact readiness and P0.10 assesses a finite
+sequence of lifecycle-continuity facts. P0.11 adds a separate audit question:
+whether one inert caller-owned transmission identity, acknowledgement fact,
+actual-observation fact, and explicit source/epoch relationship are mutually
+consistent at one caller-declared assessment identity and `as_of` time.
 
-That prospective gap is an evidence-correlation question. It is not a request
-to issue, retransmit, recover, execute, or complete a command. P0.3 retained
-actual/reconciliation, P0.4 adapter facts, P0.8 conformance evidence, and
-P0.9/P0.10 PASS/GAP assessments keep their existing distinct meanings.
+This is an evidence-correlation question. It neither admits, issues, repeats,
+recovers, executes, nor completes a command. P0.3 retained actual and
+reconciliation, P0.4 adapter facts, P0.8 conformance evidence, and P0.9/P0.10
+assessments retain their existing meanings.
 
-## Candidate decision
+## Decision
 
-If separately authorized in a future stage, P0.11 would assess one finite,
-caller-owned set of declared facts:
+P0.11 implements one pure evaluator over only inert values:
 
 ```text
-inert caller transmission identity + declared ACK correlation + actual observation
-              + assessment identity / as_of
-                                      |
-                                      v
-             deterministic audit-only correlation assessment
-                                      |
-                                      v
-                     immutable PASS/GAP findings only
+caller transmission identity + caller ACK fact + caller actual fact
+             + caller-declared source/epoch relationship
+             + assessment identity / as_of
+                              |
+                              v
+          deterministic, immutable PASS/GAP audit evidence
 ```
 
-The prospective input would carry only inert values: a caller-owned
-transmission/request identity, declared ACK-correlation facts, a distinct
-actual-observation fact, and a caller-owned `assessment_identity` and
-`assessment_as_of`. Transmission, ACK, and actual facts would each carry an
-explicit caller-owned source identity and identity epoch, together with an
-explicit declared source/epoch relationship for this audit. It would reject a
-command, command factory, raw EMS or strategy request, runtime, adapter,
-session, continuation, handoff boundary, prepared request, trace, receipt,
-endpoint, credential, socket, transport, or historical assessment as authority.
+Transmission, acknowledgement, and actual facts each carry an explicit caller
+source identity and identity epoch. The relationship is also explicit: it pins
+the source/epoch expected for each of the three facts. Equality never implies a
+relationship by inference. Missing, unavailable, malformed, stale, conflicting,
+mismatched, or undeclared facts are explicit GAP findings.
 
-The prospective output would be immutable PASS/GAP audit evidence only. It
-would retain no live input and expose no command, adapter, runtime, session,
-continuation, request, factory, hydration, copy-to-authority, replay, or
-transmission authority.
+The immutable assessment retains only its identity/time/status/findings. It
+retains no input, fact, command, request, runtime, adapter, session,
+continuation, handoff, prepared request, trace, receipt, endpoint, credential,
+socket, transport, or replay authority.
 
-## Candidate fact and authority semantics
+## Semantics and authority boundary
 
-- The transmission identity, source identity, and identity epoch are
-  caller-owned and inert. They are audit subjects, never permissions to issue
-  or repeat a command.
-- ACK correlation must be explicit and exact against the declared transmission
-  identity, source identity, identity epoch, and declared source/epoch
-  relationship. Missing, unknown, malformed, stale, conflicting, mismatched,
-  or relationship-undeclared correlation facts fail closed as GAP; a correlated
-  ACK is not physical completion.
-- Actual is a distinct caller-supplied observation fact. It cannot manufacture
-  authority, prove transmission, or replace P0.3 retained actual/reconciliation.
-  Its source identity and identity epoch must also conform to the same explicit
-  declared relationship; absent, unknown, conflicting, or undeclared facts are
-  GAP rather than an inferred match.
-- `assessment_identity` and `assessment_as_of` are caller-owned audit facts,
-  distinct from the other declared identities. They make the audit scope and
-  time explicit; they do not create a clock, freshness inference, or history.
-- Missing or unavailable ACK/actual facts remain explicit GAP/fail-closed audit
-  evidence. They are not inferred as zero power, success, recovery, device
-  availability, logical execution, or physical completion.
-- Historical evidence cannot be hydrated, resumed, cloned, re-numbered, or
-  replayed into a future audit or command path. A later audit would require a
-  new caller-owned input and separate explicit identity/time facts.
+- The transmission identity is a caller-owned audit subject, not a command,
+  request, retry, or transmission permission.
+- ACK identity, sequence, origin, source, epoch, and time are checked against
+  the transmission and explicit relationship. A correlated ACK is not physical
+  completion.
+- Actual is a distinct caller observation. It cannot prove acknowledgement or
+  transmission and cannot replace P0.3 retained actual/reconciliation.
+- `assessment_identity` and `assessment_as_of` are explicit caller audit facts;
+  they do not create a clock, history, or freshness inference outside the
+  declared finite input.
+- Historical assessment evidence is rejected as a new audit input or fact. A
+  later audit requires a new caller-owned input and new explicit facts.
 
 ## Frozen predecessors and non-goals
 
-P0.1–P0.10, Residential EMS 1.0, and Campaign A–F are frozen. This candidate
-does not modify their behavior, public APIs, numerical results, or authority
-boundaries.
+P0.1–P0.10, Residential EMS 1.0, and Campaign A–F remain frozen. P0.11 does
+not alter their behavior, APIs, numerical results, authority boundaries, or
+P0.3/P0.4 facts.
 
-It does not authorize or include protocol, network, HTTP, Modbus, CAN, serial,
+P0.11 does not implement protocols, networking, HTTP, Modbus, CAN, serial,
 threading, scheduling, persistence, retries, HIL, PCS/BMS/DSP/STM32
 integration, hardware control, field control, safety certification, or product
 deployment.
 
-## Future authorization and evidence gate
+## Local evidence and later gate
 
-This ADR defines no implemented behavior and records no completed test,
-mutation, CI, review, PR, or release evidence. Any future implementation would
-need separate user authorization and an explicit specification, focused tests,
-independent producer-corruption mutations, frozen-path regression, full
-pytest/static/pre-commit terminal evidence, independent review, and a separate
-user publication decision.
+The focused suite covers positive same-source/same-epoch and explicitly
+declared cross-source/epoch facts; missing, unavailable, malformed,
+mismatched, stale, conflicting, and undeclared GAP paths; actual/ACK/P0.3
+separation; historical-evidence rejection; inert serialization; and forbidden
+imports. It does not establish publication, CI, mutation, hardware, or field
+evidence. Those later gates require separate authorization.
