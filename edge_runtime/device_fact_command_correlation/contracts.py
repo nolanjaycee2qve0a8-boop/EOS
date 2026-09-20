@@ -141,7 +141,7 @@ class DeviceFactActualObservation:
                 "availability must be DeviceFactCommandCorrelationAvailability"
             )
         if self.actual_power_kw is not None and (
-            not isinstance(self.actual_power_kw, (int, float))
+            not isinstance(self.actual_power_kw, int | float)
             or isinstance(self.actual_power_kw, bool)
         ):
             raise TypeError("actual_power_kw must be a numeric value or None")
