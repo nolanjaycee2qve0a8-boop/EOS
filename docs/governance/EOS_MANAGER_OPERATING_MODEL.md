@@ -45,10 +45,11 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 ## 4. 当前台账
 
 - P0.1–P0.11 已合并；P0.8、P0.9 与 P0.10 的既有合并事实保持不变。P0.11 通过 PR #211 合并到 main，merge SHA 为 `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`，最终 head `c040d9ef237a01ba9250ae51f2ccb4508d474c32` 的 Quality checks 为 SUCCESS。
-- 当前 main 基线：`1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`（PR #211 merge commit）。
+- 当前 main 基线：`dc1798e8f2f9d14422285f4ed96f421cf4db4219`（PR #212 merge commit；P0.11 状态对齐 docs-only 更新）。
 - P0.11 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。P0.11 仅增加 audit-only 的 caller-owned transmission/ACK/actual correlation PASS/GAP 合同，不授权任何外部设备能力。
 - PR #211 的首次 CI Ruff UP038 失败不计为 PASS；最终 head 的语义等价 Python 3.12 兼容修复后，Quality checks SUCCESS。
-- 下一步仅可进行 P0.12 capability-gap review；任何 P0.12 implementation 仍须取得单独、显式的用户阶段批准。
+- 当前唯一活跃项目是本地 docs-only 的 **P0.12 planning-only candidate**：它拟审计有限 P0.11 correlation facts 在一个 caller-declared scope 内的 identity/sequence/time continuity；它不重复 P0.10 lifecycle transition 或 P0.11 单快照审计。该候选尚未合并，未授权实现、测试、运行时或外部设备能力。
+- P0.12 的下一 gate 是 independent read-only candidate review；任何 P0.12 implementation 仍须取得单独、显式的用户阶段批准。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
 ## 5. 上下文交接与治理文档边界
