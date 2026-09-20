@@ -1,5 +1,24 @@
 # EOS 学习手册
 
+## Edge P0.11 命令关联审计（本地候选，audit-only）
+
+P0.11 解决的不是“怎样发命令”，而是“调用方给出的 transmission、ACK 与 actual
+事实能否在一个明确的 identity/time 范围内彼此关联”。调用方必须显式提供
+`DeviceFactTransmissionIdentity`、`DeviceFactAcknowledgementObservation`、
+`DeviceFactActualObservation`、`DeviceFactSourceEpochRelationship` 和
+`DeviceFactCommandCorrelationInput`，再调用
+`DeterministicDeviceFactCommandCorrelationAuditor.evaluate(...)`。
+
+source identity 与 identity epoch 的关系必须由调用方声明，不能因字符串相等而推断。
+ACK identity/sequence/origin/time 不一致、关系缺失、actual 不可用或历史 assessment
+被重用时，结果为 `GAP`。`PASS` 仅表示有限 inert facts 与声明的审计规则一致：ACK
+不是 physical completion，actual 不能替代 P0.3 retained actual/reconciliation，也不产生
+command、runtime、adapter、session、continuation、replay 或设备 authority。
+
+工程映射是：未来 PCS/BMS/Edge telemetry 可作为 caller-owned facts 进入审计；但 P0.11
+不实现协议、CAN/Modbus/HTTP、网络、时钟同步、HIL 或硬件控制。阅读顺序见
+`docs/learning/RESIDENTIAL_EDGE_P0_11_COMMAND_CORRELATION_GUIDE.md`；该候选尚未发布。
+
 ## Edge P0.10 设备事实生命周期连续性（已合并，audit-only）
 
 P0.10 是一个纯审计 profile：caller 一次性提供按时间排序的设备事实快照和相邻对的
