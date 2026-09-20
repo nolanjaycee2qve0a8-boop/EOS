@@ -1,6 +1,6 @@
 # EOS 架构说明
 
-## P0.11 Device-Fact Command-Correlation Audit（本地候选，非 Runtime）
+## P0.11 Device-Fact Command-Correlation Audit（PR #211 已合并，非 Runtime）
 
 P0.11 位于 P0.9 readiness、P0.10 lifecycle continuity 与 P0.3/P0.4 execution facts
 之外，是一个同步、无状态的审计层：
@@ -9,7 +9,9 @@ assessment 只保留 audit identity、as-of、status 与 findings，不保留 in
 authority。它不改变 P0.3 reconciliation；P0.4 ACK/actual 也不会反向成为 command authority。
 
 这条边界让未来 Edge/PCS/BMS 的证据链可被审计，但不表示已有 transport、设备连接、
-线程、持久恢复、HIL、DSP/STM32 或现场控制能力。P0.11 当前仅是未发布本地候选。
+线程、持久恢复、HIL、DSP/STM32 或现场控制能力。P0.11 已通过 PR #211 合并到 main
+（`1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`），最终 `Quality checks` SUCCESS；这没有
+将该审计层提升为 Runtime、设备或现场 authority。
 
 ## P0.10 Device-Fact Lifecycle Continuity Profile（已合并，非 Runtime）
 

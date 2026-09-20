@@ -1,9 +1,9 @@
 # P0.11 — Residential Device-Fact Command-Correlation Audit
 
-> **RESTRICTED LOCAL COMMIT / UNPUBLISHED.** This specification defines a
-> test-only immutable audit contract. The implementation and learning-material
-> integration are committed locally, but this remains neither device,
-> transport, hardware, field, nor release authorization.
+> **MERGED AUDIT-ONLY CONTRACT.** P0.11 was merged through PR #211 at main
+> merge SHA `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`; final head
+> `c040d9ef237a01ba9250ae51f2ccb4508d474c32` passed `Quality checks`. This
+> remains neither device, transport, hardware, field, nor release authorization.
 
 ## 1. Purpose
 
@@ -84,6 +84,7 @@ passed, Campaign A–F 62 passed in 934.67s (exit 0), full pytest 2784 passed in
 ruff/format/mypy/pytest hooks (exit 0). Seven isolated mutation cases were
 killed, including the package-level `ImportFrom` alias regression.
 
-These results do not establish a push, PR, remote CI, merge, release, hardware
-or field claim. Publication remains contingent on independent review and an
-explicit user decision.
+PR #211 initially surfaced one Ruff `UP038` compatibility failure. Its final
+head made only the equivalent `isinstance(..., int | float)` syntax correction,
+then `Quality checks` succeeded. The initial failed CI run is not PASS.
+Neither merge nor final CI establishes any hardware or field claim.

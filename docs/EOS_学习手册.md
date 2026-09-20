@@ -1,6 +1,6 @@
 # EOS 学习手册
 
-## Edge P0.11 命令关联审计（本地候选，audit-only）
+## Edge P0.11 命令关联审计（PR #211 已合并，audit-only）
 
 P0.11 解决的不是“怎样发命令”，而是“调用方给出的 transmission、ACK 与 actual
 事实能否在一个明确的 identity/time 范围内彼此关联”。调用方必须显式提供
@@ -17,7 +17,10 @@ command、runtime、adapter、session、continuation、replay 或设备 authorit
 
 工程映射是：未来 PCS/BMS/Edge telemetry 可作为 caller-owned facts 进入审计；但 P0.11
 不实现协议、CAN/Modbus/HTTP、网络、时钟同步、HIL 或硬件控制。阅读顺序见
-`docs/learning/RESIDENTIAL_EDGE_P0_11_COMMAND_CORRELATION_GUIDE.md`；该候选尚未发布。
+`docs/learning/RESIDENTIAL_EDGE_P0_11_COMMAND_CORRELATION_GUIDE.md`。它已通过 PR #211
+合并到 main（`1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`），最终 head
+`c040d9ef237a01ba9250ae51f2ccb4508d474c32` 的 `Quality checks` 为 SUCCESS；合并不把
+audit 变成 device authority、physical completion 或硬件能力。
 
 ## Edge P0.10 设备事实生命周期连续性（已合并，audit-only）
 

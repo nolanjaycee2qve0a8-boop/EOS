@@ -44,11 +44,11 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 
 ## 4. 当前台账
 
-- P0.1–P0.10 已合并；P0.8 通过 PR #200 合并到 main，merge SHA 为 `3ba8480203fc4b16e5cd18ca8ed00d4d1556205a`，Quality checks 为 SUCCESS；P0.9 通过 PR #203 合并到 main，merge SHA 为 `4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks 为 SUCCESS；P0.10 通过 PR #207 合并到 main，merge SHA 为 `b78425f85fb3ccb7515cf6d69e0d0f2`，Quality checks 为 SUCCESS。
-- 当前 main 基线：`7c1ccad7db40c494d40f4a836576a58a7fb91710`（PR #208 docs-only status-alignment merge commit）。
-- P0.10 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。P0.10 的 merge 仅增加 audit-only device-fact lifecycle continuity profile，不授权任何外部设备能力。
-- P0.11 当前仅有 planning-only 的 Device-Fact Command-Correlation Audit 候选合同；它尚未获 implementation、release、PR 或 CI 授权。候选只规划 inert transmission identity、ACK correlation、actual observation 与 assessment identity/time 的 immutable PASS/GAP 审计，不创建 command、adapter、runtime、session、continuation、request 或 replay authority。
-- 后续任何 implementation stage 仍须先完成 capability-gap review，并取得单独、显式的用户阶段批准。
+- P0.1–P0.11 已合并；P0.8、P0.9 与 P0.10 的既有合并事实保持不变。P0.11 通过 PR #211 合并到 main，merge SHA 为 `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`，最终 head `c040d9ef237a01ba9250ae51f2ccb4508d474c32` 的 Quality checks 为 SUCCESS。
+- 当前 main 基线：`1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`（PR #211 merge commit）。
+- P0.11 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。P0.11 仅增加 audit-only 的 caller-owned transmission/ACK/actual correlation PASS/GAP 合同，不授权任何外部设备能力。
+- PR #211 的首次 CI Ruff UP038 失败不计为 PASS；最终 head 的语义等价 Python 3.12 兼容修复后，Quality checks SUCCESS。
+- 下一步仅可进行 P0.12 capability-gap review；任何 P0.12 implementation 仍须取得单独、显式的用户阶段批准。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
 ## 5. 上下文交接与治理文档边界
