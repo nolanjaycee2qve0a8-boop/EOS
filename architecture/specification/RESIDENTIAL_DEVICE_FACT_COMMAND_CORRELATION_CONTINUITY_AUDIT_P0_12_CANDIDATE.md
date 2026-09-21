@@ -1,6 +1,6 @@
 # Residential Device-Fact Command-Correlation Continuity Audit P0.12（候选规格）
 
-> 状态：**planning-only candidate**。本文件不是实现授权、不是公开 API，也不是对设备或协议的能力宣称。任何 P0.12 实现都必须取得后续、单独且明确的用户授权。
+> 状态：**已合并的 planning-only candidate documentation**。本文件通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS；它不是实现授权、不是公开 API，也不是对设备或协议的能力宣称。任何 P0.12 实现都必须取得后续、单独且明确的用户授权。
 
 ## 1. 目的
 
