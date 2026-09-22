@@ -322,8 +322,8 @@ P0.8 在一次 P0.7/P0.6 cycle 之后，以 caller-supplied ordered finite trans
 
 P0.9 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS），但没有 CLI、网络或硬件 Demo。它的最小、确定性阅读方式是 caller 构造 profile、六项 requirement policy、evidence、`as_of`，再调用 `DeterministicDeviceFactReadinessEvaluator.evaluate(...)` 读取 immutable PASS/GAP assessment；ACK sample 必须提供六项一致 correlation 字段。示例与 API 字段见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`；不得把该评估解释为 command、ACK completion、PCS/BMS 连接或真实执行。
 
-## Edge P0.12 连续性审计阅读入口（本地候选，非 Simulator 控制 Demo）
+## Edge P0.12 连续性审计阅读入口（已合并 audit 合同，非 Simulator 控制 Demo）
 
 P0.12 的最小阅读方式是 caller 构造两个或更多 P0.11 `DeviceFactCommandCorrelationInput`，再以 `scope`、`assessment_as_of`、`maximum_age` 调用 `DeterministicDeviceFactCommandCorrelationContinuityAuditor.evaluate(...)`。PASS 只表示有限输入在已声明范围内的 correlation continuity 一致；GAP 明确保留 failure finding。它不会运行 Strategy、MPC、Simulator、runtime tick、adapter transmit 或 device protocol。
 
-观察时要把 P0.10 lifecycle、P0.11 单-member correlation 与 P0.12 cross-member continuity 分开：ACK 或 actual 不能补救 P0.11 GAP，actual 也不能替代 P0.3 reconciliation 或证明 physical completion。该候选仅有本地验证，未 push/PR/merge；API、failure cases、测试与 mutation 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。
+观察时要把 P0.10 lifecycle、P0.11 单-member correlation 与 P0.12 cross-member continuity 分开：ACK 或 actual 不能补救 P0.11 GAP，actual 也不能替代 P0.3 reconciliation 或证明 physical completion。P0.12 已验证并随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`；它仍是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP，不具备 Simulator 控制、command/runtime/device/adapter authority，也不表示 protocol、network、HIL、hardware、field 或产品发布能力。API、failure cases、测试与 mutation 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。

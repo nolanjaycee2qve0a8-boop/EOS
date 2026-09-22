@@ -5476,8 +5476,8 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 
 该 docs-only 本地提交不增加 P0.8 production、P0.1–P0.7、Residential EMS 或 Campaign 行为，也不包含 protocol、network、thread、persistence、HIL、PCS/BMS、DSP/STM32、hardware 或 field capability。
 
-## Edge P0.12 Device-Fact Command Correlation Continuity Audit（本地候选，未发布）
+## Edge P0.12 Device-Fact Command Correlation Continuity Audit（已合并的受限 audit 合同）
 
 P0.12 在 P0.11 public immutable facts 上增加有限集合的 continuity audit，不改变 P0.1–P0.11、Residential EMS 或 Campaign A–F。它逐成员委托 P0.11 并检查 caller-declared scope relationship、assessment/transmission/actual identity uniqueness、strict transaction sequence、strict assessment time 与显式 freshness。P0.11 GAP、historical/malformed member、ACK unavailable、scope mismatch 或重复/顺序异常均 fail closed，不能由其他 member、ACK 或 actual 修复。
 
-该候选实现已完成本地 focused、upstream、Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、static checks、pre-commit 与八项 isolated mutation evidence；当前仍未 push、未创建 PR、未合并。P0.12 只是 audit contract：不表示 transmission、physical completion、hardware/device authority、network、protocol、HIL、PCS/BMS 或 field readiness。学习指南和领导摘要分别为 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md` 与 `docs/phase-summary/RESIDENTIAL_EDGE_P0_12_LEADERSHIP_SUMMARY_CN.md`。
+该候选的受限实现已完成 focused、upstream、Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、static checks、pre-commit 与八项 isolated mutation evidence；PR #215 已合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。P0.12 仍只是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP contract：不表示 transmission、physical completion、hardware/device authority、network、protocol、HIL、PCS/BMS、field readiness 或产品发布。后续阶段须新的 gap review 与明确用户授权。学习指南和领导摘要分别为 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md` 与 `docs/phase-summary/RESIDENTIAL_EDGE_P0_12_LEADERSHIP_SUMMARY_CN.md`。
