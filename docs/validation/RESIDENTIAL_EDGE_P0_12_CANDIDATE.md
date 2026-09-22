@@ -1,6 +1,6 @@
 # Residential Edge P0.12 Candidate Validation Plan
 
-> 状态：**planning-only / prospective**。没有 P0.12 implementation、test、mutation、full pytest、pre-commit 或发布证据。本记录不授权实施。
+> 状态：**已合并的 planning-only / prospective candidate documentation**。本记录通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。没有 P0.12 implementation、test、mutation、full pytest、pre-commit 或产品发布证据；本记录不授权实施。
 
 ## 1. 候选目标与可信边界
 

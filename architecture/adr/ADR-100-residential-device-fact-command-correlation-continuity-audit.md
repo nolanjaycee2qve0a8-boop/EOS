@@ -1,6 +1,6 @@
 # ADR-100：Residential Device-Fact Command-Correlation Continuity Audit（P0.12 候选）
 
-> 状态：**规划候选，尚未获实施授权**。本 ADR 仅记录 P0.12 capability-gap review 的 KEEP 结论；不创建公开 API、生产实现、测试、运行时状态或设备能力。
+> 状态：**已合并的规划候选文档，尚未获实施授权**。本 ADR 通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。它仅记录 P0.12 capability-gap review 的 KEEP 结论；不创建公开 API、生产实现、测试、运行时状态或设备能力。
 
 ## 背景与已合并边界
 
