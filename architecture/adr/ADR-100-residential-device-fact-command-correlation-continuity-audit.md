@@ -41,3 +41,7 @@ P0.12 **不得**接受或产生 P0.10 lifecycle transition 标签，也不得把
 本 ADR 只授权受限实现与其验证，不授权发布。实现至少需要 focused contract tests、producer-corruption 与 gate-order mutation、P0.10/P0.11 frozen-path zero-diff、full regression、static/import/transport scan、independent review 与单独发布决定。
 
 在任何未来授权前，P0.1–P0.11（含 P0.10 lifecycle continuity 与 P0.11 command-correlation）的生产合同、验证证据和已合并事实均保持冻结、零差异。
+
+## 本地候选状态
+
+受限实现、focused/upstream/Residential/Campaign 回归、full pytest、Ruff、format、mypy、静态边界检查、pre-commit 与 isolated mutation evidence 均已在本地取得终态证据。该事实只说明候选已完成本地验证：当前未 push、未创建 PR、未合并，仍需独立只读复审及用户单独发布决定。

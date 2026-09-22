@@ -54,3 +54,7 @@ P0.12 PASS 不表示：ACK 已导致物理完成；actual 已替代 P0.3 retaine
 ## 6. 后续 gate
 
 当前授权止于受限实现、focused tests、mutation 与完整门禁；仍须经独立只读 review 和用户单独发布决定。它不授权真实设备或外部能力。
+
+## 7. 本地验证状态
+
+本候选已完成本地 focused、upstream、Residential/Campaign、full pytest、static 与 pre-commit 门禁，且 mutation evidence 已在隔离 worktree 中取得。它尚未 push、PR 或 merge；这些本地结论不替代独立 review 或用户发布授权。

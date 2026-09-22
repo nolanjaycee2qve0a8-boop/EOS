@@ -38,3 +38,7 @@ P0.12 候选是一个有限、同步、caller-driven、immutable、test-only 的
 本阶段门禁顺序为：focused P0.12 → P0.10/P0.11 frozen regressions → Residential frozen/Campaign regressions → full pytest → Ruff/format/mypy/import and forbidden-dependency scans → `git diff --check` → mutation → independent review → 用户发布决定。
 
 验证结论只能在终止证据取得后记录。P0.1–P0.11 已合并合同保持零差异；本实现不授权协议、网络、HIL、PCS/BMS/DSP/STM32、硬件、现场、认证或部署。
+
+## 6. 本地门禁结论（未发布）
+
+本地终态证据包括 P0.12 focused、P0.10/P0.11 relevant、all Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、边界扫描与 pre-commit；八项 isolated mutation 也已被相应 assertion 杀死。当前候选仍未 push、未创建 PR、未合并；本节不是 release approval，也不表示设备、传输或物理完成能力。
