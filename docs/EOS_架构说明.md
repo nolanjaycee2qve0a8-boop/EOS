@@ -1721,3 +1721,11 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 `edge_runtime/device_fact_readiness/` 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS）。它仍是 test-only、caller-driven、同步且 protocol-free 的 read model：只消费 immutable profile、policy、evidence 和 explicit `as_of`，输出 immutable PASS/GAP assessment；不导入或调用 P0.3 runtime、P0.4 adapter、P0.5 handoff、P0.6–P0.8 组件。它们只是事实层级的语义来源。
 
 P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中 ACK 的六个 correlation 字段须完整且一致；ACK/actual 仍仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。
+
+## 34. P0.12 Device-Fact Command Correlation Continuity Audit（本地候选）
+
+P0.12 位于 P0.11 之上而不修改 P0.1–P0.11：它对一个显式、有界、caller-owned 的 P0.11 input 集合执行确定性 PASS/GAP 审计。每个有效成员先经过一次 P0.11 evaluation；随后才有跨成员的 declared origin/source-epoch relationship、identity uniqueness、transaction sequence、assessment time 与 freshness 检查。P0.10 lifecycle continuity 不被 P0.12 重新解释或重建。
+
+该模块不拥有 execution authority。它没有 runtime、adapter、handoff、transport、device、scheduler 或 global clock；assessment 也不保留输入、原始 member、ACK/actual/transmission object 或 continuation。P0.11 GAP、historical assessment、unavailable ACK、correlation mismatch、identity reuse 或不严格顺序一律 fail closed；actual telemetry 不能替代 P0.3 reconciliation，也不能把 audit PASS 解释为 transmission success 或 physical completion。
+
+当前为本地、未发布、未合并候选。它没有 network、protocol、thread、persistence、HIL、PCS/BMS、DSP/STM32 或 field-control 能力；详见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。

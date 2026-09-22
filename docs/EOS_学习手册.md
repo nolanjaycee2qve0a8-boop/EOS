@@ -3264,3 +3264,11 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 P0.9 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b722d68aa17a7`，Quality checks SUCCESS）。它把 caller 明确给出的设备事实放进同步、纯函数式 PASS/GAP 审计：`as_of` 与每项 `max_age` 都由 caller 提供，系统没有全局时钟或默认新鲜度阈值。它检查 identity/provenance、时间、ACK 关联、actual presence、disconnect/reboot 与 fresh reassessment；ACK 的六个 request/ACK correlation 字段缺一不可，PASS 只表示这些确定性输入满足这些确定性语义。
 
 这不是 command、device 或 P0.3–P0.8 authority。ACK 不等于 actual，也不等于物理完成或 hardware readiness。完整教学、最小示例、验证和非目标见 `docs/learning/RESIDENTIAL_EDGE_P0_9_DEVICE_FACT_READINESS_GUIDE.md`。
+
+## P0.12：跨 P0.11 的设备事实—命令关联连续性审计（本地候选，未发布）
+
+P0.12 是 test-only、无状态、caller-driven 的审计层：caller 一次提供有限个 P0.11 `DeviceFactCommandCorrelationInput`，以及明确的 scope、`assessment_as_of` 和最大年龄；auditor 对每个有效成员恰好调用一次 P0.11，再检查跨成员的 scope relationship、assessment/transmission/actual identity 唯一性、sequence 与时间严格递增。它不创建 command、clock、adapter、runtime、session 或 continuation。
+
+P0.10 侧重 lifecycle continuity，P0.11 侧重单个设备事实与命令的 correlation；P0.12 只连接一组 caller-owned P0.11 input 的审计结论。P0.11 GAP、历史 assessment、malformed member、ACK unavailable、identity reuse 或时间/顺序异常均为 P0.12 GAP，不能由另一个 member、ACK 或 actual 补救。P0.3 reconciliation、P0.4 actual telemetry、ACK 都仍是不同事实层，任何一层都不证明物理完成。
+
+P0.12 output 是可序列化的 immutable assessment/finding，不保留 input、member、runtime、adapter、transmission、actual 或 command authority。它仅是本地候选合同，尚未 push、PR 或合并；不包含 protocol、network、HIL、PCS/BMS、hardware 或 field capability。最小示例、API 与 mutation 阅读见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。

@@ -1,6 +1,6 @@
 # Residential Edge P0.12 Candidate Validation Plan
 
-> 状态：**已合并的 planning-only / prospective candidate documentation**。本记录通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。没有 P0.12 implementation、test、mutation、full pytest、pre-commit 或产品发布证据；本记录不授权实施。
+> 状态：**受限实现 validation contract，未发布**。本记录的 planning-only candidate version 通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。当前阶段允许 P0.12 implementation、test、mutation 与验证；尚无产品发布或外部设备能力证据。
 
 ## 1. 候选目标与可信边界
 
@@ -16,7 +16,7 @@ P0.12 候选是一个有限、同步、caller-driven、immutable、test-only 的
 
 ## 3. prospective focused matrix
 
-若用户后来授权实现，最低 focused coverage 应包括：
+当前受限实现的最低 focused coverage 应包括：
 
 | 情形 | 期望证据 |
 | --- | --- |
@@ -31,10 +31,14 @@ P0.12 候选是一个有限、同步、caller-driven、immutable、test-only 的
 
 ## 4. prospective mutation evidence
 
-本轮没有运行 mutation。若之后获实施授权，至少应在临时 worktree 中证明以下退化能被独立测试杀死：绕过 P0.11-per-member delegation、接受历史 assessment、删除跨成员 uniqueness/ordering/scope gate、把 GAP 静默写为 PASS、或让 output 保存可执行 source authority。mutation 不得人工构造最终失败对象，也不得让 producer 与 validator 共用同一错误预期。
+本阶段必须在临时 worktree 中证明以下退化能被独立测试杀死：绕过 P0.11-per-member delegation、接受历史 assessment、删除跨成员 uniqueness/ordering/scope gate、把 GAP 静默写为 PASS、或让 output 保存可执行 source authority。mutation 不得人工构造最终失败对象，也不得让 producer 与 validator 共用同一错误预期。
 
 ## 5. 计划中的门禁顺序
 
-实施授权之后，且仅在那时，建议顺序为：focused P0.12 → P0.10/P0.11 frozen regressions → Residential frozen/Campaign regressions → full pytest → Ruff/format/mypy/import and forbidden-dependency scans → `git diff --check` → mutation → independent review → 用户发布决定。
+本阶段门禁顺序为：focused P0.12 → P0.10/P0.11 frozen regressions → Residential frozen/Campaign regressions → full pytest → Ruff/format/mypy/import and forbidden-dependency scans → `git diff --check` → mutation → independent review → 用户发布决定。
 
-当前没有上述终止证据。P0.1–P0.11 已合并合同保持零差异；本候选不授权协议、网络、HIL、PCS/BMS/DSP/STM32、硬件、现场、认证或部署。
+验证结论只能在终止证据取得后记录。P0.1–P0.11 已合并合同保持零差异；本实现不授权协议、网络、HIL、PCS/BMS/DSP/STM32、硬件、现场、认证或部署。
+
+## 6. 本地门禁结论（未发布）
+
+本地终态证据包括 P0.12 focused、P0.10/P0.11 relevant、all Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、边界扫描与 pre-commit；八项 isolated mutation 也已被相应 assertion 杀死。当前候选仍未 push、未创建 PR、未合并；本节不是 release approval，也不表示设备、传输或物理完成能力。
