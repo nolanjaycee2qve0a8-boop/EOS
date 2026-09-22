@@ -50,6 +50,7 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 - PR #211 的首次 CI Ruff UP038 失败不计为 PASS；最终 head 的语义等价 Python 3.12 兼容修复后，Quality checks SUCCESS。
 - P0.12 planning-only candidate docs 曾通过 PR #213 合并；其受限 implementation 随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。它实施并验证了有限 P0.11 correlation facts 在 caller-declared scope 内的 deterministic、synchronous、caller-driven、test-only、audit-only identity/sequence/time continuity PASS/GAP；不重复 P0.10 lifecycle transition 或 P0.11 单快照审计。
 - 当前 active implementation stage 为 NONE。P0.12 已实施、验证并合并，但不授权 runtime、command、device、adapter、protocol、network、HIL、hardware、field 或产品发布能力；任何后续阶段须新的 gap review 与明确用户授权。
+- P0.13 尚未开始；在任何 P0.13 planning 或 implementation 前，必须先完成新的 capability-gap review 并获得明确用户授权。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
 ## 5. 上下文交接与治理文档边界

@@ -80,4 +80,4 @@ capability-gap review → 用户阶段批准 → 受限实施 → focused valida
 
 ## 6. 后续能力地平线（候选，不是授权）
 
-P0.12 已实施、验证并合并；当前 active stage 为 NONE。以下仍仅是待新的 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。
+P0.12 已实施、验证并合并；当前 active stage 为 NONE。P0.13 尚未开始；在任何 P0.13 planning 或 implementation 前，必须先完成新的 capability-gap review 并获得明确用户授权。以下仍仅是待新的 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。
