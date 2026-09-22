@@ -1,6 +1,6 @@
 # Residential Device-Fact Command-Correlation Continuity Audit P0.12（候选规格）
 
-> 状态：**已合并的 planning-only candidate documentation**。本文件通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS；它不是实现授权、不是公开 API，也不是对设备或协议的能力宣称。任何 P0.12 实现都必须取得后续、单独且明确的用户授权。
+> 状态：**受限实现规格，未发布**。本文件的 planning-only candidate version 通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。当前实现授权只建立 test-only audit API；它不是设备、协议或发布授权。
 
 ## 1. 目的
 
@@ -19,7 +19,7 @@ P0.12 不会将 P0.10 `CONTINUITY` 视为 correlation continuity 的证据，也
 
 ## 3. prospective contract
 
-若获授权，最小公共合同可命名为：
+最小公共合同为：
 
 - `DeviceFactCommandCorrelationContinuityInput`；
 - `DeviceFactCommandCorrelationScopeDeclaration`；
@@ -27,9 +27,9 @@ P0.12 不会将 P0.10 `CONTINUITY` 视为 correlation continuity 的证据，也
 - `DeviceFactCommandCorrelationContinuityAssessment`；
 - `DeterministicDeviceFactCommandCorrelationContinuityAuditor`。
 
-这只是命名和合同方向，不是已存在 API。候选 input 必须为一个 finite tuple，至少含两个**当前调用者提供的** P0.11 `DeviceFactCommandCorrelationInput`。它还必须携带新的 assessment identity、`assessment_as_of`、maximum age 及一个 explicit scope declaration。scope declaration 至少精确声明预期 transmission origin 与 P0.11 `DeviceFactSourceEpochRelationship`；它不能隐含生命周期事件。
+input 必须为一个 finite tuple，至少含两个**当前调用者提供的** P0.11 `DeviceFactCommandCorrelationInput`。它还必须携带新的 assessment identity、`assessment_as_of`、maximum age 及一个 explicit scope declaration。scope declaration 精确声明 scope identity、预期 transmission origin 与 P0.11 `DeviceFactSourceEpochRelationship`；它不能隐含生命周期事件。
 
-未来 evaluator 只能同步处理该单一 input：对每个成员恰好调用一次冻结的 P0.11 evaluator，临时读取其 immutable PASS/GAP；不读取先前评估、不保留历史、不拥有时钟，也不跨调用累积事实。
+evaluator 只能同步处理该单一 input：对每个有效成员恰好调用一次冻结的 P0.11 evaluator，临时读取其 immutable PASS/GAP；不读取先前评估、不保留历史、不拥有时钟，也不跨调用累积事实。成员自身事实 freshness 继续由其 P0.11 input 负责；顶层 maximum age 仅约束 member assessment time 对顶层 `assessment_as_of` 的 freshness。
 
 ## 4. prospective PASS/GAP 语义
 
@@ -53,4 +53,4 @@ P0.12 PASS 不表示：ACK 已导致物理完成；actual 已替代 P0.3 retaine
 
 ## 6. 后续 gate
 
-本候选在独立只读 review 与用户明确 implementation authorization 前止步于文档。获授权后才可讨论生产代码、focused tests、mutation、完整门禁、独立复审及发布。
+当前授权止于受限实现、focused tests、mutation 与完整门禁；仍须经独立只读 review 和用户单独发布决定。它不授权真实设备或外部能力。
