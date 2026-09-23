@@ -1,6 +1,6 @@
 # ADR-100：Residential Device-Fact Command-Correlation Continuity Audit（P0.12 候选）
 
-> 状态：**已授权的受限实现合同**。本 ADR 的规划候选文档通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。当前授权仅允许 test-only、audit-only P0.12 实现；它不授权运行时状态、设备能力或发布。
+> 状态：**已实施、已验证并已合并的受限 audit 合同**。规划候选文档曾通过 PR #213 合并；P0.12 implementation 随 PR #215 合并到 main，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main，Quality checks 为 SUCCESS。它仍仅是 deterministic、synchronous、caller-driven、test-only、audit-only 的 PASS/GAP 边界，不授权运行时状态、设备能力或发布。
 
 ## 背景与已合并边界
 
@@ -10,9 +10,9 @@ P0.11 已合并的 `DeviceFactCommandCorrelation` 审计面向**一个** caller-
 
 因此仍存在一个严格受限的能力缺口：在同一 caller-declared correlation scope 中，无法审计有限多个、分别满足 P0.11 单快照合同的关联事实，是否保持唯一身份、严格顺序及声明的来源/epoch scope 一致。P0.10 的生命周期标签不能替代这项审计；P0.11 的单次结果也不能推断下一次调用的连续性。
 
-## 决策：保留一个规划候选
+## 决策：从规划候选落实为受限合同
 
-若未来获得单独用户授权，P0.12 可定义为 **Residential Device-Fact Command-Correlation Continuity Audit**：一个同步、caller-driven、有限输入、immutable、test-only、audit-only 的 PASS/GAP 边界。
+P0.12 已落实为 **Residential Device-Fact Command-Correlation Continuity Audit**：一个 deterministic、synchronous、caller-driven、有限输入、immutable、test-only、audit-only 的 PASS/GAP 边界。以下规划候选的设计描述保留为该合同的历史与边界记录。
 
 实现 input 只包含 caller-owned inert facts：
 
@@ -42,6 +42,6 @@ P0.12 **不得**接受或产生 P0.10 lifecycle transition 标签，也不得把
 
 在任何未来授权前，P0.1–P0.11（含 P0.10 lifecycle continuity 与 P0.11 command-correlation）的生产合同、验证证据和已合并事实均保持冻结、零差异。
 
-## 本地候选状态
+## 已合并状态
 
-受限实现、focused/upstream/Residential/Campaign 回归、full pytest、Ruff、format、mypy、静态边界检查、pre-commit 与 isolated mutation evidence 均已在本地取得终态证据。该事实只说明候选已完成本地验证：当前未 push、未创建 PR、未合并，仍需独立只读复审及用户单独发布决定。
+受限实现、focused/upstream/Residential/Campaign 回归、full pytest、Ruff、format、mypy、静态边界检查、pre-commit 与 isolated mutation evidence 已取得终态证据；PR #215 已合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`。该合并不扩大 P0.12 的 audit-only 边界；后续任何 runtime、device、adapter、protocol、network、HIL、hardware、field 或产品发布阶段均须新的 gap review 与明确用户授权。

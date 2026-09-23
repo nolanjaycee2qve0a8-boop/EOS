@@ -44,6 +44,7 @@ current-caller（当前调用方）提供的、已批准的输入是 command aut
 - P0.8 已通过 PR #200 合并为 test-only adapter-conformance harness；它不把 transcript、ACK、actual 或 verdict 变成设备 authority 或物理执行证明。
 - P0.9 已通过 PR #203 合并为 test-only、同步、caller-driven、protocol-free 的 device-fact readiness evaluator；它只审计 caller facts 为 PASS/GAP，不把 ACK 当作物理完成，也不创建 PCS/BMS、DSP/STM32、硬件或现场 authority。
 - P0.11 已通过 PR #211 合并为 test-only、同步、caller-driven 的 transmission/ACK/actual correlation audit；它只形成 immutable PASS/GAP evidence，ACK 不等于 physical completion，actual 不替代 P0.3 reconciliation，也不产生 command、runtime、adapter 或设备 authority。
+- P0.12 已通过 PR #215 合并为 deterministic、synchronous、caller-driven、test-only、audit-only 的跨成员 command-correlation continuity PASS/GAP audit；Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。它不产生 command、runtime、device 或 adapter authority，也不表示 protocol、network、HIL、hardware、field 或产品发布能力。
 
 ## 4. 长期不变量
 
@@ -79,4 +80,4 @@ capability-gap review → 用户阶段批准 → 受限实施 → focused valida
 
 ## 6. 后续能力地平线（候选，不是授权）
 
-以下仅是待 capability-gap review 与用户阶段批准后才能讨论的候选：P0.12、fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。
+P0.12 已实施、验证并合并；当前 active stage 为 NONE。P0.13 尚未开始；在任何 P0.13 planning 或 implementation 前，必须先完成新的 capability-gap review 并获得明确用户授权。以下仍仅是待新的 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。

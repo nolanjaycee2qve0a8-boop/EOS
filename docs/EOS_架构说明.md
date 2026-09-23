@@ -1722,10 +1722,10 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 
 P0.9 不能连接或控制设备：没有 network、HTTP、Modbus、CAN、serial、thread、scheduler、persistence、retry、HIL、PCS/BMS、DSP/STM32 或 field deployment。assessment 中 ACK 的六个 correlation 字段须完整且一致；ACK/actual 仍仅是 caller 事实，不能替代 P0.3 reconciliation、产生 command 或证明 physical completion。
 
-## 34. P0.12 Device-Fact Command Correlation Continuity Audit（本地候选）
+## 34. P0.12 Device-Fact Command Correlation Continuity Audit（已合并的受限 audit 合同）
 
 P0.12 位于 P0.11 之上而不修改 P0.1–P0.11：它对一个显式、有界、caller-owned 的 P0.11 input 集合执行确定性 PASS/GAP 审计。每个有效成员先经过一次 P0.11 evaluation；随后才有跨成员的 declared origin/source-epoch relationship、identity uniqueness、transaction sequence、assessment time 与 freshness 检查。P0.10 lifecycle continuity 不被 P0.12 重新解释或重建。
 
 该模块不拥有 execution authority。它没有 runtime、adapter、handoff、transport、device、scheduler 或 global clock；assessment 也不保留输入、原始 member、ACK/actual/transmission object 或 continuation。P0.11 GAP、historical assessment、unavailable ACK、correlation mismatch、identity reuse 或不严格顺序一律 fail closed；actual telemetry 不能替代 P0.3 reconciliation，也不能把 audit PASS 解释为 transmission success 或 physical completion。
 
-当前为本地、未发布、未合并候选。它没有 network、protocol、thread、persistence、HIL、PCS/BMS、DSP/STM32 或 field-control 能力；详见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。
+P0.12 已实施、验证并随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。它仍是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP 合同，没有 command/runtime/device/adapter authority，也没有 network、protocol、thread、persistence、HIL、PCS/BMS、DSP/STM32、hardware、field-control 或产品发布能力；后续阶段须新的 gap review 与明确用户授权。详见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。

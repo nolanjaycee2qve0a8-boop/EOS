@@ -2,7 +2,7 @@
 
 ## 目的与边界
 
-P0.12 是本地候选、test-only 的 audit contract。它读取 caller 一次性提交的有限 P0.11 inputs，输出 immutable PASS/GAP assessment；不创建、传输、恢复或 replay command，也不接触 runtime、adapter、transport 或设备。
+P0.12 已实施、已验证并随 PR #215 合并到 main；main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main，Quality checks 为 SUCCESS。它是 deterministic、synchronous、caller-driven、test-only、audit-only 的 PASS/GAP contract：读取 caller 一次性提交的有限 P0.11 inputs，输出 immutable assessment；不创建、传输、恢复或 replay command，也不接触 runtime、adapter、transport 或设备。
 
 ## 输入、输出与最小调用
 

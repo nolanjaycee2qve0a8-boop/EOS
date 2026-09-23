@@ -1,10 +1,10 @@
 # Residential Edge P0.12 Candidate Validation Plan
 
-> 状态：**受限实现 validation contract，未发布**。本记录的 planning-only candidate version 通过 PR #213 合并到 main，merge SHA 为 `fbc2c6a84a11584a0c0887f074039cc5b815210e`，Quality checks 为 SUCCESS。当前阶段允许 P0.12 implementation、test、mutation 与验证；尚无产品发布或外部设备能力证据。
+> 状态：**已实施、已验证并已合并的受限 validation contract**。本记录保留 planning-only candidate version 的历史；P0.12 implementation 随 PR #215 合并到 main，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main，Quality checks 为 SUCCESS。它仍无产品发布或外部设备能力证据。
 
 ## 1. 候选目标与可信边界
 
-P0.12 候选是一个有限、同步、caller-driven、immutable、test-only 的 command-correlation continuity audit。它未来只能报告 PASS/GAP：在一个显式 correlation scope 中，多份 P0.11 caller-owned inert inputs 是否维持独特 identity、严格 sequence/time 顺序及同一声明 source/epoch relationship。
+P0.12 是一个有限、deterministic、synchronous、caller-driven、immutable、test-only、audit-only 的 command-correlation continuity audit。它只能报告 PASS/GAP：在一个显式 correlation scope 中，多份 P0.11 caller-owned inert inputs 是否维持独特 identity、严格 sequence/time 顺序及同一声明 source/epoch relationship。
 
 该候选不会执行或授权 command，不读取或传输设备，不保留 history/continuation，不创建 runtime/adapter/session，也不声称 ACK 是 physical completion 或 actual 是 P0.3 reconciliation。
 
@@ -39,6 +39,6 @@ P0.12 候选是一个有限、同步、caller-driven、immutable、test-only 的
 
 验证结论只能在终止证据取得后记录。P0.1–P0.11 已合并合同保持零差异；本实现不授权协议、网络、HIL、PCS/BMS/DSP/STM32、硬件、现场、认证或部署。
 
-## 6. 本地门禁结论（未发布）
+## 6. 已合并门禁结论
 
-本地终态证据包括 P0.12 focused、P0.10/P0.11 relevant、all Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、边界扫描与 pre-commit；八项 isolated mutation 也已被相应 assertion 杀死。当前候选仍未 push、未创建 PR、未合并；本节不是 release approval，也不表示设备、传输或物理完成能力。
+终态证据包括 P0.12 focused、P0.10/P0.11 relevant、all Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、边界扫描与 pre-commit；八项 isolated mutation 也已被相应 assertion 杀死。PR #215 已合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`。本节不是 release approval，也不表示设备、传输或物理完成能力；后续阶段须新的 gap review 与明确用户授权。
