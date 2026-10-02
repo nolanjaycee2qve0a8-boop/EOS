@@ -327,3 +327,19 @@ P0.9 已通过 PR #203 合并到 repository main（`4690d47cbfa4cac0ae4eb4e9a27b
 P0.12 的最小阅读方式是 caller 构造两个或更多 P0.11 `DeviceFactCommandCorrelationInput`，再以 `scope`、`assessment_as_of`、`maximum_age` 调用 `DeterministicDeviceFactCommandCorrelationContinuityAuditor.evaluate(...)`。PASS 只表示有限输入在已声明范围内的 correlation continuity 一致；GAP 明确保留 failure finding。它不会运行 Strategy、MPC、Simulator、runtime tick、adapter transmit 或 device protocol。
 
 观察时要把 P0.10 lifecycle、P0.11 单-member correlation 与 P0.12 cross-member continuity 分开：ACK 或 actual 不能补救 P0.11 GAP，actual 也不能替代 P0.3 reconciliation 或证明 physical completion。P0.12 已验证并随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`；它仍是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP，不具备 Simulator 控制、command/runtime/device/adapter authority，也不表示 protocol、network、HIL、hardware、field 或产品发布能力。API、failure cases、测试与 mutation 入口见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。
+
+## Edge P0.13：跨 scope 审计阅读入口
+
+P0.13 实现已通过 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge 到 main
+`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 CI run 36997610237 API 结论为 success。
+
+本阶段没有新增 Simulator CLI 或控制 Demo。调用者提交两份 P0.12 raw requests 与显式交接声明，
+P0.13 对结构有效的每份原请求恰好审计一次，再核对真实边界、显式 advance、完整范围和 freshness。
+学习指南给出 10→12、DST 反例及四项现有短测试入口，无需运行 Campaign 或再次执行 full 2986。
+PASS 只说明声明事实一致，不证明 transmission、ACK 物理完成或实际设备执行，actual 不替代 P0.3 reconciliation。
+输出不可变且无执行 authority；无 provenance registry，不能证明跨调用来源。软件 PASS 不等于
+PCS/BMS、HIL、field proof，也不授予 command/runtime/adapter/device/transport/replay 权力。
+
+阅读入口：[学习指南](learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
+[领导摘要](phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)、
+[最终合并与审核证据](validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。

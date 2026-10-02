@@ -1,5 +1,9 @@
 # Residential Edge P0.13 第一批实现与本地验证证据
 
+> 当前状态增补：P0.13 实现已通过 PR #218 合并；最终独立审核为 KEEP。
+> 下列第一版、R1、R2 送审快照及其失败/中断记录均为历史原文；其中“没有 PR/合并”等不代表当前状态。
+> 当前结论与来源分层见文末[最终合并与审核摘要](#最终合并与审核摘要2026-10-02)。
+
 状态：第一版独立初审为 **REVISE**；R1 在原五个文件内完成修复及作者验证，本文件为交同一 reviewer 复核的冻结送审快照。
 没有 push、PR、合并或发布；第一版 REVISE 不构成审核通过，R1 复核结论见追加记录。本文件不改写已合并的候选合同。
 
@@ -185,3 +189,66 @@ R1 独立复核仍为 REVISE，仅剩一个 P1：纽约回拨日各 scope 可按
 本轮精确补丁为 `/workspace/eos-p013-r2/p0.13-scope-handoff-r2.patch`，五文件及 patch 的 SHA-256 为同目录 `SHA256SUMS`。完整旧阶段 tracked 文件逐字节核验仍为零差异；补丁可重建完全相同的五个新文件。Python 文件与本轮 full pytest/pre-commit 哈希一致。
 
 此为作者冻结送审快照，不预写独立 KEEP。同一 reviewer 在新回合执行复核，独立报告在仓库外留存并由最终答复链接；审核中作者不修改五文件。没有 commit/push/PR/merge/发布或新的 Library 尝试。
+
+
+## 最终合并与审核摘要（2026-10-02）
+
+### Git 与 CI 的可核验事实
+
+[PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) 已于 2026-10-02T10:49:32Z squash merge。
+本次文档收尾从干净的旧基线正常 fast-forward 后，只读核验以下对象；没有 reset 或覆盖已有工作。
+
+| 对象 | 精确值 |
+| --- | --- |
+| 实现 merge / 本轮文档基线 | `c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5` |
+| merge parent | `a843d25a7f215f49ea677025416c2485558429cf` |
+| PR candidate commit | `7e71fb7c6a721dde24273e647b07d1b5f6a3f5b7` |
+| candidate 与 merge 的共同 tree | `493f8b6f410a9bd30d7f9b99632144730d1a183f` |
+| 实现相对 parent 的范围 | 5 个新文件，+2128 / -0；851 个原 tracked 文件逐字节不变 |
+
+这组范围数字属于 PR #218 实现合并，不是后续文档补丁的 diff。
+[主线 EOS CI run 36997610237](https://github.com/nolanjaycee2qve0a8-boop/EOS/actions/runs/36997610237) 的 API 返回
+`event=push`、`head_sha=c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`、`status=completed`、`conclusion=success`。
+主对话交接记录说明完整日志域名返回 Forbidden，未下载；本轮仅复核 API 状态，
+没有完整日志可供计数，不能从 success 补编测试数量、耗时或 hook 结果。
+
+### 作者验证与独立审核分别记账
+
+作者 R2 终态证据是上文已合并记录：full pytest **2986 passed**，focused 186、predecessors 64、
+Edge Runtime 486、Residential 23，作者重放独立反例/控制 28 passed；Ruff、format、mypy PASS。
+本地 pre-commit 的 Ruff/format/mypy Passed，**pytest hook Skipped**，复用同一 Python source hash
+的已完成 full pytest；不能写作 all hooks PASS。本轮仅做文档与短示例核验，没有再次运行 full 2986。
+
+独立审核的最终 **KEEP** 来自[公开 PR 的 Validation and review provenance](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218)与主对话交接摘要：
+独立 reviewer 完成 **250 focused/predecessor tests PASS**、**28 prior counterexamples/controls PASS**、
+**3 microsecond-boundary controls PASS**，以及 **28/28 semantic mutation 独立重放真实断言击杀**。
+这些是不同证据组，不相加冒充新 full-suite 计数，也不是本轮文档作者重新执行的结果。
+独立性是新上下文及隔离副本、**共享 executor**，不是独立 machine。
+作者实例的临时审核报告没有在本轮共享；上文旧临时路径仅保留历史出处，不声明在当前环境可访问，
+也不虚构本轮已读过那些文件。公开 PR 与已合并文档可核验，临时原始报告不属于当前可直接审计的附件。
+
+| 审核阶段 | 真实发现与处置 |
+| --- | --- |
+| 初审 REVISE | DST fold/绝对时刻误判、自定义 tzinfo 保留 raw/authority、tuple/数值子类（含 float）未 fail closed；R1 修复 |
+| R1 复审 REVISE | terminal→initial 向前仍不足以排除完整跨 scope 时间范围交叠；R2 补全 max/min 绝对范围检查 |
+| 最终 KEEP | 上述问题在同五文件范围修复；独立控制与 semantic mutation 重放结论如上 |
+
+第一版 7 failed / 1 control passed、R1 原审核脚本 7 passed / 1 TypeError 失败、
+仅调整明确拒绝预期后的 8 passed、R1 全量中途 **-15** 终止，以及 R1 复审 5 failed / 15 passed
+均保留在前述历史章节。TypeError 的预期变化不是原样脚本全通过；-15 不是通过或断言失败。
+后来的 KEEP 不倒填这些历史结果。
+
+### 文档收尾与能力边界
+
+本轮只增补合同状态、证据摘要、[学习指南](../learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
+[领导摘要](../phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)及既有入口；
+不修改源码、测试、依赖、CI、Campaign、规范规则或治理权限。
+文档候选须经过范围/链接/格式/敏感扫描、必要短示例及 fresh-context 只读独立文档审核；
+通过后仍只保留本地候选，push/PR/merge 由主对话后续处理，不预写完成。
+
+软件 PASS 仅描述有限声明事实的一致性，不等于 PCS/BMS、HIL、hardware 或 field proof；
+不提供设备、command、runtime、adapter、transport、continuation、restore 或 replay authority。
+无 provenance registry，不能证明当前调用者来源、跨调用唯一性/reuse，或识别被重新包装成合法 raw inputs 的历史事实。
+P0.14、第七册与硬件/网络/部署均未启动；下一阶段最小待答问题是：现有 P0.10–P0.13 审计链之外，
+哪一个具体能力缺口需要新增证据，其最小输入、拒绝条件和可独立验证的验收标准是什么？
+这只是后续 gap review 的问题，不构成新能力方案或实施授权。

@@ -45,12 +45,14 @@ worker 状态应区分实施中、等待验证、blocked、待独立审阅、待
 ## 4. 当前台账
 
 - P0.1–P0.11 已合并；P0.8、P0.9 与 P0.10 的既有合并事实保持不变。P0.11 通过 PR #211 合并到 main，merge SHA 为 `1aedd2df8cee8bd91ba772dbec80b04eb5a91c6c`，最终 head `c040d9ef237a01ba9250ae51f2ccb4508d474c32` 的 Quality checks 为 SUCCESS。
-- 当前 main 基线：`ce37c92a5daa33a588a2a33e721162f595212553`（PR #215 merge commit；P0.12 implementation 已合并）。
+- 当前 main 基线：`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`（PR #218 squash merge；P0.13 implementation 已合并）。
 - P0.11 已获授权、实施、完成验证门禁并合并；当前 active implementation stage 为 NONE。P0.11 仅增加 audit-only 的 caller-owned transmission/ACK/actual correlation PASS/GAP 合同，不授权任何外部设备能力。
 - PR #211 的首次 CI Ruff UP038 失败不计为 PASS；最终 head 的语义等价 Python 3.12 兼容修复后，Quality checks SUCCESS。
 - P0.12 planning-only candidate docs 曾通过 PR #213 合并；其受限 implementation 随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。它实施并验证了有限 P0.11 correlation facts 在 caller-declared scope 内的 deterministic、synchronous、caller-driven、test-only、audit-only identity/sequence/time continuity PASS/GAP；不重复 P0.10 lifecycle transition 或 P0.11 单快照审计。
 - 当前 active implementation stage 为 NONE。P0.12 已实施、验证并合并，但不授权 runtime、command、device、adapter、protocol、network、HIL、hardware、field 或产品发布能力；任何后续阶段须新的 gap review 与明确用户授权。
-- P0.13 尚未开始；在任何 P0.13 planning 或 implementation 前，必须先完成新的 capability-gap review 并获得明确用户授权。
+- P0.13 已通过 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) 合并；主线 CI run 36997610237 API 为 success。当前仅做 P0.13 文档/学习/验证事实收尾，未启动新 implementation stage。
+- P0.13 作者 full 2986 PASS，Ruff/format/mypy PASS；本地 pytest hook Skipped，复用同 source hash 全量。独立最终 KEEP 为公开 PR 与交接记录，独立上下文/副本共享 executor，不是独立机器；初审与复审失败历史保留。完整 CI 日志未下载，不补编计数；详见[最终合并摘要](../validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
+- 当前收尾门禁：限定文档链接/格式/敏感扫描、必要短示例及 fresh-context 只读独立文档复核；通过后仅保留本地候选交主对话处理。本轮不 push/PR/merge，不启动 P0.14、第七册、硬件、网络或部署。治理原则与审批权限保持不变，下一能力阶段仍须新的 gap review 与明确用户授权。
 - 当前治理持久化仅限 docs-only 草案，不改变生产 authority、冻结控制链或已合并阶段的事实。
 
 ## 5. 上下文交接与治理文档边界

@@ -80,4 +80,12 @@ capability-gap review → 用户阶段批准 → 受限实施 → focused valida
 
 ## 6. 后续能力地平线（候选，不是授权）
 
-P0.12 已实施、验证并合并；当前 active stage 为 NONE。P0.13 尚未开始；在任何 P0.13 planning 或 implementation 前，必须先完成新的 capability-gap review 并获得明确用户授权。以下仍仅是待新的 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。
+P0.13 已经 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge，
+当前核验 main 为 `c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 CI run 36997610237 API 为 success。
+当前 active implementation stage 为 NONE，进行中的工作仅为 P0.13 文档/学习/验证事实收尾。
+该软件合同不授予设备控制权或 PCS/BMS、HIL、field proof。
+收尾门禁为限定文档的链接/格式/敏感扫描、必要短示例与独立只读文档复核；通过后保留本地候选交主对话处理，
+不在本轮 push/PR/merge，不启动 P0.14 或第七册。证据归属、历史失败与日志访问限制见
+[最终合并摘要](../validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
+任何新能力阶段仍须新的 capability-gap review 与明确用户授权。
+以下仍仅是待新的 capability-gap review 与用户阶段批准后才能讨论的候选：fake transport、protocol sandbox、HIL、embedded mapping，以及 field/productization。它们不表示已实现或已批准。

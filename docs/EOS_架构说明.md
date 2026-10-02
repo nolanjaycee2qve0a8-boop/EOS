@@ -1729,3 +1729,21 @@ P0.12 位于 P0.11 之上而不修改 P0.1–P0.11：它对一个显式、有界
 该模块不拥有 execution authority。它没有 runtime、adapter、handoff、transport、device、scheduler 或 global clock；assessment 也不保留输入、原始 member、ACK/actual/transmission object 或 continuation。P0.11 GAP、historical assessment、unavailable ACK、correlation mismatch、identity reuse 或不严格顺序一律 fail closed；actual telemetry 不能替代 P0.3 reconciliation，也不能把 audit PASS 解释为 transmission success 或 physical completion。
 
 P0.12 已实施、验证并随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。它仍是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP 合同，没有 command/runtime/device/adapter authority，也没有 network、protocol、thread、persistence、HIL、PCS/BMS、DSP/STM32、hardware、field-control 或产品发布能力；后续阶段须新的 gap review 与明确用户授权。详见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。
+
+## Edge P0.13：跨 scope 声明性交接审计边界
+
+P0.13 实现已通过 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge 到 main
+`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 CI run 36997610237 API 结论为 success。
+
+P0.13 是 deterministic、synchronous、caller-driven、test-only、audit-only 边界。它接收恰好两份
+P0.12-shaped raw-input scopes 和显式 declaration；每个结构有效原请求恰好委托冻结 P0.12 一次，
+两侧 PASS 后才检查交接。它不复制前置审计，不排序、合并或修复事实，也不从 source/epoch 变化推断 lifecycle。
+实际 terminal→initial 的 identity/sequence/time 与声明精确相符；完整跨 scope 绝对时间范围必须分离。
+output 只含 assessment identity、as_of、PASS/GAP 和不可变 findings，没有 raw/live predecessor 引用。
+无跨调用 registry/state/persistence，无法证明 provenance/reuse，亦不产生 command/runtime/adapter/device、
+continuation/transport/replay authority。该软件合同不代表 PCS/BMS、HIL 或 field proof。
+本轮仅文档收尾，不改 P0.1–P0.12、Residential EMS 1.0、Campaign A–F 或原规范规则。
+
+阅读入口：[学习指南](learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
+[领导摘要](phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)、
+[最终合并与审核证据](validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
