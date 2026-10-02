@@ -3272,3 +3272,20 @@ P0.12 是 test-only、无状态、caller-driven 的审计层：caller 一次提�
 P0.10 侧重 lifecycle continuity，P0.11 侧重单个设备事实与命令的 correlation；P0.12 只连接一组 caller-owned P0.11 input 的审计结论。P0.11 GAP、历史 assessment、malformed member、ACK unavailable、identity reuse 或时间/顺序异常均为 P0.12 GAP，不能由另一个 member、ACK 或 actual 补救。P0.3 reconciliation、P0.4 actual telemetry、ACK 都仍是不同事实层，任何一层都不证明物理完成。
 
 P0.12 output 是可序列化的 immutable assessment/finding，不保留 input、member、runtime、adapter、transmission、actual 或 command authority。它已实施、验证并随 PR #215 合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`；仍是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP，不包含 protocol、network、HIL、PCS/BMS、hardware、field 或产品发布 capability。后续阶段须新的 gap review 与明确用户授权。最小示例、API 与 mutation 阅读见 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md`。
+
+## Edge P0.13：为什么两个 scope 都 PASS 仍要审计交接
+
+P0.13 实现已通过 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge 到 main
+`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 CI run 36997610237 API 结论为 success。
+
+P0.10 审计 lifecycle，P0.11 审计单次 correlation，P0.12 审计 scope 内连续性；P0.13 才核验两个
+raw-input scopes 之间的显式声明。每个结构有效的 P0.12 原始请求恰好委托一次，前置 GAP 不可补救；
+随后核对实际 terminal/initial、显式 10→12 advance=2、完整绝对时间范围与 freshness。
+DST 墙上时间向前不一定代表实际向前；即便首末衔接向前，完整范围也可能交叠。
+输出是不可变惰性审计事实，不保留 raw inputs 或 authority。没有 provenance registry，不能证明跨调用来源、
+唯一性或 reuse；软件 PASS 不等于 PCS/BMS、HIL、field proof，也无设备控制权。
+本节仅追加学习入口，详细反例、短示例、历史失败与能力限制见下列材料。
+
+阅读入口：[学习指南](learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
+[领导摘要](phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)、
+[最终合并与审核证据](validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。

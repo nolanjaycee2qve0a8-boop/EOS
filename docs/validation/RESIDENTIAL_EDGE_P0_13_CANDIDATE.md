@@ -1,5 +1,18 @@
 # Residential Edge P0.13 Candidate Validation Plan
 
+## 状态增补（2026-10-02）：P0.13 实现已合并
+
+P0.13 实现经 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge 到 main：
+`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 [CI run 36997610237](https://github.com/nolanjaycee2qve0a8-boop/EOS/actions/runs/36997610237) 的 API 结论为 success。
+作者终态验证、最终独立 KEEP、证据来源与限制见[实施证据的最终合并摘要](RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
+本增补仅更新状态与证据链接，不改变下面的规范规则。
+
+以下保留 candidate 阶段原文；其中 planning-only、未来、尚未发生、另行授权等叙述属于当时快照，
+不表示当前实现仍未开始，也不代表自动授权下一阶段。实现合并与本轮文档收尾是不同事项；
+本轮文档候选尚待独立文档复核及主对话后续处理，不据此声明文档已发布。
+
+## 候选历史原文（保留）
+
 > 状态：**planning-only / prospective candidate local draft**。本计划没有实现、pytest、mutation、CI、PR 或 release 结果。
 
 ## 1. 候选验证目标

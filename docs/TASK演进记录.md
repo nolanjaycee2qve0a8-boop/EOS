@@ -5481,3 +5481,23 @@ P0.8 已于 2026-09-07T04:21:48Z 通过 PR #200 合并到 main（`3ba8480203fc4b
 P0.12 在 P0.11 public immutable facts 上增加有限集合的 continuity audit，不改变 P0.1–P0.11、Residential EMS 或 Campaign A–F。它逐成员委托 P0.11 并检查 caller-declared scope relationship、assessment/transmission/actual identity uniqueness、strict transaction sequence、strict assessment time 与显式 freshness。P0.11 GAP、historical/malformed member、ACK unavailable、scope mismatch 或重复/顺序异常均 fail closed，不能由其他 member、ACK 或 actual 修复。
 
 该候选的受限实现已完成 focused、upstream、Edge Runtime、Residential frozen、Campaign A–F、full pytest、Ruff、format、mypy、static checks、pre-commit 与八项 isolated mutation evidence；PR #215 已合并，Quality checks 为 SUCCESS，main 为 `ce37c92a5daa33a588a2a33e721162f595212553`，implementation head `57d0f8828cdcb476509d8ef00933c9034143b106` 已包含在 main。P0.12 仍只是 deterministic、synchronous、caller-driven、test-only、audit-only PASS/GAP contract：不表示 transmission、physical completion、hardware/device authority、network、protocol、HIL、PCS/BMS、field readiness 或产品发布。后续阶段须新的 gap review 与明确用户授权。学习指南和领导摘要分别为 `docs/learning/RESIDENTIAL_EDGE_P0_12_COMMAND_CORRELATION_CONTINUITY_GUIDE.md` 与 `docs/phase-summary/RESIDENTIAL_EDGE_P0_12_LEADERSHIP_SUMMARY_CN.md`。
+
+## Edge P0.13：实现已合并，文档与证据收尾
+
+P0.13 实现已通过 [PR #218](https://github.com/nolanjaycee2qve0a8-boop/EOS/pull/218) squash merge 到 main
+`c7ee7ffdfb20b9133c5955c6921233cfccaf5fe5`；主线 CI run 36997610237 API 结论为 success。
+
+实现 candidate 为 `7e71fb7c6a721dde24273e647b07d1b5f6a3f5b7`，与 merge 共同 tree 为
+`493f8b6f410a9bd30d7f9b99632144730d1a183f`；相对 parent `a843d25` 仅 5 个新增文件、+2128/-0，
+851 个旧 tracked 文件逐字节不变。这是实现的 diff，不是本次文档改动计数。
+作者 full 2986 PASS，Ruff/format/mypy PASS；本地 pytest hook Skipped，复用同 source hash 全量。
+独立最终 KEEP 的交接证据为 250 focused/predecessor、28 prior counterexamples/controls、3 microsecond controls
+PASS 与 28/28 semantic mutation 真实断言独立重放击杀；独立上下文/副本共享 executor，不是独立 machine。
+初审 REVISE 三项、复审完整时间范围交叠、TypeError 预期变化和 -15 中断按原来源保留，不倒填通过。
+CI 完整日志域名 Forbidden、未下载，不补编计数；独立临时报告未在本轮共享，结果取自公开 PR 与交接。
+当前动作仅合同状态、学习/领导摘要、入口和过期治理事实收尾，保留本地候选待独立文档复核与主对话处理。
+不启动第七册、P0.14 或设备/网络/部署能力；软件 PASS 不等于 hardware/field proof。
+
+阅读入口：[学习指南](learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
+[领导摘要](phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)、
+[最终合并与审核证据](validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
