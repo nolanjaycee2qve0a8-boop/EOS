@@ -23,6 +23,19 @@ The repository includes the evolving decision-kernel architecture and a
 deterministic 24-hour Simulator 1.0 Demo. The Demo rule validates simulation
 integration; it is not a production energy-management or device-control system.
 
+## Virtual home storage teaching example
+
+Run five bounded simulated scenarios through the actual self-consumption strategy
+and controlled Edge composition:
+
+```bash
+python -m examples.virtual_home_storage.demo --output /tmp/eos-virtual-home-output
+```
+
+See the [Chinese teaching guide](docs/learning/VIRTUAL_HOME_STORAGE_GUIDE.md) for
+explicit fixture approval, power limits, expiry and ACK mismatch. Outputs separate
+virtual execution from scripted observations; they are not real device measurements.
+
 ## Development
 
 EOS requires Python 3.12.
