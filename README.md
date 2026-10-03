@@ -46,6 +46,18 @@ It reuses the existing Residential EMS reference runner and produces linked PV,
 load, battery, grid import/export and SOC curves plus Chinese hourly decision
 records. See the [24-hour Chinese guide](docs/learning/VIRTUAL_HOME_STORAGE_DAY_GUIDE.md).
 
+Run the bounded simulation-only defect campaign:
+
+```bash
+python -m examples.virtual_home_storage_defect_campaign.campaign \
+  --output-dir /tmp/eos-defect-campaign
+```
+
+It targets 18 gaps left after Campaigns B/C/D, records cross-contract failures
+and strategy limitations without changing frozen core behavior, and exports a
+machine-readable matrix plus CSV/JSON evidence. See the
+[Chinese defect-campaign guide](docs/learning/VIRTUAL_HOME_STORAGE_DEFECT_CAMPAIGN_GUIDE.md).
+
 ## Development
 
 EOS requires Python 3.12.
