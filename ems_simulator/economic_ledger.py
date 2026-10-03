@@ -61,6 +61,15 @@ def _require_non_negative_finite(value: object, field_name: str) -> float:
     return normalized
 
 
+def _require_finite(value: object, field_name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError(f"{field_name} must be a number")
+    normalized = float(value)
+    if not isfinite(normalized):
+        raise ValueError(f"{field_name} must be finite")
+    return normalized
+
+
 def _require_positive_finite(value: object, field_name: str) -> float:
     normalized = _require_non_negative_finite(value, field_name)
     if normalized == 0.0:
@@ -180,10 +189,8 @@ class EconomicLedgerInterval:
             "grid_import_energy_kwh",
             "grid_export_energy_kwh",
             "battery_throughput_kwh",
-            "import_tariff_per_kwh",
             "export_tariff_per_kwh",
             "degradation_cost_per_throughput_kwh",
-            "realized_import_cost",
             "realized_export_revenue",
             "battery_degradation_cost",
         ):
@@ -191,6 +198,16 @@ class EconomicLedgerInterval:
                 self,
                 field_name,
                 _require_non_negative_finite(getattr(self, field_name), field_name),
+            )
+        for field_name in (
+            "import_tariff_per_kwh",
+            "realized_import_cost",
+            "realized_interval_net_cost",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                _require_finite(getattr(self, field_name), field_name),
             )
         object.__setattr__(
             self,
@@ -318,16 +335,24 @@ class DailyEconomicLedger:
             "total_grid_import_energy_kwh",
             "total_grid_export_energy_kwh",
             "total_battery_throughput_kwh",
-            "total_realized_import_cost",
             "total_realized_export_revenue",
             "total_battery_degradation_cost",
-            "total_realized_net_cost",
             "terminal_energy_value",
         ):
             object.__setattr__(
                 self,
                 field_name,
                 _require_non_negative_finite(getattr(self, field_name), field_name),
+            )
+        for field_name in (
+            "total_realized_import_cost",
+            "total_realized_net_cost",
+            "adjusted_net_economic_cost",
+        ):
+            object.__setattr__(
+                self,
+                field_name,
+                _require_finite(getattr(self, field_name), field_name),
             )
         object.__setattr__(
             self,

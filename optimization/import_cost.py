@@ -19,13 +19,23 @@ def _require_non_negative_finite(value: object, field_name: str) -> float:
     return normalized
 
 
+def _require_finite(value: object, field_name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError(f"{field_name} must be a number")
+    normalized = float(value)
+    if not isfinite(normalized):
+        raise ValueError(f"{field_name} must be finite")
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class ImportCostInput:
     """Caller-owned realized import energy and one explicit import tariff.
 
     ``realized_import_energy_kwh`` is already a non-negative realized scalar.
-    This contract neither derives it from grid-power signs nor selects a tariff
-    from a schedule, market, tariff profile, or forecast.
+    ``import_tariff_per_kwh`` is signed so a finite negative market price is
+    preserved. This contract neither derives energy from grid-power signs nor
+    selects a tariff from a schedule, market, tariff profile, or forecast.
     """
 
     realized_import_energy_kwh: float
@@ -43,7 +53,7 @@ class ImportCostInput:
         object.__setattr__(
             self,
             "import_tariff_per_kwh",
-            _require_non_negative_finite(
+            _require_finite(
                 self.import_tariff_per_kwh,
                 "import_tariff_per_kwh",
             ),
@@ -62,15 +72,19 @@ class ImportCostEvidence:
     def __post_init__(self) -> None:
         if not isinstance(self.source_input, ImportCostInput):
             raise TypeError("source_input must be an ImportCostInput")
-        for field_name in (
+        object.__setattr__(
+            self,
             "realized_import_energy_kwh",
-            "import_tariff_per_kwh",
-            "realized_import_cost",
-        ):
+            _require_non_negative_finite(
+                self.realized_import_energy_kwh,
+                "realized_import_energy_kwh",
+            ),
+        )
+        for field_name in ("import_tariff_per_kwh", "realized_import_cost"):
             object.__setattr__(
                 self,
                 field_name,
-                _require_non_negative_finite(getattr(self, field_name), field_name),
+                _require_finite(getattr(self, field_name), field_name),
             )
         if (
             self.realized_import_energy_kwh

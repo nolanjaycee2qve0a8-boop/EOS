@@ -21,14 +21,23 @@ def _require_non_negative_finite(value: object, field_name: str) -> float:
     return normalized
 
 
+def _require_finite(value: object, field_name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError(f"{field_name} must be a number")
+    normalized = float(value)
+    if not isfinite(normalized):
+        raise ValueError(f"{field_name} must be finite")
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class EconomicOutcomeInput:
     """Caller-owned realized import expense and already-valued terminal evidence.
 
-    ``realized_import_cost`` is an already-reduced non-negative expense over a
-    caller-defined horizon. This contract intentionally has no tariff profile,
-    grid trace, forecast, or battery state from which that cost could be
-    recalculated.
+    ``realized_import_cost`` is an already-reduced signed cost over a
+    caller-defined horizon so finite negative import prices remain visible.
+    This contract intentionally has no tariff profile, grid trace, forecast,
+    or battery state from which that cost could be recalculated.
     """
 
     realized_import_cost: float
@@ -45,7 +54,7 @@ class EconomicOutcomeInput:
         object.__setattr__(
             self,
             "realized_import_cost",
-            _require_non_negative_finite(
+            _require_finite(
                 self.realized_import_cost,
                 "realized_import_cost",
             ),
@@ -82,7 +91,7 @@ class EconomicOutcomeEvidence:
             )
         if not isinstance(self.terminal_value_credit_applied, bool):
             raise TypeError("terminal_value_credit_applied must be a bool")
-        realized_import_cost = _require_non_negative_finite(
+        realized_import_cost = _require_finite(
             self.realized_import_cost,
             "realized_import_cost",
         )

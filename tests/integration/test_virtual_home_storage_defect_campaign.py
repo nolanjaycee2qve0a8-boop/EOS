@@ -5,6 +5,7 @@ from __future__ import annotations
 import csv
 import json
 from collections import Counter
+from dataclasses import replace
 from datetime import datetime, timedelta
 from math import isclose
 from pathlib import Path
@@ -165,15 +166,12 @@ def test_findings_distinguish_contract_defects_strategy_limits_and_input_rejecti
 ) -> None:
     counts = Counter(item.status for item in campaign.path_results)
     assert counts == {
-        "PASS": 16,
+        "PASS": 24,
         "LIMITATION": 8,
-        "FAIL": 8,
         "REJECTED_AS_EXPECTED": 3,
     }
     codes = {item.finding_code for item in campaign.path_results if item.finding_code}
     assert {
-        "NEGATIVE_REALIZED_NET_COST_REJECTED",
-        "NEGATIVE_TARIFF_LEDGER_REJECTED",
         "ZERO_EXPORT_NOT_ENFORCED_NO_CURTAILMENT",
         "NO_PRICE_ONLY_ARBITRAGE",
         "FALSE_PV_FORECAST_CAUSES_GRID_CHARGE",
@@ -208,6 +206,24 @@ def test_findings_distinguish_contract_defects_strategy_limits_and_input_rejecti
     assert independent_net_costs["S05_PV_STEP_UP"] == pytest.approx(-0.05)
     assert independent_net_costs["S07_CHARGE_LIMIT"] == -1.25
 
+    repaired = [
+        item
+        for item in campaign.path_results
+        if item.scenario_id
+        in {
+            "S02_MAX_SOC_PV",
+            "S05_PV_STEP_UP",
+            "S07_CHARGE_LIMIT",
+            "S10_NEGATIVE_PRICE",
+        }
+    ]
+    assert len(repaired) == 8
+    assert all(item.status == "PASS" and not item.exception_type for item in repaired)
+    assert all(
+        item.ledger_net_cost_cny == pytest.approx(item.independent_net_cost_cny)
+        for item in repaired
+    )
+
     false_pv = next(
         item
         for item in campaign.path_results
@@ -225,7 +241,7 @@ def test_findings_distinguish_contract_defects_strategy_limits_and_input_rejecti
     assert missed_load.total_battery_throughput_kwh == 0.0
 
 
-def test_negative_tariff_and_negative_net_cost_are_minimal_core_reproductions(
+def test_negative_tariff_and_negative_net_cost_now_reconcile_without_clamping(
     tmp_path: Path,
 ) -> None:
     negative_price = _spec("S10_NEGATIVE_PRICE")
@@ -236,33 +252,79 @@ def test_negative_tariff_and_negative_net_cost_are_minimal_core_reproductions(
         grid = max(state.grid_result.actual_grid_power_kw, 0.0)
         actual_import_cost += grid * state.tariff_result.import_price_cny_per_kwh
     assert isclose(actual_import_cost, -1.0526315789473686, abs_tol=1e-12)
-    with pytest.raises(
-        ValueError, match="import_tariff_per_kwh must be finite and non-negative"
-    ):
-        DeterministicEconomicLedgerBuilder().build(
-            EconomicLedgerInput(
-                trajectory,
-                (EXPORT_TARIFF,) * HOURS,
-                (DEGRADATION_RATE,) * HOURS,
-                TERMINAL_VALUE,
-                negative_price.battery_model,
-            )
+    negative_ledger = DeterministicEconomicLedgerBuilder().build(
+        EconomicLedgerInput(
+            trajectory,
+            (EXPORT_TARIFF,) * HOURS,
+            (DEGRADATION_RATE,) * HOURS,
+            TERMINAL_VALUE,
+            negative_price.battery_model,
         )
+    )
+    assert negative_ledger.total_realized_import_cost == pytest.approx(
+        -1.0526315789473686
+    )
+    assert negative_ledger.total_realized_net_cost == pytest.approx(-0.7894736842105264)
 
     export_only = _spec("S02_MAX_SOC_PV")
     export_trajectory = _schedule(export_only, tmp_path / "export_only")
-    with pytest.raises(
-        ValueError, match="total_realized_net_cost must be finite and non-negative"
-    ):
-        DeterministicEconomicLedgerBuilder().build(
-            EconomicLedgerInput(
-                export_trajectory,
-                (EXPORT_TARIFF,) * HOURS,
-                (DEGRADATION_RATE,) * HOURS,
-                TERMINAL_VALUE,
-                export_only.battery_model,
-            )
+    export_ledger = DeterministicEconomicLedgerBuilder().build(
+        EconomicLedgerInput(
+            export_trajectory,
+            (EXPORT_TARIFF,) * HOURS,
+            (DEGRADATION_RATE,) * HOURS,
+            TERMINAL_VALUE,
+            export_only.battery_model,
         )
+    )
+    assert export_ledger.total_realized_net_cost == -0.4
+
+
+def test_negative_tariff_ledger_remains_signed_across_consecutive_days(
+    tmp_path: Path,
+) -> None:
+    source_spec = _spec("S10_NEGATIVE_PRICE")
+    load = (1.0, *source_spec.realized_load_kw[1:])
+    day1_spec = replace(source_spec, realized_load_kw=load, forecast_load_kw=load)
+    day1 = _schedule(day1_spec, tmp_path / "negative_day1")
+    day1_ledger = DeterministicEconomicLedgerBuilder().build(
+        EconomicLedgerInput(
+            day1,
+            (EXPORT_TARIFF,) * HOURS,
+            (DEGRADATION_RATE,) * HOURS,
+            TERMINAL_VALUE,
+            day1_spec.battery_model,
+        )
+    )
+    final_soc = day1.step_traces[
+        -1
+    ].simulation_trace.state.battery_result.next_state.soc
+    day2_spec = replace(
+        day1_spec,
+        initial_soc=final_soc,
+        start=day1_spec.start + timedelta(days=1),
+    )
+    day2 = _schedule(day2_spec, tmp_path / "negative_day2")
+    day2_ledger = DeterministicEconomicLedgerBuilder().build(
+        EconomicLedgerInput(
+            day2,
+            (EXPORT_TARIFF,) * HOURS,
+            (DEGRADATION_RATE,) * HOURS,
+            TERMINAL_VALUE,
+            day2_spec.battery_model,
+        )
+    )
+
+    assert day1_ledger.total_realized_import_cost < 0.0
+    assert day2_ledger.total_realized_import_cost < 0.0
+    day1_end = day1.step_traces[
+        -1
+    ].simulation_trace.simulation_input.step_identity.timestamp
+    day2_start = day2.step_traces[
+        0
+    ].simulation_trace.simulation_input.step_identity.timestamp
+    assert day1_end is not None and day2_start is not None
+    assert day2_start == day1_end + timedelta(hours=1)
 
 
 def test_cross_midnight_carries_actual_soc_and_keeps_strategy_chains_separate(
@@ -315,7 +377,8 @@ def test_outputs_are_deterministic_labeled_parseable_and_report_scope(
         "策略与产品能力局限",
         "输入合同拒绝",
         "Simulator 与测试缺口",
-        "建议的下一修复顺序",
+        "修复状态与下一步",
     ):
         assert heading in report
     assert "不是 PCS/BMS、HIL" in report
+    assert "有限负进口价、负进口成本和负日净成本已由 ledger 保留" in report

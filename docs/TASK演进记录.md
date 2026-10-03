@@ -5501,3 +5501,13 @@ CI 完整日志域名 Forbidden、未下载，不补编计数；独立临时报�
 阅读入口：[学习指南](learning/RESIDENTIAL_EDGE_P0_13_SCOPE_HANDOFF_GUIDE.md)、
 [领导摘要](phase-summary/RESIDENTIAL_EDGE_P0_13_LEADERSHIP_SUMMARY_CN.md)、
 [最终合并与审核证据](validation/RESIDENTIAL_EDGE_P0_13_IMPLEMENTATION_EVIDENCE.md#最终合并与审核摘要2026-10-02)。
+
+## 有符号电价与经济账本合同修复
+
+缺陷 Campaign `bedd238245709bbc91c8372580e0f8bdc9bb42c4` 独立复现了两个合同断点：
+出口净收益形成的负日净成本被 ledger 拒绝，以及 Daily/Tariff 已接受的有限负进口价
+无法进入 import-cost evidence。经用户单独批准，本批把进口电价、进口成本和净成本
+定义为有限有符号值，同时继续要求所有物理能量、出口收入、退化成本和终端价值有限
+非负，并保留逐 interval、逐日及 terminal-adjusted 对账。范围不包含零上网、弃光、
+套利、预测保护、硬件或现场结算。合同见
+[`SIGNED_ECONOMIC_LEDGER_CONTRACT.md`](learning/SIGNED_ECONOMIC_LEDGER_CONTRACT.md)。

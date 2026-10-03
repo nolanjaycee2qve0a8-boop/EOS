@@ -73,6 +73,13 @@ def test_zero_import_energy_and_zero_tariff_produce_zero_cost() -> None:
     assert _calculate(5.0, 0.0).realized_import_cost == 0.0
 
 
+def test_negative_tariff_produces_signed_import_cost_without_clamping() -> None:
+    evidence = _calculate(5.25, -0.20)
+
+    assert evidence.import_tariff_per_kwh == -0.20
+    assert evidence.realized_import_cost == pytest.approx(-1.05)
+
+
 def test_higher_energy_and_tariff_increase_cost_linearly() -> None:
     baseline = _calculate(5.0, 0.60)
     higher_energy = _calculate(10.0, 0.60)
@@ -86,9 +93,10 @@ def test_higher_energy_and_tariff_increase_cost_linearly() -> None:
     ("energy", "tariff", "exception"),
     (
         (-0.01, 0.60, ValueError),
-        (10.0, -0.01, ValueError),
         (float("nan"), 0.60, ValueError),
+        (10.0, float("nan"), ValueError),
         (10.0, float("inf"), ValueError),
+        (10.0, float("-inf"), ValueError),
         (True, 0.60, TypeError),
         (10.0, True, TypeError),
         (cast(Any, "10"), 0.60, TypeError),

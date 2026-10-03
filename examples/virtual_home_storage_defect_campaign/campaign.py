@@ -1096,12 +1096,28 @@ def _report(results: tuple[PathResult, ...]) -> str:
             "- 所有已完成 trace 的功率平衡、SOC 效率积分、SOC/功率边界和对象 identity 均通过；本轮没有发现电池/Grid simulator 算术违例。\n",
             "- 当前 24 小时合同没有 grid import power limit，也没有 PV curtailment 输出，故不能证明购电限幅或弃光控制。\n",
             "- Campaign C 有 ±25%/±2h 预测误差，但此前没有完全虚假 PV 或完全漏报负载尖峰的定向断言。\n",
-            "## 建议的下一修复顺序\n",
-            "1. 统一 ledger 对负 `total_realized_net_cost` 的合同，使其与允许出口收益且 ExtendedEconomicOutcome 可为负的语义一致。\n",
-            "2. 对负进口价作明确产品决定：要么收窄 Daily/Tariff 输入合同，要么让成本与 ledger 全链支持 signed tariff。\n",
-            "3. 单独决定是否新增 realized-current guard、零出口修正和 PV curtailment；这些是产品能力变化，不在本批修复。\n",
+            "## 修复状态与下一步\n",
+        )
+    )
+    if {
+        "NEGATIVE_REALIZED_NET_COST_REJECTED",
+        "NEGATIVE_TARIFF_LEDGER_REJECTED",
+    } & findings.keys():
+        lines.extend(
+            (
+                "1. 统一 ledger 对负 `total_realized_net_cost` 的合同。\n",
+                "2. 明确负进口价是上游禁止还是 ledger 全链支持。\n",
+            )
+        )
+    else:
+        lines.append(
+            "- 有限负进口价、负进口成本和负日净成本已由 ledger 保留并与独立 oracle 对账；没有裁零或取绝对值。\n"
+        )
+    lines.extend(
+        (
+            "- 下一批可单独设计零上网修正与 PV curtailment；本批没有实现该能力，也没有改变套利或预测动作。\n",
             "## 解释边界\n",
-            "- `FAIL` 是当前软件合同或独立不变量的可复现问题；本 Campaign 未修改冻结核心。\n",
+            "- `FAIL` 是当前软件合同或独立不变量的可复现问题；Campaign 本身只记录证据。\n",
             "- `LIMITATION` 是现有策略/产品能力边界，不等于计算错误，也不能包装为 PASS。\n",
             "- 所有结果均为固定仿真；不是 PCS/BMS、HIL、现场保护或实时控制证据。\n",
         )
