@@ -22,13 +22,22 @@ def _require_non_negative_finite(value: object, field_name: str) -> float:
     return normalized
 
 
+def _require_finite(value: object, field_name: str) -> float:
+    if isinstance(value, bool) or not isinstance(value, int | float):
+        raise TypeError(f"{field_name} must be a number")
+    normalized = float(value)
+    if not isfinite(normalized):
+        raise ValueError(f"{field_name} must be finite")
+    return normalized
+
+
 @dataclass(frozen=True, slots=True)
 class ExtendedEconomicOutcomeInput:
     """Caller-owned accounting components and already-valued terminal evidence.
 
-    All scalar components are already-reduced non-negative costs or revenue for
-    a caller-defined horizon. The contract has no traces or tariff inputs from
-    which any component could be recalculated.
+    Import cost is signed to preserve finite negative import prices. Export
+    revenue and degradation cost remain non-negative. The contract has no
+    traces or tariff inputs from which any component could be recalculated.
     """
 
     realized_import_cost: float
@@ -44,11 +53,12 @@ class ExtendedEconomicOutcomeInput:
             raise TypeError(
                 "terminal_energy_value_evidence must be a TerminalEnergyValueEvidence"
             )
-        for field_name in (
+        object.__setattr__(
+            self,
             "realized_import_cost",
-            "realized_export_revenue",
-            "battery_degradation_cost",
-        ):
+            _require_finite(self.realized_import_cost, "realized_import_cost"),
+        )
+        for field_name in ("realized_export_revenue", "battery_degradation_cost"):
             object.__setattr__(
                 self,
                 field_name,
@@ -82,8 +92,12 @@ class ExtendedEconomicOutcomeEvidence:
             raise ValueError(
                 "terminal_energy_value_evidence must preserve exact source identity"
             )
-        for field_name in (
+        object.__setattr__(
+            self,
             "realized_import_cost",
+            _require_finite(self.realized_import_cost, "realized_import_cost"),
+        )
+        for field_name in (
             "realized_export_revenue",
             "battery_degradation_cost",
             "terminal_energy_value",

@@ -54,9 +54,10 @@ python -m examples.virtual_home_storage_defect_campaign.campaign \
 ```
 
 It targets 18 gaps left after Campaigns B/C/D, records cross-contract failures
-and strategy limitations without changing frozen core behavior, and exports a
-machine-readable matrix plus CSV/JSON evidence. See the
-[Chinese defect-campaign guide](docs/learning/VIRTUAL_HOME_STORAGE_DEFECT_CAMPAIGN_GUIDE.md).
+and strategy limitations, and exports a machine-readable matrix plus CSV/JSON
+evidence. See the
+[Chinese defect-campaign guide](docs/learning/VIRTUAL_HOME_STORAGE_DEFECT_CAMPAIGN_GUIDE.md)
+and the [signed-ledger contract](docs/learning/SIGNED_ECONOMIC_LEDGER_CONTRACT.md).
 
 ## Development
 

@@ -99,10 +99,17 @@ def test_zero_realized_import_cost_is_valid() -> None:
     assert outcome.net_economic_cost == pytest.approx(-5.13)
 
 
+def test_negative_realized_import_cost_remains_signed() -> None:
+    outcome = _calculate(-1.05, _terminal_evidence(terminal_soc=0.20))
+
+    assert outcome.realized_import_cost == -1.05
+    assert outcome.net_economic_cost == -1.05
+
+
 @pytest.mark.parametrize(
     ("realized_import_cost", "exception"),
     (
-        (-0.01, ValueError),
+        (float("-inf"), ValueError),
         (float("nan"), ValueError),
         (float("inf"), ValueError),
         (True, TypeError),

@@ -116,10 +116,19 @@ def test_terminal_value_lowers_adjusted_cost_and_negative_cost_is_valid() -> Non
     assert with_terminal_value.adjusted_net_economic_cost == pytest.approx(-3.13)
 
 
+def test_signed_import_cost_remains_signed_through_extended_outcome() -> None:
+    outcome = _calculate(-1.05, 0.40, 0.15, _terminal_evidence(0.20))
+
+    assert outcome.realized_import_cost == -1.05
+    assert outcome.adjusted_net_economic_cost == pytest.approx(-1.30)
+
+
 @pytest.mark.parametrize(
     ("field_name", "value", "exception"),
     (
-        ("realized_import_cost", -0.01, ValueError),
+        ("realized_import_cost", float("-inf"), ValueError),
+        ("realized_export_revenue", -0.01, ValueError),
+        ("battery_degradation_cost", -0.01, ValueError),
         ("realized_export_revenue", float("nan"), ValueError),
         ("battery_degradation_cost", float("inf"), ValueError),
         ("realized_import_cost", True, TypeError),

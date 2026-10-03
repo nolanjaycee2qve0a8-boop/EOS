@@ -4,6 +4,11 @@
 能量和成本复算寻找软件合同不一致与策略能力边界。它只运行模拟，不修改冻结核心，
 也不代表实物、HIL、PCS/BMS 或现场控制验证。
 
+本页第 1、2 项保留 Campaign 提交 `bedd238245709bbc91c8372580e0f8bdc9bb42c4`
+发现缺陷时的原始解释。后续有符号账本修复已让这两类场景通过；当前合同和修复证据见
+[`SIGNED_ECONOMIC_LEDGER_CONTRACT.md`](SIGNED_ECONOMIC_LEDGER_CONTRACT.md)。重新运行
+Campaign 时，它们应显示为 PASS，原始修复前输出仍作为历史证据保留。
+
 ## 运行
 
 ```bash
@@ -96,11 +101,11 @@ idle，6 kW 全部由电网供给，尽管 SOC=100%。这同样说明动作依�
 decision/provenance/feasible/handoff/Simulator identity 都通过。本轮没有发现
 Simulator 电池或 Grid 算术违例。
 
-## 下一步建议
+## 修复后的下一步建议
 
-1. 先修复负的日净成本 ledger 合同不一致，并新增最小回归；
-2. 明确负进口价是上游禁止还是 ledger 全链支持；
-3. 再分别决定 realized-current guard、零出口修正、PV curtailment 和 grid import
+1. 保留负日净成本和有限负进口价的最小回归与独立复算；
+2. 单独设计零出口修正与 PV curtailment 的最小合同；
+3. 再分别决定 realized-current guard、纯价格套利和 grid import
    limit 是否属于下一产品范围。
 
-这些建议都涉及冻结核心或新增产品能力，本 Campaign 只提供复现与证据，不实施修复。
+有符号账本修复没有实现这些剩余能力；Campaign 继续只提供模拟复现与证据。
