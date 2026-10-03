@@ -36,6 +36,16 @@ See the [Chinese teaching guide](docs/learning/VIRTUAL_HOME_STORAGE_GUIDE.md) fo
 explicit fixture approval, power limits, expiry and ACK mismatch. Outputs separate
 virtual execution from scripted observations; they are not real device measurements.
 
+Run the complementary 24-hour simulated household example:
+
+```bash
+python -m examples.virtual_home_storage_day.demo --output-dir /tmp/eos-virtual-home-day
+```
+
+It reuses the existing Residential EMS reference runner and produces linked PV,
+load, battery, grid import/export and SOC curves plus Chinese hourly decision
+records. See the [24-hour Chinese guide](docs/learning/VIRTUAL_HOME_STORAGE_DAY_GUIDE.md).
+
 ## Development
 
 EOS requires Python 3.12.
