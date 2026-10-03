@@ -59,6 +59,19 @@ evidence. See the
 [Chinese defect-campaign guide](docs/learning/VIRTUAL_HOME_STORAGE_DEFECT_CAMPAIGN_GUIDE.md)
 and the [signed-ledger contract](docs/learning/SIGNED_ECONOMIC_LEDGER_CONTRACT.md).
 
+Run the explicit opt-in, simulation-only Zero Export curtailment lesson:
+
+```bash
+python -m examples.virtual_home_storage_zero_export.demo \
+  --output-dir /tmp/eos-zero-export-opt-in
+```
+
+The default runners remain unchanged. The lesson previews the existing virtual
+battery physics, keeps PV availability immutable, and emits separate utilized
+and curtailed PV evidence before forming a corrected Grid result. See the
+[minimal design](docs/learning/ZERO_EXPORT_CURTAILMENT_MINIMAL_DESIGN.md) and
+[validation matrix](docs/learning/ZERO_EXPORT_CURTAILMENT_VALIDATION_MATRIX.md).
+
 ## Development
 
 EOS requires Python 3.12.
