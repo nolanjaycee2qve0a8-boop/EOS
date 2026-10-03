@@ -1,10 +1,14 @@
-# 零上网与 PV 弃光最小设计（待评审，不含实现）
+# 零上网与 PV 弃光最小合同及隔离 opt-in 实现
 
 ## 1. 范围与目标
 
 本设计承接缺陷 Campaign 的 S09：`export_limit=0`、PV=10 kW、负载=0、SOC=100%
 时，现有日链仍输出 10 kW 上网。本轮只定义一个虚拟仿真合同和验证矩阵，不修改
 策略、feasibility、handoff、Simulator、runner 或设备接口。
+
+经评审确认后，合同已在
+`examples/virtual_home_storage_zero_export/correction.py` 作为隔离、显式 opt-in 示例
+实现。默认 runner 和本文件分析的现有生产合同仍未修改。
 
 目标是在每个显式仿真步内：
 
@@ -34,7 +38,7 @@ charge，也不能为吸收 PV 而增加源请求。`ActuationHandoffResult` 又
 feasible action/power 完全一致。为本功能放宽它们会改变既有策略与 handoff 语义，超出
 最小范围。
 
-因此建议第一版采用 **curtailment-only**：不修改电池 action 或功率，只在电池虚拟物理
+因此第一版采用 **curtailment-only**：不修改电池 action 或功率，只在电池虚拟物理
 结果已知后减少 PV 实际利用量。未来若产品要求“先额外充电、再弃光”，应另立 battery
 correction 合同和审批，不在本设计中暗含。
 
@@ -46,20 +50,23 @@ correction 合同和审批，不在本设计中暗含。
 - `GridEnergyBalanceSimulationModel` 使用
   `grid = load + battery - pv`，其中 Grid 正为进口、负为出口；电池正为充电、负为放电。
 
-后续实现应新增独立 correction evidence，再由 curtailment-aware PV 模型把
+隔离示例新增独立 correction evidence，再由 curtailment-aware PV 结果把
 `pv_utilized_kw` 写入新的 `PVSimulationResult`。不得改写 daily PV curve、原
 `PVSimulationInput`、历史 decision/context 或 Battery result。
 
-## 3. 建议的最小合同
+## 3. 已实现的最小合同
 
-名称仅用于设计评审，尚未冻结：
+示例实现采用以下合同：
 
 ```text
 ZeroExportCurtailmentInput
   exact_zero_export_feasibility
+  exact_expected_provenance          # caller 所属策略/decision 的 exact lineage
+  exact_source_handoff               # actuation 必须属于本 source step
   exact_pv_input                    # available PV 与 step identity
   exact_load_result                 # 虚拟实际负载
   exact_battery_result              # 现有 SOC/效率/功率约束后的虚拟实际功率
+  exact_grid_input                   # exact step identity；不改写 requested 值
   export_limit_kw                   # 有限非负；0 表示零上网
   curtailment_permission            # caller 显式批准或禁止
 
@@ -74,6 +81,7 @@ ZeroExportCurtailmentEvidence
   export_limit_kw
   status                            # SATISFIED / REJECTED
   reason_code
+  *_energy_kwh                      # available/utilized/curtailed/load/battery/grid
 ```
 
 所有 source/result 必须共享 exact `SimulationStepIdentity`；输入和输出 immutable、
@@ -86,11 +94,18 @@ load shedding。`battery_actual_power_kw` 必须等于 exact battery result，�
 - `WITHIN_EXPORT_LIMIT`：无需弃光；
 - `PV_CURTAILED_TO_EXPORT_LIMIT`：显式批准后弃光；
 - `CURTAILMENT_NOT_AUTHORIZED`：需要弃光但 caller 未批准；
-- `NON_PV_EXPORT_CANNOT_BE_CORRECTED`：即使 PV 利用为零，电池放电仍导致超限出口；
-- `SOURCE_FACT_MISMATCH`：identity、数值或 lineage 不一致，在构造/求值时拒绝。
+- `NON_PV_EXPORT_CANNOT_BE_CORRECTED`：即使 PV 利用为零，电池放电仍导致超限出口。
+
+identity、数值或 lineage 不一致在 input/evidence 构造时直接拒绝，不生成伪造的业务
+reason code。
 
 `REJECTED` 证据只是 fail-closed 结果，不得继续创建该步的 PV/Grid result、handoff 或
 设备命令。虚拟 Battery result 可作为求值输入，但不代表真实电池已经动作。
+
+`OptInZeroExportStepExecutor` 先通过现有纯电池/负载模型生成不可变 preview；只有
+correction 为 `SATISFIED` 才用 exact preview 组装完整 `SimulationExecutionTrace`。
+`REJECTED` 返回 `simulation_trace=None`，caller 无 next SOC、progression 或 ledger
+可以提交。
 
 ## 4. 独立公式与不变量
 
@@ -137,6 +152,12 @@ abs(B_discharge) <= min(P_discharge_max,
 
 correction 只读取 `B`，不重新应用这些公式，也不能用理论 headroom 替换实际结果。
 
+功率与能量对账使用公开常量 `POWER_TOLERANCE_KW=1e-9` 和
+`ENERGY_TOLERANCE_KWH=1e-9`。该容差只接受边界浮点残差；超过容差的出口必须实际
+弃光或拒绝，不能用容差吞掉。`BΔt` 是现有 Simulator 公共电气功率边界上的有符号
+交换能量；电池内部充放电效率只体现在既有 Battery next-SOC 中，本示例不声称真实
+AC/DC 拓扑或另加变流损耗。
+
 ## 5. S09 最小复现
 
 固定输入：`A=10`、`L=0`、`SOC=100%`、`E=0`。即使策略请求充电，现有电池物理
@@ -161,13 +182,13 @@ G = 0 + 0 - 0 = 0 kW
 - 不定义 inverter、MPPT、无功、母线、电流环、PWM、保护、通信或现场 ACK；
 - 不把模拟 `pv_curtailed` 描述为设备实测或真实电站弃光。
 
-## 7. 实施前需要确认的取舍
+## 7. 已确认的实现取舍
 
-1. **第一版纠偏策略**：建议采用 curtailment-only；“优先额外充电再弃光”会改变
+1. **第一版纠偏策略**：采用 curtailment-only；“优先额外充电再弃光”会改变
    FeasibleDecision/handoff 语义，应另立范围。
-2. **无弃光授权时的行为**：建议整步 fail closed，不生成 PV/Grid 结果；另一选择是保留
-   violation evidence 后继续模拟超限出口，但这不能称为零上网执行。
-3. **`ZeroExportFeasibility` 的角色**：建议保留为 lineage/precheck，并要求 correction
+2. **无弃光授权时的行为**：整步 fail closed，不生成 PV/Grid 结果；只保留 rejection
+   evidence，不能称为零上网执行。
+3. **`ZeroExportFeasibility` 的角色**：保留为 lineage/precheck，并要求 correction
    独立按 exact Battery/PV/Load 结果证明最终约束；不能只信 Boolean。
-4. **`export_limit_kw > 0`**：建议同一合同统一支持，边界为 `G >= -E`，避免为零值写
+4. **`export_limit_kw > 0`**：同一合同统一支持，边界为 `G >= -E`，避免为零值写
    特例算法。

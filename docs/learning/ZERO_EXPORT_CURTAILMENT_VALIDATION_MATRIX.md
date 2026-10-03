@@ -1,6 +1,6 @@
 # 零上网与弃光验证矩阵（设计阶段）
 
-本矩阵用于后续实现验收，目前不对应生产代码。符号固定为：PV available `A`、PV
+本矩阵用于隔离 opt-in 示例验收，不对应默认生产 runner。符号固定为：PV available `A`、PV
 utilized `U`、curtailed `C`、load `L`、battery actual `B`（正充负放）、grid `G`
 （正进口负出口）、export limit `E`。默认一小时，弃光已授权，所有数值单位为 kW。
 
@@ -29,8 +29,8 @@ utilized `U`、curtailed `C`、load `L`、battery actual `B`（正充负放）�
 2. `G = L + B - U`；
 3. `G >= -E`；
 4. `0 <= U <= A` 且 `C >= 0`；
-5. exact source input、step identity、ZeroExport feasibility、PV input、Load result 和
-   Battery result identity 全部保留；
+5. exact source input、step identity、预期 strategy/decision provenance、handoff/actuation、
+   ZeroExport feasibility、PV input、Load result 和 Battery result identity 全部保留；
 6. 原 PV available、load、battery result、decision/provenance/feasible/handoff 均未改写；
 7. CSV/JSON 分开输出 available/utilized/curtailed/battery/grid/status/reason，并标记
    `SIMULATED`。
@@ -49,4 +49,4 @@ utilized `U`、curtailed `C`、load `L`、battery actual `B`（正充负放）�
 - Simulator 组合测试：curtailment-aware PV result → 现有 Grid balance；
 - 日 runner 回归：弃光已授权时 S09 从 LIMITATION 变为 PASS；确认其他 17 场景、
   纯价格套利和 forecast limitation 分类不变；
-- 静态检查及必要 full regression 只在实现阶段运行，本设计阶段不运行全套。
+- 静态检查及必要 full regression 在本实现阶段按仓库要求运行一次。
