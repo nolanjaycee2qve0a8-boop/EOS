@@ -1,0 +1,66 @@
+# Dynamic constraint closed-loop acceptance — pre-run contract
+
+Baseline: `d80a02872893cb2889c1d5c50a2c14c82917eef4`. This is an independent, test-only acceptance entry. It does not replace or invoke `DailySimulationRunner`. The existing Zero Export feasibility contract records a fact but does not dispatch or curtail; Campaign A–F and existing strategy/grid-charge tests cover their legacy/abstract paths, not the new `time_energy` physics. Only this new entry couples scheduled requests to new-module SOC feedback.
+
+## Sign, priority, and capability
+
+Battery power is positive for charge and negative for discharge. Grid power is positive for import and negative for export: `grid = served load + actual battery - used PV`. `BatteryParameters.reserve_soc=0.2` is the physical hard lower SOC; the time-energy module enforces it and the upper bound 1.0. A scenario's `reserve_target_soc` is a soft management target, not an instantaneous physical floor. A target above present SOC creates a reported target gap until there is charging opportunity and enough time. Priority: physical SOC/power limits; explicit external facts and energy conservation; scheduled grid-charge permission; soft reserve target; scheduled self-consumption/Zero Export request. No lower-priority objective may rewrite measured actual, PV, load, or grid energy. Conflicts retain a reason and unmet quantity.
+
+The independent probe uses the existing simple imbalance/reserve policy shape, extended only for explicit target and grid-charge permission: PV surplus requests charge up to 3 kW; otherwise, if below target and grid charging is permitted, request charge up to 3 kW; otherwise, load deficit requests discharge up to 3 kW only while above target. A request is computed at 0 and 3600 simulated seconds and held until the next tick. An external event changes the physical input and constraints at its exact timestamp but cannot trigger an extra control decision. Permission changing between ticks can therefore expose held-request grid charging while prohibited; the audit reports it, not hide it. A separate 1800-second control run is a different strategy schedule, not a physics equivalence case.
+
+Zero Export here is a **periodic controller objective**, not an ideal instantaneous limiter. The physics has no PV curtailment or load shedding. Export following a PV/load event, charge-power saturation, or full SOC remains measured. Strict Zero Export means export peak, duration, and energy must all be zero within numerical tolerance whenever enabled. The verdict distinguishes `NOT_APPLICABLE` (not enabled), `FAIL_CONTROL_DELAY` (held request after an event) and `FAIL_UNSUPPORTED` (insufficient charge headroom with no curtailment); the exported amount is retained as the unmet constraint. This does not imply a hardware actuator or certified Zero Export response. Unserved load is 0 only under this grid-connected, unlimited-grid assumption, not evidence of islanded reliability. Curtailed PV is 0 because the model has no curtailment capability. Charging provenance uses a declared accounting convention: PV serves load first, then battery; grid-to-battery kW is `max(0, actual_charge - max(PV-load,0))`. This is not a physical metering claim.
+
+## Cases and predeclared expected behavior
+
+All cases run `[0,7200)` seconds, 10 kWh, 3 kW charge/discharge limits, 0.95 efficiencies, hard SOC floor 0.2, control period 3600 seconds, external facts right-continuous. For every case, physical steps 3600/60/15 seconds share *identical* control and event times. No slice may cross an event, control tick, or SOC boundary.
+
+| Case | Event and expected behavior before execution |
+| --- | --- |
+| steady_zero_export | PV 2/load 1 kW, initial SOC .5, target .2, no grid charge, Zero Export on: +1 kW charge request, no export; strict objective PASS. |
+| pv_jump | At 1800 s PV 0→5 with load 2: held discharge request persists until 3600; short export must be separately integrated; periodic Zero Export fails, not retrospectively clamped. |
+| load_drop | At 1800 s load 3→0 while PV stays 3: prior zero request persists; export appears until next decision. |
+| full_battery | Initial SOC 1, PV 5/load 1: charge request cannot be delivered; with no curtailment, export 4 kW persists and strict Zero Export is unsupported. |
+| soc_floor | Initial SOC .21, PV 0/load 3, target .2: discharge reaches hard floor inside first control period; actual becomes zero, import increases; SOC never crosses .2. |
+| permission_mid_tick | Initial SOC .3, PV 0/load 1, target .8; grid charge enabled at 0 then disabled at 1800: held charge continues until 3600, so prohibited grid-to-battery energy must be reported as failure. |
+| permission_on_tick | Same, but permission disabled at 3600: no prohibited grid-to-battery energy after the tick; normal grid import for load remains allowed. |
+| target_switch | Initial SOC .5, PV 0/load 1, target .2→.8 at 1800: the old request remains held to 3600, then a permitted charge request begins; below-target gap is reported and is not a hard-SOC violation. |
+| simultaneous | At 1800 s, PV 0→5, load 1→0, permission on→off, target .8→.9, Zero Export off→on: all new facts apply together, one event split, no decision until 3600; export from surplus/power limit is visible; grid-charge permission is audited by actual provenance. |
+
+## Acceptance limits, defined before running
+
+Control times/counts are exact integer seconds: 2 decisions at 0 and 3600, no extra event decision. Event and control boundaries have `1e-9 s` tolerance; power balance `1e-10 kW`; SOC and cross-step SOC `1e-9`; energy conservation/cross-step total `4e-11 kWh × duration-hours` (two hours: `8e-11 kWh`). Segment conservation is checked per physical slice against duration-scaled tolerance with a one-second floor. Peak export or prohibited grid charging over `1e-10 kW`, or integrated energy over `8e-11 kWh`, is a strict-constraint failure, not a test-harness failure. SOC must remain in `[0.2,1]`; actual power within 3 kW. Changing record/display only must preserve all physical outcomes and decision counts. Changing control period may change outcomes but cannot break conservation or physical bounds.
+
+The ledger must retain request, actual, load, PV, grid import/export, grid-to-battery charge, curtailment=0, unserved load=0 under grid-connected assumption, storage change, and charge/discharge conversion loss. The trace and summary must distinguish test execution PASS, objective PASS/FAIL, and unsupported capabilities. Tests passing does not convert a failed Zero Export objective into a product capability.
+
+## Results
+
+Initial focused run of `python -m pytest tests/unit/ems_simulator/test_dynamic_constraint_probe.py --basetemp <fresh-dir> -p no:cacheprovider -q` returned exit `1`: `3 failed, 13 passed in 4.28s`. The three failures were the new ledger's negative discharge-conversion-loss value (`pv_jump`, `soc_floor`, `target_switch`). The physical module's SOC and energy assertions before that line were satisfied. Root cause was a sign error in the acceptance ledger, not a demonstrated physics defect: discharge loss must be `battery_delivered_kwh - storage_delta_kwh` (e.g. `-1 - (-1.0526316)=+0.0526316`). The ledger formula was corrected without touching production physics. This failure remains part of the record.
+
+The final independent probe finished with exit `0` and wrote `summary.csv`, `decisions.csv`, a full per-physical-slice `ledger.csv`, and one grid/SOC SVG time curve per case at the 60-second physical step to `C:\Users\22908\Desktop\eos-codex\evidence-dynamic-constraints-final-results-20261011`. Each row retains request and actual battery power, signed grid power, separate import/export, grid-to-battery allocation, curtailed PV, unserved load, storage change, conversion loss, and end-of-slice reserve-target gap. The SVGs visualize measured signed grid power; no negative value was clipped. The earlier `evidence-dynamic-constraints-results-20261011` directory is retained as a pre-review snapshot, not the final summary.
+
+| Case | Strict Zero Export: peak / duration / violating energy | Prohibited grid-to-battery energy | End target gap | Explanation |
+| --- | --- | ---: | ---: | --- |
+| Steady surplus | PASS: 0 kW / 0 s / 0 kWh | 0 kWh | 0 kWh | Scheduled +1 kW charge absorbs the surplus. |
+| PV jump | FAIL_CONTROL_DELAY: 5 kW / 1800 s / 2.5 kWh | 0 kWh | 0 kWh | Prior -2 kW request is held until 3600 s; no instantaneous export limiter. |
+| Load drop | FAIL_CONTROL_DELAY: 3 kW / 1800 s / 1.5 kWh | 0 kWh | 0 kWh | Prior zero request is held after load falls. |
+| Full battery | FAIL_UNSUPPORTED: 4 kW / 7200 s / 8 kWh | 0 kWh | 0 kWh | SOC=1 prevents charge; no PV curtailment or other export sink exists. |
+| SOC floor | PASS: 0 kW / 0 s / 0 kWh | 0 kWh | 0 kWh | Discharge stops at SOC=.2 after 114 s; the grid supplies remaining load. |
+| Permission off mid-tick | NOT_APPLICABLE | **1.5 kWh FAIL** | 2.15 kWh | Held +3 kW charge continues from 1800 to 3600 s after permission falls. |
+| Permission off at tick | NOT_APPLICABLE | 0 kWh PASS | 2.15 kWh | At 3600 s request becomes 0; ordinary grid purchase still serves load. |
+| Reserve target raised mid-tick | NOT_APPLICABLE | 0 kWh, permission rule not applicable | 1.202632 kWh | Target changes at 1800 s, but first new charge decision is at 3600 s. A higher soft target is not an instantaneous hard floor. |
+| Simultaneous event | FAIL_UNSUPPORTED: 5 kW / 5400 s / 3.736842 kWh | 0 kWh | 0 kWh | PV/load/permission/target/Zero Export all change at 1800 s; held request, 3 kW charge limit and eventual full SOC leave surplus. |
+
+For all nine cases, the 3600-, 60-, and 15-second physical-step variants have exactly two decisions (0 and 3600 s) and their SOC/energy totals meet the predeclared cross-step limits. External events at 1800 s and the SOC-floor event at 114 s are separately represented; no event creates a control decision. Changing only record/display periods leaves every decision and physical slice unchanged. Changing control to 1800 s in the PV-jump case produces four decisions and a different outcome, correctly classified as a strategy schedule change, not an integration error.
+
+All 27 main scenario/step combinations satisfy slice-level power/energy balance, SOC and power limits, and nonnegative conversion loss under the declared 0.95 charge/discharge efficiencies. PV curtailment is **not implemented**, so its ledger value of 0 is a capability limitation, not proof that curtailment was unnecessary. Unserved load is 0 only because the experiment assumes an unlimited connected grid; islanding and load shedding are **not covered**. Grid-to-battery allocation is the stated accounting convention, not measured power provenance. These are simulation findings, not real-time Zero Export, BMS/PCS interlock, or site-safety evidence.
+
+Actual validation with Python `3.12.14` and pytest `8.4.2`:
+
+- Final focused (after independent review): `python -m pytest tests/unit/ems_simulator/test_dynamic_constraint_probe.py --basetemp <fresh-dir> -p no:cacheprovider -q` → `16 passed in 1.05s`, exit `0`.
+- Final related new-physics, prior closed-loop, abstract Zero Export and Campaign A tests: `python -m pytest <five explicit test files> --basetemp <fresh-dir> -p no:cacheprovider -q` → `58 passed in 9.61s`, exit `0`; `final-related-stdout.log`, stderr and exit at `C:\Users\22908\Desktop\eos-codex\evidence-dynamic-constraints-gates-20261011`. The prior `58 passed in 8.97s` was pre-review.
+- Final full project (including Campaign A–F) with a fresh, repository-external basetemp and cache provider disabled: `python -m pytest --basetemp <fresh-dir> -p no:cacheprovider -q` → `2850 passed in 742.47s (0:12:22)`, exit `0`; `final-full-stdout.log`, `final-full-stderr.log`, manifest and exit file in the same evidence directory. The prior `2850 passed in 615.13s` is retained as a pre-review run, not the final candidate evidence. Campaign A–F was **included** in the final suite, not independently re-run or separately counted.
+- `ruff check .` → PASS, exit `0`; `ruff format --check .` → `840 files already formatted`, exit `0`; `mypy tools/dynamic_constraint_probe.py` → `Success: no issues found in 1 source file`, exit `0`; `git diff --check` → exit `0`.
+
+Legacy-path boundary: `ems_simulator/demo.py` still invokes `DailySimulationRunner`; the Residential Campaign modules do not import `simulate_time_energy`. Existing `ems_strategy/zero_export.py` supplies an identity-preserving feasibility fact only; it does not alter power. Existing economic/grid-charge Campaign and strategy tests protect their respective historical paths, but only this new independent probe asserts the new time/energy physics under these dynamic switches. Full-suite success does not make the strict constraint failures above pass.
+
+Recommended next step: design an explicit execution-layer fast interlock for permission revocation and a separately specified PV-curtailment/export-limiting capability, with response-delay and residual-energy limits. Do not post-process negative grid power to zero. No such layer or hardware behavior is implemented in this round. Recovery-package and independent-review outcomes are recorded separately once completed.
