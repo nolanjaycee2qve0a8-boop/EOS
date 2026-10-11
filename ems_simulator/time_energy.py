@@ -5,6 +5,7 @@ and request as explicit intervals. Cadences never sample or schedule commands.
 """
 
 from dataclasses import dataclass
+from math import ulp
 
 from ems_simulator.input import BatteryParameters
 from simulator.validation import (
@@ -168,12 +169,16 @@ def simulate_time_energy(source_input: TimeEnergyInput) -> TimeEnergyResult:
             else:
                 seconds_to_boundary = physical_end - cursor
 
-            actual = limited_power if seconds_to_boundary > 0 else 0.0
-            delivery_end = (
-                min(physical_end, cursor + seconds_to_boundary)
-                if actual
-                else physical_end
+            # Absolute simulation timestamps cannot represent a positive duration
+            # smaller than their ULP. Do not invent delivered energy for such a
+            # remainder; keep its SOC unchanged and deliver zero for this step.
+            boundary_time = cursor + seconds_to_boundary
+            actual = (
+                limited_power
+                if seconds_to_boundary > 0 and boundary_time > cursor
+                else 0.0
             )
+            delivery_end = min(physical_end, boundary_time) if actual else physical_end
             if delivery_end <= cursor:
                 raise ValueError("energy slice cannot advance simulation time")
 
@@ -197,6 +202,34 @@ def simulate_time_energy(source_input: TimeEnergyInput) -> TimeEnergyResult:
                 )
             else:
                 next_soc = soc
+
+            # If the boundary is inside this step (or indistinguishable from its
+            # end at the timestamp's one-ULP resolution), account for the *actual*
+            # slice duration before setting the exact boundary SOC. This prevents
+            # a sub-ULP SOC residue from requesting a non-advancing second slice.
+            time_resolution_seconds = max(ulp(cursor), ulp(physical_end))
+            reaches_boundary = bool(actual) and seconds_to_boundary <= (
+                physical_end - cursor + time_resolution_seconds
+            )
+            if reaches_boundary:
+                battery_factor = (
+                    parameters.charge_efficiency
+                    if actual > 0
+                    else 1.0 / parameters.discharge_efficiency
+                )
+                accounted_kwh = abs(actual) * duration_hours * battery_factor
+                time_quantum_kwh = (
+                    abs(actual)
+                    * time_resolution_seconds
+                    / SECONDS_PER_HOUR
+                    * battery_factor
+                )
+                rounding_kwh = ulp(available_kwh) + ulp(accounted_kwh)
+                if abs(accounted_kwh - available_kwh) > (
+                    time_quantum_kwh + rounding_kwh
+                ):
+                    raise ValueError("SOC boundary energy exceeds time resolution")
+                next_soc = 1.0 if actual > 0 else parameters.reserve_soc
 
             grid_power = interval.load_power_kw + actual - interval.pv_power_kw
             slices.append(

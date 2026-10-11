@@ -1,5 +1,7 @@
 """Analytical checks for explicit simulation time and delivered energy."""
 
+from math import inf, nextafter, ulp
+
 import pytest
 
 from ems_simulator.input import BatteryParameters
@@ -116,6 +118,129 @@ def test_soc_lower_event_stops_delivery_at_reserve() -> None:
     assert result.battery_delivered_energy_kwh == pytest.approx(-0.5)
     assert result.grid_import_energy_kwh == pytest.approx(1.5)
     assert result.final_soc == 0.2
+
+
+def test_idle_then_discharge_reaches_lower_soc_without_zero_duration_slice() -> None:
+    battery = BatteryParameters(1.0, 10.0, 10.0, 0.8, 0.9, 0.0)
+    result = evaluate(
+        (
+            PowerInterval(0.0, 900.0, 0.0, 0.0, 0.0),
+            PowerInterval(900.0, 1800.0, 0.0, 0.0, -5.0),
+        ),
+        battery=battery,
+        soc=1.0,
+    )
+
+    assert [(item.start_seconds, item.end_seconds) for item in result.slices] == [
+        (0.0, 900.0),
+        (900.0, 1548.0),
+        (1548.0, 1800.0),
+    ]
+    assert [item.actual_battery_power_kw for item in result.slices] == [
+        0.0,
+        -5.0,
+        0.0,
+    ]
+    assert result.battery_delivered_energy_kwh == pytest.approx(-0.9)
+    assert result.grid_export_energy_kwh == pytest.approx(0.9)
+    assert result.final_soc == 0.0
+    for item in result.slices:
+        elapsed_hours = (item.end_seconds - item.start_seconds) / 3600.0
+        if item.actual_battery_power_kw < 0:
+            expected_soc = item.soc_before + (
+                item.actual_battery_power_kw
+                * elapsed_hours
+                / (battery.discharge_efficiency * battery.capacity_kwh)
+            )
+        else:
+            expected_soc = item.soc_before
+        assert item.soc_after == pytest.approx(expected_soc, abs=1e-12)
+
+
+@pytest.mark.parametrize("direction", ["charge", "discharge"])
+@pytest.mark.parametrize("boundary_offset", [-1, 0, 1])
+def test_soc_boundary_at_interval_edge_and_one_ulp_either_side_conserves_energy(
+    direction: str, boundary_offset: int
+) -> None:
+    charge = direction == "charge"
+    battery = BatteryParameters(1.0, 10.0, 10.0, 0.8, 0.9, 0.0)
+    power = 5.0 if charge else -5.0
+    initial_soc = 0.0 if charge else 1.0
+    exact_event = 1800.0 if charge else 1548.0
+    event = (
+        nextafter(exact_event, -inf)
+        if boundary_offset < 0
+        else nextafter(exact_event, inf)
+        if boundary_offset > 0
+        else exact_event
+    )
+    end = 2100.0 if charge else 1800.0
+    result = evaluate(
+        (
+            PowerInterval(0.0, 900.0, 0.0, 0.0, 0.0),
+            PowerInterval(900.0, event, 0.0, 0.0, power),
+            PowerInterval(event, end, 0.0, 0.0, power),
+        ),
+        battery=battery,
+        soc=initial_soc,
+    )
+
+    assert result.final_soc == pytest.approx(1.0 if charge else 0.0, abs=1e-15)
+    assert result.battery_delivered_energy_kwh == pytest.approx(
+        1.25 if charge else -0.9, abs=1e-15
+    )
+    previous_end = 0.0
+    for item in result.slices:
+        assert item.start_seconds == previous_end
+        assert item.end_seconds > item.start_seconds
+        hours = (item.end_seconds - item.start_seconds) / 3600.0
+        factor = (
+            battery.charge_efficiency
+            if item.actual_battery_power_kw > 0
+            else 1.0 / battery.discharge_efficiency
+            if item.actual_battery_power_kw < 0
+            else 0.0
+        )
+        accounted_kwh = item.actual_battery_power_kw * hours * factor
+        soc_energy_kwh = (item.soc_after - item.soc_before) * battery.capacity_kwh
+        time_quantum_kwh = (
+            abs(item.actual_battery_power_kw)
+            * max(ulp(item.start_seconds), ulp(item.end_seconds))
+            / 3600.0
+            * factor
+        )
+        rounding_kwh = ulp(abs(accounted_kwh)) + ulp(abs(soc_energy_kwh))
+        assert abs(accounted_kwh - soc_energy_kwh) <= (time_quantum_kwh + rounding_kwh)
+        previous_end = item.end_seconds
+    assert previous_end == end
+
+
+@pytest.mark.parametrize(
+    ("initial_soc", "power"),
+    [(nextafter(1.0, 0.0), 5.0), (nextafter(0.0, 1.0), -5.0)],
+)
+def test_near_boundary_remainder_is_limited_to_one_time_quantum(
+    initial_soc: float, power: float
+) -> None:
+    result = evaluate(
+        (
+            PowerInterval(0.0, 900.0, 0.0, 0.0, 0.0),
+            PowerInterval(900.0, 1800.0, 0.0, 0.0, power),
+        ),
+        battery=BatteryParameters(1.0, 10.0, 10.0, 0.8, 0.9, 0.0),
+        soc=initial_soc,
+    )
+
+    time_quantum_seconds = max(ulp(900.0), ulp(1800.0))
+    assert abs(result.battery_delivered_energy_kwh) <= (
+        abs(power) * time_quantum_seconds / 3600.0
+    )
+    if result.slices[-1].actual_battery_power_kw == 0.0:
+        assert result.slices[-1].soc_after == result.slices[-1].soc_before
+    else:
+        assert result.slices[-1].end_seconds - result.slices[-1].start_seconds <= (
+            time_quantum_seconds
+        )
 
 
 def test_repeated_evaluation_and_wall_clock_pause_do_not_accumulate_twice() -> None:
