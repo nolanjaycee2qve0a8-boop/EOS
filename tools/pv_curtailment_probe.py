@@ -7,11 +7,14 @@ injection cap and the battery request passed to the frozen physics function.
 
 import argparse
 import csv
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field, replace
+from math import fsum
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
+from ems_simulator.input import BatteryParameters
 from ems_simulator.time_energy import (
+    EnergySlice,
     PowerInterval,
     SimulationCadences,
     TimeEnergyInput,
@@ -47,16 +50,20 @@ class CurtailmentSettings:
     # Joint-only: a controlled AC output rise cannot count as already
     # delivered PV.  Later source loss still follows delayed observation.
     guard_controlled_pv_rise: bool = False
+    duration_seconds: int = DURATION_SECONDS
+    battery_parameters: BatteryParameters = field(default_factory=battery)
 
     def __post_init__(self) -> None:
         if type(self.check_period_s) is not int or self.check_period_s <= 0:
             raise ValueError("check period must be a positive integer")
-        if DURATION_SECONDS % self.check_period_s:
+        if type(self.duration_seconds) is not int or self.duration_seconds <= 0:
+            raise ValueError("duration must be a positive integer")
+        if self.duration_seconds % self.check_period_s:
             raise ValueError("check period must divide scenario duration")
-        for field in ("observation_delay_s", "execution_delay_s"):
-            value = getattr(self, field)
+        for field_name in ("observation_delay_s", "execution_delay_s"):
+            value = getattr(self, field_name)
             if type(value) is not int or value < 0:
-                raise ValueError(f"{field} must be a non-negative integer")
+                raise ValueError(f"{field_name} must be a non-negative integer")
         if self.pv_ac_max_kw <= 0 or self.pv_ramp_kw_per_s < 0:
             raise ValueError("PV rating must be positive and ramp non-negative")
         if type(self.strict_startup_observation) is not bool:
@@ -84,7 +91,7 @@ class CurtailmentSettings:
 
     @property
     def export_peak_budget_kw(self) -> float:
-        return self.pv_ac_max_kw + battery().max_discharge_power_kw
+        return self.pv_ac_max_kw + self.battery_parameters.max_discharge_power_kw
 
     @property
     def export_energy_budget_kwh(self) -> float:
@@ -107,6 +114,19 @@ class EMSDecision:
     at: int
     feedback_soc: float
     original_request_kw: float
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicalLedgerPart:
+    """Lossless two-component time; start/end remain local simulation seconds."""
+
+    origin_s: float
+    start_s: float
+    end_s: float
+    actual_battery_kw: float
+    grid_kw: float
+    soc_before: float
+    soc_after: float
 
 
 @dataclass(frozen=True, slots=True)
@@ -140,6 +160,101 @@ class CurtailmentRow:
     prohibited_grid_charge_kwh: float
     storage_delta_kwh: float
     conversion_loss_kwh: float
+    physical_parts: tuple[PhysicalLedgerPart, ...] = ()
+    audit_duration_s: float | None = None
+
+    @property
+    def duration_s(self) -> float:
+        """Audit expansions use local duration, never rounded endpoint subtraction."""
+        return (
+            self.end_s - self.start_s
+            if self.audit_duration_s is None
+            else self.audit_duration_s
+        )
+
+
+def _absolute_slice_groups(
+    slices: tuple[EnergySlice, ...], origin_s: float
+) -> tuple[tuple[EnergySlice, ...], ...]:
+    """Coalesce only unrepresentable endpoints within ONE constant-fact call.
+
+    No slice is discarded; a leading remainder joins its successor and a
+    trailing remainder joins its predecessor. Physics and event times stay put.
+    """
+    groups: list[tuple[EnergySlice, ...]] = []
+    pending: list[EnergySlice] = []
+    for sl in slices:
+        if sl.end_seconds <= sl.start_seconds:
+            raise AssertionError("nonpositive physical slice")
+        pending.append(sl)
+        if origin_s + sl.end_seconds > origin_s + pending[0].start_seconds:
+            groups.append(tuple(pending))
+            pending = []
+    if pending:
+        if not groups:
+            raise AssertionError("physical call has no representable duration")
+        groups[-1] += tuple(pending)
+    return tuple(groups)
+
+
+def physical_audit_rows(rows: tuple[CurtailmentRow, ...]) -> tuple[CurtailmentRow, ...]:
+    """Expand retained parts for peaks/durations/energy, not control or display.
+
+    Absolute endpoints may round together; duration_s is the original positive
+    local duration. These audit records are NOT zero-width state transitions.
+    """
+    expanded: list[CurtailmentRow] = []
+    for row in rows:
+        if not row.physical_parts:
+            expanded.append(row)
+            continue
+        for part in row.physical_parts:
+            duration = part.end_s - part.start_s
+            hours = duration / HOUR_SECONDS
+            charge = (
+                max(
+                    0.0,
+                    part.actual_battery_kw
+                    - max(row.delivered_pv_kw - row.load_kw, 0.0),
+                )
+                * hours
+            )
+            # Capacity is derived from this row only for storage bookkeeping;
+            # exact part SOC-to-energy is supplied below by proportional delta.
+            delta = row.soc_after - row.soc_before
+            stored = (
+                row.storage_delta_kwh * (part.soc_after - part.soc_before) / delta
+                if delta
+                else 0.0
+            )
+            battery_kwh = part.actual_battery_kw * hours
+            expanded.append(
+                replace(
+                    row,
+                    start_s=part.origin_s + part.start_s,
+                    end_s=part.origin_s + part.end_s,
+                    actual_battery_kw=part.actual_battery_kw,
+                    grid_kw=part.grid_kw,
+                    soc_before=part.soc_before,
+                    soc_after=part.soc_after,
+                    available_pv_kwh=row.available_pv_kw * hours,
+                    delivered_pv_kwh=row.delivered_pv_kw * hours,
+                    curtailed_pv_kwh=row.curtailed_pv_kw * hours,
+                    load_kwh=row.load_kw * hours,
+                    battery_kwh=battery_kwh,
+                    import_kwh=max(part.grid_kw, 0.0) * hours,
+                    export_kwh=max(-part.grid_kw, 0.0) * hours,
+                    grid_to_battery_kwh=charge,
+                    prohibited_grid_charge_kwh=charge
+                    if not row.grid_charge_allowed
+                    else 0.0,
+                    storage_delta_kwh=stored,
+                    conversion_loss_kwh=battery_kwh - stored,
+                    physical_parts=(part,),
+                    audit_duration_s=duration,
+                )
+            )
+    return tuple(expanded)
 
 
 @dataclass(frozen=True, slots=True)
@@ -214,7 +329,7 @@ def scenarios() -> dict[str, Case]:
 
 
 def _checks(case: Case, settings: CurtailmentSettings) -> tuple[ExecutionCheck, ...]:
-    check_times = set(range(0, DURATION_SECONDS, settings.check_period_s))
+    check_times = set(range(0, settings.duration_seconds, settings.check_period_s))
     if settings.strict_startup_observation and settings.observation_delay_s:
         # The joint experiment requires a full post-start observation delay;
         # clamping a negative sample time to t=0 would backdate knowledge.
@@ -247,8 +362,10 @@ def _move_cap(current: float, target: float, settings: CurtailmentSettings) -> f
     )
 
 
-def _soc_boundary_seconds(soc: float, request: float) -> float | None:
-    params = battery()
+def _soc_boundary_seconds(
+    soc: float, request: float, params: BatteryParameters | None = None
+) -> float | None:
+    params = battery() if params is None else params
     if request > 0 and soc < 1:
         return (
             (1 - soc)
@@ -281,7 +398,7 @@ def run_curtailment(
     if (
         type(control_period_s) is not int
         or control_period_s <= 0
-        or DURATION_SECONDS % control_period_s
+        or settings.duration_seconds % control_period_s
     ):
         raise ValueError("control period must divide scenario duration")
     expected = 0
@@ -291,16 +408,18 @@ def run_curtailment(
         if fact.pv_kw > settings.pv_ac_max_kw:
             raise ValueError("available PV exceeds explicit AC PV rating")
         expected = fact.end
-    if expected != DURATION_SECONDS:
+    if expected != settings.duration_seconds:
         raise ValueError("facts must cover scenario duration")
 
-    params = battery()
+    params = settings.battery_parameters
     checks = _checks(case, settings)
     effects = {
-        check.effect_at: check for check in checks if check.effect_at < DURATION_SECONDS
+        check.effect_at: check
+        for check in checks
+        if check.effect_at < settings.duration_seconds
     }
-    event_times = {0, DURATION_SECONDS}
-    event_times.update(range(0, DURATION_SECONDS, control_period_s))
+    event_times = {0, settings.duration_seconds}
+    event_times.update(range(0, settings.duration_seconds, control_period_s))
     event_times.update(fact.start for fact in case.segments)
     event_times.update(effects)
     timeline = sorted(event_times)
@@ -326,7 +445,7 @@ def run_curtailment(
     rows: list[CurtailmentRow] = []
     retarget_on_soc = False
 
-    while now < DURATION_SECONDS:
+    while now < settings.duration_seconds:
         # At a simultaneous boundary: external facts become right-continuous,
         # matured observations apply, then the scheduled EMS decision is made.
         at_event = int(now) == now and now in event_times
@@ -437,9 +556,18 @@ def run_curtailment(
             end = min(end, ramp_due_at)
         if output_ramp_due_at is not None:
             end = min(end, output_ramp_due_at)
-        boundary = _soc_boundary_seconds(soc, constrained)
-        if boundary is not None and boundary > 1e-8:
-            end = min(end, now + boundary)
+        # Physics uses local time. Do not round a SOC-boundary duration through
+        # (absolute origin + duration) - origin before giving it to physics.
+        # Return after each existing physical step so the next boundary uses
+        # the actual returned SOC, not a prediction spanning multiple rounded
+        # SOC updates. Scheduled EMS/observation/effect predicates above do not
+        # change: returning physics is not a new control decision.
+        physical_duration = min(end - now, physical_step_s)
+        end = now + physical_duration
+        boundary = _soc_boundary_seconds(soc, constrained, params)
+        if boundary is not None and 1e-8 < boundary < physical_duration:
+            physical_duration = boundary
+            end = now + boundary
         if end <= now:
             raise AssertionError("execution timeline did not advance")
 
@@ -452,31 +580,45 @@ def run_curtailment(
                     record_period_s,
                     display_period_s,
                 ),
-                (PowerInterval(0, end - now, fact.load_kw, delivered_pv, constrained),),
+                (
+                    PowerInterval(
+                        0, physical_duration, fact.load_kw, delivered_pv, constrained
+                    ),
+                ),
                 params,
                 soc,
             )
         )
-        for sl in physical.slices:
-            start_s = now + sl.start_seconds
-            end_s = now + sl.end_seconds
+        for group in _absolute_slice_groups(physical.slices, now):
+            start_s = now + group[0].start_seconds
+            end_s = now + group[-1].end_seconds
             if end_s <= start_s:
-                # The frozen integrator can emit a zero-energy, sub-ULP local
-                # remainder at an exact SOC boundary.  It cannot be represented
-                # as a distinct absolute simulation timestamp or ledger row.
-                if sl.soc_before != sl.soc_after:
-                    raise AssertionError("unrepresentable slice changed SOC")
-                continue
-            hours = (end_s - start_s) / HOUR_SECONDS
-            actual = sl.actual_battery_power_kw
-            grid = sl.grid_power_kw
-            available = fact.pv_kw * hours
-            delivered = delivered_pv * hours
+                raise AssertionError("unrepresentable physical group")
+            local_hours = (
+                fsum(sl.end_seconds - sl.start_seconds for sl in group) / HOUR_SECONDS
+            )
+            battery_kwh = fsum(
+                sl.actual_battery_power_kw
+                * (sl.end_seconds - sl.start_seconds)
+                / HOUR_SECONDS
+                for sl in group
+            )
+            # Display row power is a local-duration average. Retained parts,
+            # not this average, are authoritative for sign/peak/duration audits.
+            actual = battery_kwh / local_hours
+            grid = fact.load_kw + actual - delivered_pv
+            available = fact.pv_kw * local_hours
+            delivered = delivered_pv * local_hours
             curtailed = available - delivered
-            battery_kwh = actual * hours
-            stored = (sl.soc_after - sl.soc_before) * params.capacity_kwh
-            grid_charge = (
-                max(0.0, actual - max(delivered_pv - fact.load_kw, 0.0)) * hours
+            stored = (group[-1].soc_after - group[0].soc_before) * params.capacity_kwh
+            grid_charge = fsum(
+                max(
+                    0.0,
+                    sl.actual_battery_power_kw - max(delivered_pv - fact.load_kw, 0.0),
+                )
+                * (sl.end_seconds - sl.start_seconds)
+                / HOUR_SECONDS
+                for sl in group
             )
             rows.append(
                 CurtailmentRow(
@@ -496,19 +638,41 @@ def run_curtailment(
                     fact.zero_export,
                     effective_zero,
                     fact.reserve_target_soc,
-                    sl.soc_before,
-                    sl.soc_after,
+                    group[0].soc_before,
+                    group[-1].soc_after,
                     available,
                     delivered,
                     curtailed,
-                    fact.load_kw * hours,
+                    fact.load_kw * local_hours,
                     battery_kwh,
-                    max(grid, 0.0) * hours,
-                    max(-grid, 0.0) * hours,
+                    fsum(
+                        max(sl.grid_power_kw, 0.0)
+                        * (sl.end_seconds - sl.start_seconds)
+                        / HOUR_SECONDS
+                        for sl in group
+                    ),
+                    fsum(
+                        max(-sl.grid_power_kw, 0.0)
+                        * (sl.end_seconds - sl.start_seconds)
+                        / HOUR_SECONDS
+                        for sl in group
+                    ),
                     grid_charge,
                     grid_charge if not fact.grid_charge_allowed else 0.0,
                     stored,
                     battery_kwh - stored,
+                    tuple(
+                        PhysicalLedgerPart(
+                            now,
+                            sl.start_seconds,
+                            sl.end_seconds,
+                            sl.actual_battery_power_kw,
+                            sl.grid_power_kw,
+                            sl.soc_before,
+                            sl.soc_after,
+                        )
+                        for sl in group
+                    ),
                 )
             )
         prior_soc = soc
@@ -524,7 +688,9 @@ def run_curtailment(
         now = end
 
     export_rows = [
-        row for row in rows if row.grid_kw < -1e-10 and row.zero_export_requested
+        row
+        for row in physical_audit_rows(tuple(rows))
+        if row.grid_kw < -1e-10 and row.zero_export_requested
     ]
     return CurtailmentResult(
         case,
@@ -537,7 +703,7 @@ def run_curtailment(
         tuple(rows),
         soc,
         max((-row.grid_kw for row in export_rows), default=0.0),
-        sum(row.end_s - row.start_s for row in export_rows),
+        sum(row.duration_s for row in export_rows),
         sum(row.export_kwh for row in export_rows),
     )
 
@@ -569,7 +735,7 @@ def write_evidence(result: CurtailmentResult, output: Path) -> None:
         ("SOC", "soc_after", "#3167bc", 260, 340),
     ):
         points = " ".join(
-            f"{30 + row.end_s / DURATION_SECONDS * 940:.2f},"
+            f"{30 + row.end_s / result.settings.duration_seconds * 940:.2f},"
             f"{offset - y_value(row, key) * scale:.2f}"
             for row in result.ledger
         )

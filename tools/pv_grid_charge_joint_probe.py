@@ -11,11 +11,13 @@ from itertools import pairwise
 from pathlib import Path
 from xml.etree import ElementTree as ET
 
-from tools.dynamic_constraint_probe import HOUR_SECONDS, Case, FactSegment, battery
+from tools.dynamic_constraint_probe import HOUR_SECONDS, Case, FactSegment
+from tools.joint_execution_contract import JointExecutionContext
 from tools.pv_curtailment_probe import (
     CurtailmentResult,
     CurtailmentRow,
     CurtailmentSettings,
+    physical_audit_rows,
     run_curtailment,
 )
 from tools.pv_curtailment_probe import (
@@ -193,14 +195,14 @@ def _excursions(
     rows: tuple[CurtailmentRow, ...], settings: CurtailmentSettings
 ) -> tuple[Excursion, ...]:
     groups: list[tuple[str, list[CurtailmentRow]]] = []
-    for row in rows:
+    for row in physical_audit_rows(rows):
         violations = (
             ("ZERO_EXPORT", max(-row.grid_kw, 0.0), row.export_kwh)
             if row.zero_export_requested
             else ("ZERO_EXPORT", 0.0, 0.0),
             (
                 "GRID_CHARGE_FORBIDDEN",
-                row.grid_to_battery_kwh * HOUR_SECONDS / (row.end_s - row.start_s)
+                row.grid_to_battery_kwh * HOUR_SECONDS / row.duration_s
                 if not row.grid_charge_allowed
                 else 0.0,
                 row.prohibited_grid_charge_kwh,
@@ -222,14 +224,14 @@ def _excursions(
         peak = max(
             max(-row.grid_kw, 0.0)
             if kind == "ZERO_EXPORT"
-            else row.grid_to_battery_kwh * HOUR_SECONDS / (row.end_s - row.start_s)
+            else row.grid_to_battery_kwh * HOUR_SECONDS / row.duration_s
             for row in group
         )
         energy = sum(
             row.export_kwh if kind == "ZERO_EXPORT" else row.prohibited_grid_charge_kwh
             for row in group
         )
-        duration = sum(row.end_s - row.start_s for row in group)
+        duration = sum(row.duration_s for row in group)
         charge_gate_budget_s = (
             settings.observation_delay_s
             + settings.check_period_s
@@ -244,10 +246,12 @@ def _excursions(
         )
         if kind == "GRID_CHARGE_FORBIDDEN":
             within = (
-                peak <= battery().max_charge_power_kw + POWER_TOL_KW
+                peak <= settings.battery_parameters.max_charge_power_kw + POWER_TOL_KW
                 and duration <= charge_budget_s + 1e-7
                 and energy
-                <= battery().max_charge_power_kw * charge_budget_s / HOUR_SECONDS
+                <= settings.battery_parameters.max_charge_power_kw
+                * charge_budget_s
+                / HOUR_SECONDS
                 + ENERGY_TOL_KWH
             )
         else:
@@ -269,7 +273,7 @@ def _event_outcomes(execution: CurtailmentResult) -> tuple[EventOutcome, ...]:
     events = sorted(
         {fact.start for fact in case.segments}
         | {decision.at for decision in execution.decisions}
-        | {7200}
+        | {execution.settings.duration_seconds}
     )
     fact_starts = {fact.start for fact in case.segments}
     decision_times = {decision.at for decision in execution.decisions}
@@ -283,11 +287,18 @@ def _event_outcomes(execution: CurtailmentResult) -> tuple[EventOutcome, ...]:
             if start in fact_starts
             else "EMS_TICK"
         )
-        rows = tuple(
+        # Assign positive-width parent rows BEFORE expanding local parts.
+        # A sub-ULP part can round to the common endpoint of two windows;
+        # that does not give it ownership in both. Tolerance is not ownership.
+        parents = tuple(
             row
             for row in execution.ledger
-            if row.start_s >= start - 1e-7 and row.end_s <= end + 1e-7
+            if row.start_s >= start
+            and row.end_s <= end
+            and row.start_s < end
+            and row.end_s > start
         )
+        rows = physical_audit_rows(parents)
         for constraint, applicable in (
             ("ZERO_EXPORT", fact.zero_export),
             ("GRID_CHARGE_FORBIDDEN", not fact.grid_charge_allowed),
@@ -300,9 +311,7 @@ def _event_outcomes(execution: CurtailmentResult) -> tuple[EventOutcome, ...]:
                 if (
                     max(-row.grid_kw, 0.0)
                     if constraint == "ZERO_EXPORT"
-                    else row.grid_to_battery_kwh
-                    * HOUR_SECONDS
-                    / (row.end_s - row.start_s)
+                    else row.grid_to_battery_kwh * HOUR_SECONDS / row.duration_s
                 )
                 > POWER_TOL_KW
             )
@@ -311,9 +320,7 @@ def _event_outcomes(execution: CurtailmentResult) -> tuple[EventOutcome, ...]:
                     (
                         max(-row.grid_kw, 0.0)
                         if constraint == "ZERO_EXPORT"
-                        else row.grid_to_battery_kwh
-                        * HOUR_SECONDS
-                        / (row.end_s - row.start_s)
+                        else row.grid_to_battery_kwh * HOUR_SECONDS / row.duration_s
                     )
                     for row in violations
                 )
@@ -326,7 +333,7 @@ def _event_outcomes(execution: CurtailmentResult) -> tuple[EventOutcome, ...]:
                 else row.prohibited_grid_charge_kwh
                 for row in violations
             )
-            duration = sum(row.end_s - row.start_s for row in violations)
+            duration = sum(row.duration_s for row in violations)
             censored = bool(violations and abs(violations[-1].end_s - end) < 1e-7)
             outcomes.append(
                 EventOutcome(
@@ -351,6 +358,8 @@ def run_joint(
     mode: str,
     physical_step_s: float,
     record_period_s: float = 60.0,
+    display_period_s: float = 5.0,
+    context: JointExecutionContext | None = None,
 ) -> JointResult:
     """Run the accepted executor once under both delayed execution gates."""
     if mode not in {"ideal", "dynamic"}:
@@ -361,11 +370,19 @@ def run_joint(
         current_pv_surplus_guard=False,
         guard_controlled_pv_rise=True,
     )
+    if context is not None:
+        settings = replace(
+            settings,
+            duration_seconds=context.duration_seconds,
+            pv_ac_max_kw=context.pv_ac_max_kw,
+            battery_parameters=context.battery_parameters,
+        )
     execution = run_curtailment(
         case,
         physical_step_s=physical_step_s,
         settings=settings,
         record_period_s=record_period_s,
+        display_period_s=display_period_s,
     )
     excursions = _excursions(execution.ledger, settings)
     event_outcomes = _event_outcomes(execution)
@@ -386,7 +403,7 @@ def run_joint(
             0.0,
             case.segments[-1].reserve_target_soc - execution.final_soc,
         )
-        * battery().capacity_kwh
+        * settings.battery_parameters.capacity_kwh
     )
     if reserve_gap > ENERGY_TOL_KWH:
         findings.append(
@@ -446,7 +463,8 @@ def write_evidence(result: JointResult, output: Path) -> None:
         ("delivered PV", "delivered_pv_kw", "#218750"),
     ):
         points = " ".join(
-            f"{30 + row.end_s / 7200 * 940:.2f},{190 - getattr(row, field) * 25:.2f}"
+            f"{30 + row.end_s / result.execution.settings.duration_seconds * 940:.2f},"
+            f"{190 - getattr(row, field) * 25:.2f}"
             for row in result.execution.ledger
         )
         line = ET.SubElement(root, "polyline", points=points, fill="none", stroke=color)
