@@ -9,6 +9,7 @@ from ems_simulator.time_energy import (
     PowerInterval,
     SimulationCadences,
     TimeEnergyInput,
+    TimeEnergyResult,
     simulate_time_energy,
 )
 
@@ -31,7 +32,7 @@ def evaluate(
     record: float = 60.0,
     battery: BatteryParameters | None = None,
     soc: float = 0.5,
-):
+) -> TimeEnergyResult:
     return simulate_time_energy(
         TimeEnergyInput(
             cadences(physical=physical, decision=decision, record=record),

@@ -450,6 +450,26 @@ def _surplus_loss_outcomes(
     return tuple(outcomes)
 
 
+def constrain_charge_request(
+    original_request_kw: float,
+    *,
+    effective_permission: bool,
+    latched_old_request: bool,
+    observed_surplus_kw: float,
+) -> tuple[float, str]:
+    """Shared AC-bus permission gate; this does not integrate physical energy."""
+    if original_request_kw <= 0:
+        return original_request_kw, "NON_CHARGE"
+    if effective_permission and not latched_old_request:
+        return original_request_kw, "PERMITTED_FRESH_REQUEST"
+    return (
+        min(original_request_kw, observed_surplus_kw),
+        "PV_ONLY_WHILE_REVOKED"
+        if not effective_permission
+        else "RESTORED_AWAIT_FRESH_EMS",
+    )
+
+
 def run_interlock(
     case: Case,
     *,
@@ -530,19 +550,12 @@ def run_interlock(
                 )
                 ems.append(EMSDecision(tick, soc, original_request))
 
-            if original_request <= 0:
-                constrained = original_request
-                reason = "NON_CHARGE"
-            elif effective_permission and not latched_old_request:
-                constrained = original_request
-                reason = "PERMITTED_FRESH_REQUEST"
-            else:
-                constrained = min(original_request, observed_surplus)
-                reason = (
-                    "PV_ONLY_WHILE_REVOKED"
-                    if not effective_permission
-                    else "RESTORED_AWAIT_FRESH_EMS"
-                )
+            constrained, reason = constrain_charge_request(
+                original_request,
+                effective_permission=effective_permission,
+                latched_old_request=latched_old_request,
+                observed_surplus_kw=observed_surplus,
+            )
             spans.append(
                 ExecutionSpan(
                     start,

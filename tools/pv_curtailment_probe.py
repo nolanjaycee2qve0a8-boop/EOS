@@ -27,6 +27,7 @@ from tools.dynamic_constraint_probe import (
     battery,
 )
 from tools.dynamic_constraint_probe import cases as predecessor_cases
+from tools.grid_charge_interlock_probe import constrain_charge_request
 
 
 @dataclass(frozen=True, slots=True)
@@ -36,6 +37,16 @@ class CurtailmentSettings:
     execution_delay_s: int = 10
     pv_ac_max_kw: float = 5.0
     pv_ramp_kw_per_s: float = 1.0
+    # The joint entry requires a complete first observation delay.  The
+    # original PV experiment keeps its previously accepted startup default.
+    strict_startup_observation: bool = False
+    # Preserve the PV-only experiment's additional instantaneous AC-surplus
+    # clamp by default.  The joint entry disables it to reproduce the
+    # accepted interlock's delayed PV-loss response and records its transient.
+    current_pv_surplus_guard: bool = True
+    # Joint-only: a controlled AC output rise cannot count as already
+    # delivered PV.  Later source loss still follows delayed observation.
+    guard_controlled_pv_rise: bool = False
 
     def __post_init__(self) -> None:
         if type(self.check_period_s) is not int or self.check_period_s <= 0:
@@ -48,6 +59,12 @@ class CurtailmentSettings:
                 raise ValueError(f"{field} must be a non-negative integer")
         if self.pv_ac_max_kw <= 0 or self.pv_ramp_kw_per_s < 0:
             raise ValueError("PV rating must be positive and ramp non-negative")
+        if type(self.strict_startup_observation) is not bool:
+            raise ValueError("strict startup observation must be a boolean")
+        if type(self.current_pv_surplus_guard) is not bool:
+            raise ValueError("current PV surplus guard must be a boolean")
+        if type(self.guard_controlled_pv_rise) is not bool:
+            raise ValueError("controlled PV rise guard must be a boolean")
 
     @classmethod
     def ideal(cls) -> "CurtailmentSettings":
@@ -198,6 +215,10 @@ def scenarios() -> dict[str, Case]:
 
 def _checks(case: Case, settings: CurtailmentSettings) -> tuple[ExecutionCheck, ...]:
     check_times = set(range(0, DURATION_SECONDS, settings.check_period_s))
+    if settings.strict_startup_observation and settings.observation_delay_s:
+        # The joint experiment requires a full post-start observation delay;
+        # clamping a negative sample time to t=0 would backdate knowledge.
+        check_times = {at for at in check_times if at >= settings.observation_delay_s}
     if settings.observation_delay_s == 0 and settings.execution_delay_s == 0:
         check_times.update(fact.start for fact in case.segments)
     return tuple(
@@ -321,7 +342,14 @@ def run_curtailment(
         if at_event and int(now) % control_period_s == 0:
             fact = _fact_at(case, now)
             original_request = _request(fact, soc, params)
-            latched_old_request = original_request > 0 and not effective_permission
+            # For the joint entry, an unobserved fail-closed startup is not a
+            # revocation; a fresh request may execute after an affirmative
+            # delayed observation.  Preserve the older probe's default.
+            latched_old_request = (
+                original_request > 0
+                and not effective_permission
+                and (has_observation or not settings.strict_startup_observation)
+            )
             decisions.append(EMSDecision(int(now), soc, original_request))
 
         fact = _fact_at(case, now)
@@ -332,14 +360,12 @@ def run_curtailment(
         )
         prior_target_pv_cap = target_pv_cap
         if update_target:
-            if original_request > 0 and (
-                not effective_permission or latched_old_request
-            ):
-                battery_target = min(
-                    original_request, max(observed.pv_kw - observed.load_kw, 0.0)
-                )
-            else:
-                battery_target = original_request
+            battery_target, _gate_reason = constrain_charge_request(
+                original_request,
+                effective_permission=effective_permission,
+                latched_old_request=latched_old_request,
+                observed_surplus_kw=max(observed.pv_kw - observed.load_kw, 0.0),
+            )
             if effective_zero:
                 # Prioritize PV for load; discharge cannot export by itself.
                 if battery_target < 0:
@@ -389,9 +415,20 @@ def run_curtailment(
             output_ramp_due_at = None
         delivered_pv = pv_output_kw
         constrained = battery_target
-        # A withdrawn permission remains a hard AC-side gate even while the PV
-        # cap is slewing or source facts change between observation checks.
-        if constrained > 0 and (not effective_permission or latched_old_request):
+        # Delayed permission and source observations use the same accepted
+        # interlock gate.  A source revoke can cause a bounded transient until
+        # its observation effect; do not relabel that energy as safe.
+        if (
+            (
+                settings.current_pv_surplus_guard
+                or (
+                    settings.guard_controlled_pv_rise
+                    and (ramp_due_at is not None or output_ramp_due_at is not None)
+                )
+            )
+            and constrained > 0
+            and (not effective_permission or latched_old_request)
+        ):
             constrained = min(constrained, max(delivered_pv - fact.load_kw, 0.0))
 
         next_event = next(point for point in timeline if point > now)
