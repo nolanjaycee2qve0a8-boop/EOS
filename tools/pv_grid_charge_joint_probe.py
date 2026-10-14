@@ -13,6 +13,7 @@ from xml.etree import ElementTree as ET
 
 from tools.dynamic_constraint_probe import HOUR_SECONDS, Case, FactSegment
 from tools.joint_execution_contract import JointExecutionContext
+from tools.joint_strategy_adapter import JOINT, RequestStrategy
 from tools.pv_curtailment_probe import (
     CurtailmentResult,
     CurtailmentRow,
@@ -360,10 +361,17 @@ def run_joint(
     record_period_s: float = 60.0,
     display_period_s: float = 5.0,
     context: JointExecutionContext | None = None,
+    strategy: RequestStrategy | None = None,
 ) -> JointResult:
     """Run the accepted executor once under both delayed execution gates."""
     if mode not in {"ideal", "dynamic"}:
         raise ValueError("mode must be ideal or dynamic")
+    if strategy is not None and not isinstance(strategy, RequestStrategy):
+        raise TypeError("strategy must be a RequestStrategy")
+    if context is not None and context.strategy != (
+        JOINT if strategy is None else strategy.identifier
+    ):
+        raise ValueError("context and selected strategy differ")
     settings = replace(
         CurtailmentSettings.ideal() if mode == "ideal" else CurtailmentSettings(),
         strict_startup_observation=True,
@@ -383,6 +391,7 @@ def run_joint(
         settings=settings,
         record_period_s=record_period_s,
         display_period_s=display_period_s,
+        strategy=strategy,
     )
     excursions = _excursions(execution.ledger, settings)
     event_outcomes = _event_outcomes(execution)

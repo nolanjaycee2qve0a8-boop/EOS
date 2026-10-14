@@ -31,6 +31,7 @@ from tools.dynamic_constraint_probe import (
 )
 from tools.dynamic_constraint_probe import cases as predecessor_cases
 from tools.grid_charge_interlock_probe import constrain_charge_request
+from tools.joint_strategy_adapter import RequestStrategy, StrategyInput
 
 
 @dataclass(frozen=True, slots=True)
@@ -362,10 +363,20 @@ def _move_cap(current: float, target: float, settings: CurtailmentSettings) -> f
     )
 
 
+def pcs_limited_request(request: float, params: BatteryParameters) -> float:
+    """AC command capability, not interval-average absorption or future SOC.
+
+    Permission has its own delayed gate. SOC availability is evaluated by the
+    existing boundary mechanism and physics, not by spending future headroom.
+    """
+    return min(params.max_charge_power_kw, max(-params.max_discharge_power_kw, request))
+
+
 def _soc_boundary_seconds(
     soc: float, request: float, params: BatteryParameters | None = None
 ) -> float | None:
     params = battery() if params is None else params
+    request = pcs_limited_request(request, params)
     if request > 0 and soc < 1:
         return (
             (1 - soc)
@@ -392,9 +403,12 @@ def run_curtailment(
     control_period_s: int = HOUR_SECONDS,
     record_period_s: float = 60.0,
     display_period_s: float = 5.0,
+    strategy: RequestStrategy | None = None,
 ) -> CurtailmentResult:
     """Run one deterministic scenario; no command or device authority is created."""
     settings = settings or CurtailmentSettings()
+    if strategy is not None and not isinstance(strategy, RequestStrategy):
+        raise TypeError("strategy must be a RequestStrategy")
     if (
         type(control_period_s) is not int
         or control_period_s <= 0
@@ -460,7 +474,13 @@ def run_curtailment(
                 latched_old_request = True
         if at_event and int(now) % control_period_s == 0:
             fact = _fact_at(case, now)
-            original_request = _request(fact, soc, params)
+            original_request = (
+                _request(fact, soc, params)
+                if strategy is None
+                else strategy.evaluate(
+                    StrategyInput.snapshot(int(now), soc, fact, params)
+                )
+            )
             # For the joint entry, an unobserved fail-closed startup is not a
             # revocation; a fresh request may execute after an affirmative
             # delayed observation.  Preserve the older probe's default.
@@ -485,6 +505,10 @@ def run_curtailment(
                 latched_old_request=latched_old_request,
                 observed_surplus_kw=max(observed.pv_kw - observed.load_kw, 0.0),
             )
+            # A raw strategy request is not PCS capability. Use the same AC
+            # command limit for PV coordination and the physical boundary time.
+            # Keep original_request intact; no observation/effect is advanced.
+            battery_target = pcs_limited_request(battery_target, params)
             if effective_zero:
                 # Prioritize PV for load; discharge cannot export by itself.
                 if battery_target < 0:

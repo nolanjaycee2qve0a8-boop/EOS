@@ -9,6 +9,7 @@ from typing import cast
 from ems_simulator.demo import create_demo_scenario
 from ems_simulator.input import BatteryParameters, DailySimulationScenarioInput
 from tools.dynamic_constraint_probe import Case, FactSegment, battery
+from tools.joint_strategy_adapter import STRATEGIES
 
 DAY_SECONDS = 86400
 START_UTC = datetime(2026, 1, 1, tzinfo=UTC)
@@ -45,8 +46,8 @@ class JointExecutionContext:
             raise ValueError("daily PV AC rating is explicitly 6 kW")
         if self.battery_parameters != battery():
             raise ValueError("daily battery must retain the accepted fixed parameters")
-        if self.strategy != "joint_reserve_v1":
-            raise ValueError("only the accepted joint strategy is supported")
+        if self.strategy not in STRATEGIES:
+            raise ValueError("unknown strategy identifier")
 
 
 @dataclass(frozen=True, slots=True)
