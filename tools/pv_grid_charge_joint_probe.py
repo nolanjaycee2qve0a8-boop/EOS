@@ -13,6 +13,7 @@ from xml.etree import ElementTree as ET
 
 from tools.dynamic_constraint_probe import HOUR_SECONDS, Case, FactSegment
 from tools.joint_execution_contract import JointExecutionContext
+from tools.joint_mpc_adapter import IssuedMPCRequestStrategy
 from tools.joint_strategy_adapter import JOINT, RequestStrategy
 from tools.pv_curtailment_probe import (
     CurtailmentResult,
@@ -361,13 +362,17 @@ def run_joint(
     record_period_s: float = 60.0,
     display_period_s: float = 5.0,
     context: JointExecutionContext | None = None,
-    strategy: RequestStrategy | None = None,
+    strategy: RequestStrategy | IssuedMPCRequestStrategy | None = None,
 ) -> JointResult:
     """Run the accepted executor once under both delayed execution gates."""
     if mode not in {"ideal", "dynamic"}:
         raise ValueError("mode must be ideal or dynamic")
-    if strategy is not None and not isinstance(strategy, RequestStrategy):
-        raise TypeError("strategy must be a RequestStrategy")
+    if strategy is not None and not isinstance(
+        strategy, RequestStrategy | IssuedMPCRequestStrategy
+    ):
+        raise TypeError("strategy must be a validated request strategy")
+    if isinstance(strategy, IssuedMPCRequestStrategy) and context is None:
+        raise ValueError("MPC requires an explicit daily context")
     if context is not None and context.strategy != (
         JOINT if strategy is None else strategy.identifier
     ):

@@ -239,8 +239,11 @@ def test_24_calls_own_feedback_and_same_time_events(identifier: str) -> None:
     for sample in calls:
         row = next(x for x in result.execution.ledger if x.start_s == sample.at_s)
         assert sample.soc == row.soc_before
+    assert calls[2].fact is not None
     assert calls[2].fact.grid_charge_allowed
+    assert calls[6].fact is not None
     assert not calls[6].fact.grid_charge_allowed
+    assert calls[18].fact is not None
     assert calls[18].fact.reserve_target_soc == 0.9
     assert all(x.fact is not y for x in calls for y in case.segments)
 

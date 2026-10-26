@@ -31,7 +31,9 @@ from tools.dynamic_constraint_probe import (
 )
 from tools.dynamic_constraint_probe import cases as predecessor_cases
 from tools.grid_charge_interlock_probe import constrain_charge_request
-from tools.joint_strategy_adapter import RequestStrategy, StrategyInput
+from tools.joint_execution_contract import DAY_SECONDS
+from tools.joint_mpc_adapter import IssuedMPCRequestStrategy
+from tools.joint_strategy_adapter import MPC, RequestStrategy, StrategyInput
 
 
 @dataclass(frozen=True, slots=True)
@@ -163,6 +165,7 @@ class CurtailmentRow:
     conversion_loss_kwh: float
     physical_parts: tuple[PhysicalLedgerPart, ...] = ()
     audit_duration_s: float | None = None
+    restriction_reasons: tuple[str, ...] = ()
 
     @property
     def duration_s(self) -> float:
@@ -403,18 +406,28 @@ def run_curtailment(
     control_period_s: int = HOUR_SECONDS,
     record_period_s: float = 60.0,
     display_period_s: float = 5.0,
-    strategy: RequestStrategy | None = None,
+    strategy: RequestStrategy | IssuedMPCRequestStrategy | None = None,
 ) -> CurtailmentResult:
     """Run one deterministic scenario; no command or device authority is created."""
     settings = settings or CurtailmentSettings()
-    if strategy is not None and not isinstance(strategy, RequestStrategy):
-        raise TypeError("strategy must be a RequestStrategy")
+    if strategy is not None and not isinstance(
+        strategy, RequestStrategy | IssuedMPCRequestStrategy
+    ):
+        raise TypeError("strategy must be a validated request strategy")
     if (
         type(control_period_s) is not int
         or control_period_s <= 0
         or settings.duration_seconds % control_period_s
     ):
         raise ValueError("control period must divide scenario duration")
+    if (
+        strategy is not None
+        and strategy.identifier == MPC
+        and (
+            settings.duration_seconds != DAY_SECONDS or control_period_s != HOUR_SECONDS
+        )
+    ):
+        raise ValueError("MPC requires daily context and hourly decisions")
     expected = 0
     for fact in case.segments:
         if fact.start != expected or fact.end <= fact.start:
@@ -451,6 +464,7 @@ def run_curtailment(
     pv_output_kw = 0.0
     output_ramp_due_at: float | None = None
     observed = initial
+    latest_observation: ExecutionCheck | None = None
     effective_permission = False
     effective_zero = True
     has_observation = False
@@ -458,6 +472,9 @@ def run_curtailment(
     decisions: list[EMSDecision] = []
     rows: list[CurtailmentRow] = []
     retarget_on_soc = False
+    gate_reason = "NO_EFFECTIVE_OBSERVATION"
+    gate_target = 0.0
+    pcs_target = 0.0
 
     while now < settings.duration_seconds:
         # At a simultaneous boundary: external facts become right-continuous,
@@ -467,6 +484,7 @@ def run_curtailment(
         if check is not None:
             prior_permission = effective_permission
             observed = _fact_at(case, check.sampled_at)
+            latest_observation = check
             effective_permission = check.observed_permission
             effective_zero = check.observed_zero_export
             has_observation = True
@@ -474,13 +492,39 @@ def run_curtailment(
                 latched_old_request = True
         if at_event and int(now) % control_period_s == 0:
             fact = _fact_at(case, now)
-            original_request = (
-                _request(fact, soc, params)
-                if strategy is None
-                else strategy.evaluate(
+            if strategy is None:
+                original_request = _request(fact, soc, params)
+            elif strategy.identifier == MPC:
+                # The external fact is right-continuous for physical accounting,
+                # but MPC sees only the last observation whose effect has
+                # already arrived. No first-observation truth is substituted.
+                original_request = strategy.evaluate(
+                    StrategyInput.snapshot(
+                        int(now),
+                        soc,
+                        observed if latest_observation is not None else None,
+                        params,
+                        observed_at_s=(
+                            latest_observation.sampled_at
+                            if latest_observation is not None
+                            else None
+                        ),
+                        available_at_s=(
+                            latest_observation.effect_at
+                            if latest_observation is not None
+                            else None
+                        ),
+                        max_observation_age_s=(
+                            settings.check_period_s
+                            + settings.observation_delay_s
+                            + settings.execution_delay_s
+                        ),
+                    )
+                )
+            else:
+                original_request = strategy.evaluate(
                     StrategyInput.snapshot(int(now), soc, fact, params)
                 )
-            )
             # For the joint entry, an unobserved fail-closed startup is not a
             # revocation; a fresh request may execute after an affirmative
             # delayed observation.  Preserve the older probe's default.
@@ -499,7 +543,7 @@ def run_curtailment(
         )
         prior_target_pv_cap = target_pv_cap
         if update_target:
-            battery_target, _gate_reason = constrain_charge_request(
+            battery_target, gate_reason = constrain_charge_request(
                 original_request,
                 effective_permission=effective_permission,
                 latched_old_request=latched_old_request,
@@ -508,7 +552,9 @@ def run_curtailment(
             # A raw strategy request is not PCS capability. Use the same AC
             # command limit for PV coordination and the physical boundary time.
             # Keep original_request intact; no observation/effect is advanced.
+            gate_target = battery_target
             battery_target = pcs_limited_request(battery_target, params)
+            pcs_target = battery_target
             if effective_zero:
                 # Prioritize PV for load; discharge cannot export by itself.
                 if battery_target < 0:
@@ -696,6 +742,32 @@ def run_curtailment(
                             sl.soc_after,
                         )
                         for sl in group
+                    ),
+                    restriction_reasons=tuple(
+                        reason
+                        for reason, applies in (
+                            (
+                                gate_reason,
+                                has_observation
+                                and original_request > 0
+                                and gate_target < original_request,
+                            ),
+                            (
+                                "NO_EFFECTIVE_OBSERVATION",
+                                not has_observation and original_request != 0,
+                            ),
+                            ("PCS_LIMIT", abs(gate_target - pcs_target) > 1e-9),
+                            (
+                                "ZERO_EXPORT_BATTERY_LIMIT",
+                                abs(pcs_target - battery_target) > 1e-9,
+                            ),
+                            (
+                                "PV_SURPLUS_GUARD",
+                                abs(battery_target - constrained) > 1e-9,
+                            ),
+                            ("SOC_HARD_BOUNDARY", abs(constrained - actual) > 1e-9),
+                        )
+                        if applies
                     ),
                 )
             )
