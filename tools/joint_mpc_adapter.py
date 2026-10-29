@@ -21,6 +21,7 @@ from capability import (
     RequiredCapabilityCollection,
 )
 from ems_simulator.mpc_demo import _runner
+from ems_simulator.net_load_mpc_demo import _runner as _net_load_runner
 from ems_strategy import (
     EMSContext,
     EMSStrategyDescriptor,
@@ -43,6 +44,8 @@ from tools.joint_strategy_adapter import MPC, StrategyInput
 CONTROL_STEP = timedelta(hours=1)
 HORIZON_STEPS = 4
 MAX_FORECAST_AGE = CONTROL_STEP
+PRICE_BASELINE = "price_baseline"
+NET_LOAD_BASELINE = "net_load_baseline"
 
 
 def _utc(value: datetime, name: str) -> datetime:
@@ -95,12 +98,16 @@ class IssuedMPCForecast:
 
 def _build_mpc_request(
     forecasts: tuple[IssuedMPCForecast, ...],
+    *,
+    planner: str = PRICE_BASELINE,
 ) -> Callable[[StrategyInput], float]:
     """Preflight all 24 issued forecasts, then build the MPC request callback.
 
     No forecast or future actuals are retrieved during execution. The joint
     executor retains all permission, curtailment, SOC and physical authority.
     """
+    if type(planner) is not str or planner not in (PRICE_BASELINE, NET_LOAD_BASELINE):
+        raise ValueError("unknown MPC planner")
     if not isinstance(forecasts, tuple) or len(forecasts) != DAY_SECONDS // 3600:
         raise ValueError("exactly 24 issued forecasts are required")
     by_hour: dict[int, IssuedMPCForecast] = {}
@@ -111,10 +118,17 @@ def _build_mpc_request(
             raise ValueError("forecast schedule must match the UTC decision hours")
         by_hour[hour] = forecast
 
-    # Reuse the existing physically-aware price MPC composition. Its old daily
-    # runner is not called, and it receives no simulation scenario or ledger.
-    cycle = _runner().mpc_cycle_boundary
-    capability = CapabilityDescriptor("mpc", "Physically-aware price MPC.")
+    # Select only an existing composition, never its daily runner or forecast
+    # generator. Both retain the same physical revision and first-step seam.
+    cycle = (
+        _runner() if planner == PRICE_BASELINE else _net_load_runner()
+    ).mpc_cycle_boundary
+    capability = CapabilityDescriptor(
+        "mpc",
+        "Physically-aware price MPC."
+        if planner == PRICE_BASELINE
+        else "Physically-aware net-load MPC.",
+    )
     matches = CapabilityMatchCollection(
         RequiredCapabilityCollection((capability,)),
         AvailableCapabilityCollection((capability,)),
@@ -217,10 +231,13 @@ class IssuedMPCRequestStrategy:
     """
 
     forecasts: tuple[IssuedMPCForecast, ...]
+    planner: str = field(default=PRICE_BASELINE, kw_only=True)
     _request: Callable[[StrategyInput], float] = field(init=False, repr=False)
 
     def __post_init__(self) -> None:
-        object.__setattr__(self, "_request", _build_mpc_request(self.forecasts))
+        object.__setattr__(
+            self, "_request", _build_mpc_request(self.forecasts, planner=self.planner)
+        )
 
     @property
     def identifier(self) -> str:
@@ -235,6 +252,8 @@ class IssuedMPCRequestStrategy:
 
 def mpc_strategy(
     forecasts: tuple[IssuedMPCForecast, ...],
+    *,
+    planner: str = PRICE_BASELINE,
 ) -> IssuedMPCRequestStrategy:
     """Expose existing MPC only after the constructor's forecast preflight."""
-    return IssuedMPCRequestStrategy(forecasts)
+    return IssuedMPCRequestStrategy(forecasts, planner=planner)
